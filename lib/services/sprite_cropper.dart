@@ -21,6 +21,43 @@ abstract final class SpriteCropper {
     return image;
   }
 
+  /// 특정 색상(기본값: 흰색)을 투명하게 변환한다.
+  ///
+  /// [targetRed], [targetGreen], [targetBlue]: 제거할 배경 색상 (RGB 0~255)
+  /// [tolerance]: 오차 허용 범위 (0~255). 값이 크면 유사한 색상까지 투명화됨.
+  static Uint8List removeBackgroundColor({
+    required Uint8List bytes,
+    int targetRed = 255,
+    int targetGreen = 255,
+    int targetBlue = 255,
+    int tolerance = 30,
+  }) {
+    final image = decode(bytes);
+
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        final pixel = image.getPixel(x, y);
+
+        final r = pixel.r.toInt();
+        final g = pixel.g.toInt();
+        final b = pixel.b.toInt();
+
+        // 목표 색상과의 차이 계산
+        final rDiff = (r - targetRed).abs();
+        final gDiff = (g - targetGreen).abs();
+        final bDiff = (b - targetBlue).abs();
+
+        // 허용 범위(tolerance) 이내의 색상이면 Alpha를 0(투명)으로 설정
+        if (rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance) {
+          pixel.setRgba(r, g, b, 0);
+        }
+      }
+    }
+
+    // 투명 채널이 적용된 PNG 바이트로 인코딩하여 반환
+    return Uint8List.fromList(img.encodePng(image));
+  }
+
   /// [settings]에 따라 전체 이미지를 분할해 프레임을 잘라낸다.
   static List<({String name, Uint8List bytes})> cropFrames({
     required Uint8List sourceBytes,

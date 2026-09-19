@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../models/crop_settings.dart';
 
-/// 좌측 설정 패널: 파란색 검수 테마, 업로드, 분할 수 입력, 저장 버튼.
+/// 좌측 설정 패널: 파란색 검수 테마, 업로드, 배경 처리, 분할 수 입력, 저장 버튼.
 class ControlPanel extends StatelessWidget {
   const ControlPanel({
     super.key,
@@ -19,6 +19,11 @@ class ControlPanel extends StatelessWidget {
     required this.onPickImage,
     required this.onSettingsChanged,
     required this.onSave,
+    // 배경 투명화 옵션 추가
+    required this.removeBg,
+    required this.tolerance,
+    required this.onRemoveBgChanged,
+    required this.onToleranceChanged,
   });
 
   final String? fileName;
@@ -41,6 +46,12 @@ class ControlPanel extends StatelessWidget {
   }) onSettingsChanged;
   final VoidCallback onSave;
 
+  // 배경 투명화 관련 프로퍼티
+  final bool removeBg;
+  final double tolerance;
+  final ValueChanged<bool> onRemoveBgChanged;
+  final ValueChanged<double> onToleranceChanged;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -56,7 +67,7 @@ class ControlPanel extends StatelessWidget {
           FilledButton.icon(
             onPressed: busy ? null : onPickImage,
             icon: const Icon(Icons.upload_file),
-            label: const Text('이미지 업로드'),
+            label: Text(hasImage ? '다른 이미지 선택' : '이미지 업로드'),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
               backgroundColor: primaryColor,
@@ -78,6 +89,48 @@ class ControlPanel extends StatelessWidget {
               iconColor: primaryColor,
             ),
           const SizedBox(height: 12),
+          const Divider(),
+
+          // ── 배경 투명화 옵션 ─────────────────────────────
+          Text('배경 처리', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('흰색 배경 투명하게', style: TextStyle(fontSize: 14)),
+            value: removeBg,
+            onChanged: busy || !hasImage ? null : onRemoveBgChanged,
+          ),
+          if (removeBg) ...[
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '허용 오차 (Tolerance)',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${tolerance.round()}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+              ],
+            ),
+            Slider(
+              value: tolerance,
+              min: 0,
+              max: 100,
+              divisions: 100,
+              activeColor: primaryColor,
+              label: '${tolerance.round()}',
+              onChanged: busy || !hasImage ? null : onToleranceChanged,
+            ),
+          ],
+          const SizedBox(height: 8),
           const Divider(),
 
           // ── 분할 수 입력 ─────────────────────────────────
