@@ -8,7 +8,7 @@ import '../models/crop_settings.dart';
 /// 이미지 프리뷰 캔버스.
 ///
 /// 업로드된 이미지를 화면에 100% 피팅해서 표시하고,
-/// 상/하단 여백을 드래그로 조절할 수 있는 가이드 박스 및 격자선을 표시합니다.
+/// 투명 배경(체커보드) 및 상/하단 여백 조절 가이드 라인을 제공합니다.
 class ImageCanvas extends StatefulWidget {
   const ImageCanvas({
     super.key,
@@ -74,16 +74,38 @@ class _ImageCanvasState extends State<ImageCanvas> {
 
         return Stack(
           children: [
-            // 1) 이미지 표시
+            // 0) 전체 캔버스 영역 투명 체커보드 배경 (추가됨)
+            const Positioned.fill(
+              child: CustomPaint(
+                painter: CheckerboardPainter(squareSize: 12),
+              ),
+            ),
+
+            // 1) 이미지 영역 직하단 체커보드 + 이미지 표시
             Positioned(
               left: imgX,
               top: imgY,
               width: dispW,
               height: dispH,
-              child: Image.memory(
-                widget.imageBytes,
-                fit: BoxFit.fill,
-                gaplessPlayback: true,
+              child: ClipRect(
+                child: Stack(
+                  children: [
+                    // 이미지 바로 뒤 체커보드
+                    const Positioned.fill(
+                      child: CustomPaint(
+                        painter: CheckerboardPainter(squareSize: 10),
+                      ),
+                    ),
+                    // 실제 이미지
+                    Positioned.fill(
+                      child: Image.memory(
+                        widget.imageBytes,
+                        fit: BoxFit.fill,
+                        gaplessPlayback: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -190,7 +212,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '상/하단 경계선을 드래그하여 높이를 조절하세요  •  가로 ${widget.settings.horizontalCount} × 세로 ${widget.settings.verticalCount} 분할',
+                  '상/하단 경계선을 드래그하여 높이를 조절하세요  •  가로 ${widget.settings.safeHorizontalCount} × 세로 ${widget.settings.safeVerticalCount} 분할',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
@@ -254,20 +276,20 @@ class _OverlayPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.85);
 
     // 세로 격자선 (가로 분할)
-    for (var i = 1; i < settings.horizontalCount; i++) {
+    for (var i = 1; i < settings.safeHorizontalCount; i++) {
       final gx = boxRect.left + i * cellW;
       canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
     }
     // 가로 격자선 (세로 분할)
-    for (var i = 1; i < settings.verticalCount; i++) {
+    for (var i = 1; i < settings.safeVerticalCount; i++) {
       final gy = boxRect.top + i * cellH;
       canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
     }
 
     // 4) 각 컷 번호
-    for (var row = 0; row < settings.verticalCount; row++) {
-      for (var col = 0; col < settings.horizontalCount; col++) {
-        final index = row * settings.horizontalCount + col;
+    for (var row = 0; row < settings.safeVerticalCount; row++) {
+      for (var col = 0; col < settings.safeHorizontalCount; col++) {
+        final index = row * settings.safeHorizontalCount + col;
         final cell = Rect.fromLTWH(
           boxRect.left + col * cellW,
           boxRect.top + row * cellH,
@@ -323,3 +345,37 @@ class _OverlayPainter extends CustomPainter {
   }
 }
 
+/// 투명 배경을 시각적으로 나타내기 위한 체커보드(격자 무늬) 커스텀 페인터
+class CheckerboardPainter extends CustomPainter {
+  const CheckerboardPainter({
+    this.squareSize = 12.0,
+    this.color1 = const Color(0xFFE0E0E0),
+    this.color2 = const Color(0xFFFFFFFF),
+  });
+
+  final double squareSize;
+  final Color color1;
+  final Color color2;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()..color = color1;
+    final paint2 = Paint()..color = color2;
+
+    for (double y = 0; y < size.height; y += squareSize) {
+      for (double x = 0; x < size.width; x += squareSize) {
+        final isEven = ((x / squareSize).floor() + (y / squareSize).floor()) % 2 == 0;
+        final rect = Rect.fromLTWH(
+          x,
+          y,
+          x + squareSize > size.width ? size.width - x : squareSize,
+          y + squareSize > size.height ? size.height - y : squareSize,
+        );
+        canvas.drawRect(rect, isEven ? paint1 : paint2);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
