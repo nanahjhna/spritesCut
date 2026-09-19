@@ -19,8 +19,14 @@ class CropSettings {
   /// 하단 여백 (픽셀 단위).
   final double bottomPadding;
 
+  /// 안전한 가로 분할 수 (0 이하 입력 방지)
+  int get safeHorizontalCount => horizontalCount <= 0 ? 1 : horizontalCount;
+
+  /// 안전한 세로 분할 수 (0 이하 입력 방지)
+  int get safeVerticalCount => verticalCount <= 0 ? 1 : verticalCount;
+
   /// 전체 컷 수.
-  int get totalCount => horizontalCount * verticalCount;
+  int get totalCount => safeHorizontalCount * safeVerticalCount;
 
   /// 설정 변경용 불변 객체 복사 메서드
   CropSettings copyWith({
@@ -42,13 +48,17 @@ class CropSettings {
     required int imageWidth,
     required int imageHeight,
   }) {
-    // 상/하단 여백을 제외한 실제 분할 영역의 높이 계산
+    // 0 이하 값 입력 시 1로 간주하여 NaN / Infinity로 인한 .round() 에러 방지
+    final hCount = safeHorizontalCount;
+    final vCount = safeVerticalCount;
+
+    // 상/하단 여백을 제외한 실제 분할 영역의 높이 계산 (1.0 미만으로 떨어지는 것 방지)
     final activeHeight = (imageHeight - topPadding - bottomPadding)
         .clamp(1.0, imageHeight.toDouble());
 
     return (
-    spriteWidth: (imageWidth / horizontalCount).round(),
-    spriteHeight: (activeHeight / verticalCount).round(),
+    spriteWidth: (imageWidth / hCount).round(),
+    spriteHeight: (activeHeight / vCount).round(),
     );
   }
 
@@ -58,13 +68,19 @@ class CropSettings {
       int imageWidth,
       int imageHeight,
       ) {
-    assert(index >= 0 && index < totalCount);
+    final hCount = safeHorizontalCount;
+    final total = totalCount;
+
+    // 인덱스 범위 초과 예외 방지 (clamp 적용)
+    final safeIndex = index.clamp(0, total > 0 ? total - 1 : 0);
+
     final sprite = calcSpriteSize(
       imageWidth: imageWidth,
       imageHeight: imageHeight,
     );
-    final col = index % horizontalCount;
-    final row = index ~/ horizontalCount;
+
+    final col = safeIndex % hCount;
+    final row = safeIndex ~/ hCount;
 
     return (
     x: col * sprite.spriteWidth,

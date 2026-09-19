@@ -33,12 +33,20 @@ class _EditorScreenState extends State<EditorScreen> {
   late final TextEditingController _verticalController =
   TextEditingController(text: '${_settings.verticalCount}');
 
+  // 상/하단 여백 조절용 Controllers
+  late final TextEditingController _topPaddingController =
+  TextEditingController(text: '${_settings.topPadding.round()}');
+  late final TextEditingController _bottomPaddingController =
+  TextEditingController(text: '${_settings.bottomPadding.round()}');
+
   bool _busy = false;
 
   @override
   void dispose() {
     _horizontalController.dispose();
     _verticalController.dispose();
+    _topPaddingController.dispose();
+    _bottomPaddingController.dispose();
     super.dispose();
   }
 
@@ -49,22 +57,28 @@ class _EditorScreenState extends State<EditorScreen> {
         type: FileType.image,
         dialogTitle: '스프라이트 시트 이미지 선택',
       );
-      if (files.isEmpty) return;
+
+      if (files == null || files.isEmpty) return;
 
       final file = files.first;
+
+      // PlatformFile에서 readAsBytes()를 직접 호출합니다.
       final bytes = await file.readAsBytes();
       final decoded = SpriteCropper.decode(bytes);
+
       if (!mounted) return;
 
       setState(() {
         _sourceBytes = bytes;
         _decoded = decoded;
         _fileName = file.name;
-        // 새 이미지를 올릴 때 상/하단 여백 초기화
+
         _settings = _settings.copyWith(
           topPadding: 0.0,
           bottomPadding: 0.0,
         );
+        _topPaddingController.text = '0';
+        _bottomPaddingController.text = '0';
       });
     } on FormatException catch (e) {
       _showSnack(e.message);
@@ -73,25 +87,30 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  // ── 설정 변경 ────────────────────────────────────────
-// ── 설정 변경 ────────────────────────────────────────
-  void _updateSettings({
-    CropSettings? settings,
-    int? horizontalCount,
-    int? verticalCount,
-    double? topPadding,
-    double? bottomPadding,
-  }) {
+  // ── 설정 변경 (드래그 및 텍스트 입력 시 동기화) ────────
+  void _updateSettings(CropSettings nextSettings) {
     setState(() {
-      if (settings != null) {
-        _settings = settings;
-      } else {
-        _settings = _settings.copyWith(
-          horizontalCount: horizontalCount,
-          verticalCount: verticalCount,
-          topPadding: topPadding,
-          bottomPadding: bottomPadding,
-        );
+      _settings = nextSettings;
+
+      // 텍스트 필드 값이 현재 입력 중인 상태와 다를 때만 동기화 (포커스/커서 튀김 방지)
+      final topText = '${nextSettings.topPadding.round()}';
+      if (_topPaddingController.text != topText) {
+        _topPaddingController.text = topText;
+      }
+
+      final bottomText = '${nextSettings.bottomPadding.round()}';
+      if (_bottomPaddingController.text != bottomText) {
+        _bottomPaddingController.text = bottomText;
+      }
+
+      final hText = '${nextSettings.horizontalCount}';
+      if (_horizontalController.text != hText) {
+        _horizontalController.text = hText;
+      }
+
+      final vText = '${nextSettings.verticalCount}';
+      if (_verticalController.text != vText) {
+        _verticalController.text = vText;
       }
     });
   }
@@ -112,19 +131,23 @@ class _EditorScreenState extends State<EditorScreen> {
       );
       final zip = SpriteCropper.buildZip(frames);
 
+      // ext: 'zip' -> fileExtension: 'zip' 으로 수정
       await FileSaver.instance.saveFile(
         name: 'sprites',
         bytes: zip,
         fileExtension: 'zip',
         mimeType: MimeType.zip,
       );
+
       if (!mounted) return;
       _showSnack('${frames.length}개의 스프라이트를 sprites.zip으로 저장했습니다.');
     } catch (e) {
       if (!mounted) return;
       _showSnack('저장에 실패했습니다: $e');
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
@@ -138,17 +161,17 @@ class _EditorScreenState extends State<EditorScreen> {
   // ── 레이아웃 ─────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Colors.blue[700]!;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI 스프라이트 시트 분할 도구'),
         centerTitle: false,
-        backgroundColor: Colors.blue[700],
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
       ),
       body: Row(
         children: [
-// lib/screens/editor_screen.dart
-
           SizedBox(
             width: 320,
             child: ControlPanel(
@@ -159,12 +182,22 @@ class _EditorScreenState extends State<EditorScreen> {
               busy: _busy,
               horizontalController: _horizontalController,
               verticalController: _verticalController,
+              topPaddingController: _topPaddingController,
+              bottomPaddingController: _bottomPaddingController,
               onPickImage: _pickImage,
-              // [수정] Named Parameter를 명시적으로 전달하거나 _updateSettings 연동
-              onSettingsChanged: ({horizontalCount, verticalCount}) {
+              onSettingsChanged: ({
+                int? horizontalCount,
+                int? verticalCount,
+                double? topPadding,
+                double? bottomPadding,
+              }) {
                 _updateSettings(
-                  horizontalCount: horizontalCount,
-                  verticalCount: verticalCount,
+                  _settings.copyWith(
+                    horizontalCount: horizontalCount ?? _settings.horizontalCount,
+                    verticalCount: verticalCount ?? _settings.verticalCount,
+                    topPadding: topPadding ?? _settings.topPadding,
+                    bottomPadding: bottomPadding ?? _settings.bottomPadding,
+                  ),
                 );
               },
               onSave: _saveZip,
@@ -184,14 +217,15 @@ class _EditorScreenState extends State<EditorScreen> {
       return const _EmptyState();
     }
 
-    // 1컷 크기 계산
     final sprite = _settings.calcSpriteSize(
       imageWidth: decoded.width,
       imageHeight: decoded.height,
     );
 
-    // 여백 제외 실제 가이드 영역 높이
-    final activeHeight = (decoded.height - _settings.topPadding - _settings.bottomPadding).round();
+    final activeHeight =
+    (decoded.height - _settings.topPadding - _settings.bottomPadding)
+        .round()
+        .clamp(0, decoded.height);
 
     return Column(
       children: [
@@ -204,9 +238,7 @@ class _EditorScreenState extends State<EditorScreen> {
               imageWidth: decoded.width,
               imageHeight: decoded.height,
               settings: _settings,
-              onSettingsChanged: (updatedSettings) {
-                _updateSettings(settings: updatedSettings);
-              },
+              onSettingsChanged: _updateSettings,
             ),
           ),
         ),
@@ -223,7 +255,7 @@ class _EditorScreenState extends State<EditorScreen> {
             ),
             child: Text(
               '전체: ${decoded.width} × ${decoded.height} px  •  '
-                  '선택 영역: ${decoded.width} × $activeHeight px  •  '
+                  '영역 높이: $activeHeight px (상단: ${_settings.topPadding.round()}px, 하단: ${_settings.bottomPadding.round()}px)  •  '
                   '1컷: ${sprite.spriteWidth} × ${sprite.spriteHeight} px  •  '
                   '총 ${_settings.totalCount}개 (${_settings.horizontalCount}×${_settings.verticalCount})',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -255,10 +287,15 @@ class _EmptyState extends StatelessWidget {
             color: Colors.blue[200],
           ),
           const SizedBox(height: 16),
-          Text('스프라이트 시트를 업로드해 주세요', style: theme.textTheme.titleMedium?.copyWith(color: Colors.blue[700])),
+          Text(
+            '스프라이트 시트를 업로드해 주세요',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Colors.blue[700],
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
-            '이미지 가이드 박스의 상/하단 경계선을 드래그하여 높이를 조절하고\n가로/세로 분할 수만큼 등분할 수 있습니다.',
+            '가이드 박스의 핸들을 드래그하거나\n좌측 컨트롤 패널에서 세로 높이/여백 수치를 직접 수정할 수 있습니다.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: Colors.blue[400],

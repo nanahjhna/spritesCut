@@ -322,3 +322,4 @@ class _OverlayPainter extends CustomPainter {
         oldDelegate.scale != scale;
   }
 }
+
