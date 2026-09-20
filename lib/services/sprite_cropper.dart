@@ -30,7 +30,7 @@ abstract final class SpriteCropper {
     int targetRed = 255,
     int targetGreen = 255,
     int targetBlue = 255,
-    int tolerance = 30,
+    int tolerance = 50, // 기본 오차 범위를 50 이상으로 설정 추천
   }) {
     final image = decode(bytes);
 
@@ -42,19 +42,18 @@ abstract final class SpriteCropper {
         final g = pixel.g.toInt();
         final b = pixel.b.toInt();
 
-        // 목표 색상과의 차이 계산
         final rDiff = (r - targetRed).abs();
         final gDiff = (g - targetGreen).abs();
         final bDiff = (b - targetBlue).abs();
 
-        // 허용 범위(tolerance) 이내의 색상이면 Alpha를 0(투명)으로 설정
+        // 오차 범위 내 색상을 투명으로 변경
         if (rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance) {
-          pixel.setRgba(r, g, b, 0);
+          pixel.setRgba(r, g, b, 0); // Alpha = 0
         }
       }
     }
 
-    // 투명 채널이 적용된 PNG 바이트로 인코딩하여 반환
+    // 반드시 PNG로 인코딩되어야 알파 채널(투명도)이 유지됩니다.
     return Uint8List.fromList(img.encodePng(image));
   }
 

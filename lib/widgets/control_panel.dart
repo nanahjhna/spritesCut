@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../models/crop_settings.dart';
 
-/// 좌측 설정 패널: 파란색 검수 테마, 업로드, 배경 처리, 분할 수 입력, 저장 버튼.
 class ControlPanel extends StatelessWidget {
   const ControlPanel({
     super.key,
@@ -12,18 +11,15 @@ class ControlPanel extends StatelessWidget {
     required this.imageHeight,
     required this.settings,
     required this.busy,
+    required this.removeBg,
     required this.horizontalController,
     required this.verticalController,
     required this.topPaddingController,
     required this.bottomPaddingController,
     required this.onPickImage,
+    required this.onRemoveBgChanged,
     required this.onSettingsChanged,
     required this.onSave,
-    // 배경 투명화 옵션 추가
-    required this.removeBg,
-    required this.tolerance,
-    required this.onRemoveBgChanged,
-    required this.onToleranceChanged,
   });
 
   final String? fileName;
@@ -31,6 +27,7 @@ class ControlPanel extends StatelessWidget {
   final int? imageHeight;
   final CropSettings settings;
   final bool busy;
+  final bool removeBg;
 
   final TextEditingController horizontalController;
   final TextEditingController verticalController;
@@ -38,6 +35,7 @@ class ControlPanel extends StatelessWidget {
   final TextEditingController bottomPaddingController;
 
   final VoidCallback onPickImage;
+  final ValueChanged<bool> onRemoveBgChanged;
   final void Function({
   int? horizontalCount,
   int? verticalCount,
@@ -45,12 +43,6 @@ class ControlPanel extends StatelessWidget {
   double? bottomPadding,
   }) onSettingsChanged;
   final VoidCallback onSave;
-
-  // 배경 투명화 관련 프로퍼티
-  final bool removeBg;
-  final double tolerance;
-  final ValueChanged<bool> onRemoveBgChanged;
-  final ValueChanged<double> onToleranceChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -91,45 +83,17 @@ class ControlPanel extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
 
-          // ── 배경 투명화 옵션 ─────────────────────────────
-          Text('배경 처리', style: theme.textTheme.titleSmall),
+          // ── AI 배경 투명화 ────────────────────────────────
+          Text('AI 배경 처리', style: theme.textTheme.titleSmall),
           const SizedBox(height: 4),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('흰색 배경 투명하게', style: TextStyle(fontSize: 14)),
+            title: const Text('AI 배경 제거 (누끼 따기)', style: TextStyle(fontSize: 14)),
+            subtitle: const Text('브라우저 AI가 캐릭터 외의 배경을 자동으로 분석해 지웁니다.',
+                style: TextStyle(fontSize: 11)),
             value: removeBg,
             onChanged: busy || !hasImage ? null : onRemoveBgChanged,
           ),
-          if (removeBg) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '허용 오차 (Tolerance)',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  '${tolerance.round()}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                ),
-              ],
-            ),
-            Slider(
-              value: tolerance,
-              min: 0,
-              max: 100,
-              divisions: 100,
-              activeColor: primaryColor,
-              label: '${tolerance.round()}',
-              onChanged: busy || !hasImage ? null : onToleranceChanged,
-            ),
-          ],
           const SizedBox(height: 8),
           const Divider(),
 

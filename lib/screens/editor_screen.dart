@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
 import '../models/crop_settings.dart';
+import '../services/ai_bg_remover.dart';
 import '../services/sprite_cropper.dart';
 import '../widgets/control_panel.dart';
 import '../widgets/image_canvas.dart';
 
-/// 스프라이트 시트 분할 메인 화면.
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
 
@@ -19,18 +19,13 @@ class EditorScreen extends StatefulWidget {
 }
 
 class _EditorScreenState extends State<EditorScreen> {
-  // 배경 투명화 처리를 위한 원본 바이트 보존 변수
   Uint8List? _rawOriginalBytes;
   Uint8List? _sourceBytes;
   img.Image? _decoded;
   String? _fileName;
 
-  // ── 배경 투명화 옵션 상태 ──
   bool _removeBg = false;
-  int _bgRed = 255;
-  int _bgGreen = 255;
-  int _bgBlue = 255;
-  double _tolerance = 30.0;
+  bool _busy = false;
 
   CropSettings _settings = const CropSettings(
     horizontalCount: 4,
@@ -41,14 +36,10 @@ class _EditorScreenState extends State<EditorScreen> {
   TextEditingController(text: '${_settings.horizontalCount}');
   late final TextEditingController _verticalController =
   TextEditingController(text: '${_settings.verticalCount}');
-
-  // 상/하단 여백 조절용 Controllers
   late final TextEditingController _topPaddingController =
   TextEditingController(text: '${_settings.topPadding.round()}');
   late final TextEditingController _bottomPaddingController =
   TextEditingController(text: '${_settings.bottomPadding.round()}');
-
-  bool _busy = false;
 
   @override
   void dispose() {
@@ -70,19 +61,17 @@ class _EditorScreenState extends State<EditorScreen> {
       if (files == null || files.isEmpty) return;
 
       final file = files.first;
-
-      // PlatformFile에서 readAsBytes()를 직접 호출합니다.
       final bytes = await file.readAsBytes();
       final decoded = SpriteCropper.decode(bytes);
 
       if (!mounted) return;
 
       setState(() {
-        _rawOriginalBytes = bytes; // 원본 보존
+        _rawOriginalBytes = bytes;
         _sourceBytes = bytes;
         _decoded = decoded;
         _fileName = file.name;
-        _removeBg = false; // 이미지 새로 업로드 시 배경 투명화 초기화
+        _removeBg = false;
 
         _settings = _settings.copyWith(
           topPadding: 0.0,
@@ -98,46 +87,53 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  // ── 배경 투명화 파이프라인 처리 ───────────────────────
-  void _applyBackgroundRemoval() {
+  // ── AI 배경 제거 연동 처리 ─────────────────────────────
+  Future<void> _toggleAiBackgroundRemoval(bool enable) async {
     final raw = _rawOriginalBytes;
     if (raw == null) return;
 
-    if (!_removeBg) {
-      // 투명화 비활성화 시 원본 복원
+    if (!enable) {
+      // 배경 제거 해제 시 원본 복원
       final decoded = SpriteCropper.decode(raw);
       setState(() {
+        _removeBg = false;
         _sourceBytes = raw;
         _decoded = decoded;
       });
       return;
     }
 
+    setState(() {
+      _busy = true;
+    });
+
+    _showSnack('AI가 배경을 분석하여 지우는 중입니다… (최초 실행 시 모델 다운로드로 몇 초 소요)');
+
     try {
-      final processedBytes = SpriteCropper.removeBackgroundColor(
-        bytes: raw,
-        targetRed: _bgRed,
-        targetGreen: _bgGreen,
-        targetBlue: _bgBlue,
-        tolerance: _tolerance.round(),
-      );
+      final processedBytes = await AiBgRemover.removeBackground(raw);
       final decoded = SpriteCropper.decode(processedBytes);
 
+      if (!mounted) return;
       setState(() {
+        _removeBg = true;
         _sourceBytes = processedBytes;
         _decoded = decoded;
       });
+      _showSnack('AI 배경 제거 완료!');
     } catch (e) {
-      _showSnack('배경 제거 실패: $e');
+      if (!mounted) return;
+      _showSnack('AI 배경 제거 실패: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
   }
 
-  // ── 설정 변경 (드래그 및 텍스트 입력 시 동기화) ────────
   void _updateSettings(CropSettings nextSettings) {
     setState(() {
       _settings = nextSettings;
 
-      // 텍스트 필드 값이 현재 입력 중인 상태와 다를 때만 동기화 (포커스/커서 튀김 방지)
       final topText = '${nextSettings.topPadding.round()}';
       if (_topPaddingController.text != topText) {
         _topPaddingController.text = topText;
@@ -160,7 +156,6 @@ class _EditorScreenState extends State<EditorScreen> {
     });
   }
 
-  // ── ZIP 저장 ─────────────────────────────────────────
   Future<void> _saveZip() async {
     final bytes = _sourceBytes;
     if (bytes == null) {
@@ -202,7 +197,6 @@ class _EditorScreenState extends State<EditorScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  // ── 레이아웃 ─────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final primaryColor = Colors.blue[700]!;
@@ -224,22 +218,13 @@ class _EditorScreenState extends State<EditorScreen> {
               imageHeight: _decoded?.height,
               settings: _settings,
               busy: _busy,
+              removeBg: _removeBg,
               horizontalController: _horizontalController,
               verticalController: _verticalController,
               topPaddingController: _topPaddingController,
               bottomPaddingController: _bottomPaddingController,
-              // 배경 투명화 옵션 전달 (ControlPanel의 파라미터 정의에 맞게 연결 가능)
-              removeBg: _removeBg,
-              tolerance: _tolerance,
-              onRemoveBgChanged: (val) {
-                _removeBg = val;
-                _applyBackgroundRemoval();
-              },
-              onToleranceChanged: (val) {
-                _tolerance = val;
-                if (_removeBg) _applyBackgroundRemoval();
-              },
               onPickImage: _pickImage,
+              onRemoveBgChanged: _toggleAiBackgroundRemoval,
               onSettingsChanged: ({
                 int? horizontalCount,
                 int? verticalCount,
@@ -325,7 +310,6 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 }
 
-/// 이미지가 아직 없을 때 표시하는 빈 상태 화면.
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
 
