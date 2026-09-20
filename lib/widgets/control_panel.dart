@@ -259,13 +259,13 @@ class ControlPanel extends StatelessWidget {
                     for (var i = 0; i < colBoundaryControllers.length; i++)
                       SizedBox(
                         width: 128,
-                        child: _NumberField(
+                        child: _BoundaryField(
                           controller: colBoundaryControllers[i],
                           label: '가로 경계 ${i + 1}',
                           icon: Icons.swap_horiz,
                           suffixText: 'px',
                           primaryColor: primaryColor,
-                          onChanged: (v) {
+                          onCommitted: (v) {
                             final updated = settings.withUpdatedColumnBoundary(
                               i,
                               v,
@@ -297,13 +297,13 @@ class ControlPanel extends StatelessWidget {
                     for (var i = 0; i < rowBoundaryControllers.length; i++)
                       SizedBox(
                         width: 128,
-                        child: _NumberField(
+                        child: _BoundaryField(
                           controller: rowBoundaryControllers[i],
                           label: '세로 경계 ${i + 1}',
                           icon: Icons.swap_vert,
                           suffixText: 'px',
                           primaryColor: primaryColor,
-                          onChanged: (v) {
+                          onCommitted: (v) {
                             final updated = settings.withUpdatedRowBoundary(
                               i,
                               v,
@@ -431,6 +431,117 @@ class _NumberField extends StatelessWidget {
           onChanged(0);
         }
       },
+    );
+  }
+}
+
+/// 경계선 위치 입력 전용 필드.
+///
+/// - 탭하면 전체 텍스트가 선택되어 바로 덮어쓰기할 수 있다.
+/// - 타이핑하는 동안에는 텍스트를 건드리지 않는다 (설정 갱신 없음).
+/// - Enter 또는 포커스 이탈 시에만 [onCommitted]로 값이 적용되고,
+///   이때 인접 경계·이미지 범위로 clamp된 최종 값이 필드에 표시된다.
+class _BoundaryField extends StatefulWidget {
+  const _BoundaryField({
+    required this.controller,
+    required this.label,
+    required this.icon,
+    required this.suffixText,
+    required this.primaryColor,
+    required this.onCommitted,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final String suffixText;
+  final Color primaryColor;
+
+  /// 입력 완료 시 호출된다 (유효한 정수일 때만).
+  final ValueChanged<int> onCommitted;
+
+  @override
+  State<_BoundaryField> createState() => _BoundaryFieldState();
+}
+
+class _BoundaryFieldState extends State<_BoundaryField> {
+  final FocusNode _focusNode = FocusNode();
+
+  /// 포커스를 얻기 직전의 값 (실패 시 복원용).
+  late String _editStartText;
+
+  /// 이번 포커스 동안 이미 적용했는지 (중복 적용 방지).
+  bool _committed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _editStartText = widget.controller.text;
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChanged(bool hasFocus) {
+    if (hasFocus) {
+      _editStartText = widget.controller.text;
+      _committed = false;
+    } else {
+      _commit();
+    }
+  }
+
+  void _commit() {
+    if (_committed) return;
+    _committed = true;
+
+    final text = widget.controller.text.trim();
+    if (text == _editStartText) return; // 값 변화 없음
+
+    final value = int.tryParse(text);
+    if (value == null || text.isEmpty) {
+      // 빈 값/비정상 입력 → 편집 전 값으로 복원
+      widget.controller.text = _editStartText;
+      return;
+    }
+    widget.onCommitted(value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _onFocusChanged,
+      child: TextField(
+        controller: widget.controller,
+        focusNode: _focusNode,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        textInputAction: TextInputAction.done,
+        onTap: () {
+          widget.controller.selection = TextSelection(
+            baseOffset: 0,
+            extentOffset: widget.controller.text.length,
+          );
+        },
+        onEditingComplete: () {
+          _commit();
+          _focusNode.unfocus();
+        },
+        decoration: InputDecoration(
+          labelText: widget.label,
+          suffixText: widget.suffixText,
+          prefixIcon: Icon(widget.icon, size: 18, color: widget.primaryColor),
+          border: const OutlineInputBorder(),
+          isDense: true,
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: widget.primaryColor, width: 2),
+          ),
+        ),
+      ),
     );
   }
 }

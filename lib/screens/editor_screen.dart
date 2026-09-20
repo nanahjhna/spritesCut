@@ -3,11 +3,12 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart' hide UndoHistory;
+import 'package:flutter/services.dart' show LogicalKeyboardKey, rootBundle;
 import 'package:image/image.dart' as img;
 
 import '../models/crop_settings.dart';
+import '../models/undo_history.dart';
 import '../services/ai_bg_remover.dart';
 import '../services/sprite_cropper.dart';
 import '../widgets/control_panel.dart';
@@ -36,6 +37,9 @@ class _EditorScreenState extends State<EditorScreen> {
   List<({int w, int h})> _previewSizes = [];
   int? _editingFrameIndex;
   bool _previewCollapsed = false;
+
+  /// 설정 변경 이력 (되돌리기/다시 실행).
+  final UndoHistory<CropSettings> _undoHistory = UndoHistory(capacity: 100);
 
   CropSettings _settings = const CropSettings(
     horizontalCount: 4,
@@ -95,6 +99,7 @@ class _EditorScreenState extends State<EditorScreen> {
       if (!mounted) return;
 
       setState(() {
+        _undoHistory.clear();
         _rawOriginalBytes = bytes;
         _sourceBytes = bytes;
         _decoded = decoded;
@@ -133,6 +138,7 @@ class _EditorScreenState extends State<EditorScreen> {
       // 배경 제거 해제 시 원본 복원
       final decoded = SpriteCropper.decode(raw);
       setState(() {
+        _undoHistory.clear();
         _removeBg = false;
         _sourceBytes = raw;
         _decoded = decoded;
@@ -155,6 +161,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
       if (!mounted) return;
       setState(() {
+        _undoHistory.clear();
         _removeBg = true;
         _sourceBytes = processedBytes;
         _decoded = decoded;
@@ -174,6 +181,41 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   void _updateSettings(
+    CropSettings nextSettings, {
+    bool resetFrameEdits = false,
+  }) {
+    _undoHistory.record(_settings);
+    _applySettingsState(nextSettings, resetFrameEdits: resetFrameEdits);
+  }
+
+  bool get _canUndo => _undoHistory.canUndo;
+  bool get _canRedo => _undoHistory.canRedo;
+
+  /// 한 단계 실행 취소 (되돌리기).
+  void _undo() {
+    final restored = _undoHistory.undo(_settings);
+    if (restored == null) return;
+    _guardEditingIndex(restored);
+    _applySettingsState(restored);
+  }
+
+  /// 한 단계 다시 실행.
+  void _redo() {
+    final restored = _undoHistory.redo(_settings);
+    if (restored == null) return;
+    _guardEditingIndex(restored);
+    _applySettingsState(restored);
+  }
+
+  /// 복원된 설정의 프레임 수가 편집 중 인덱스보다 적으면 편집을 해제한다.
+  void _guardEditingIndex(CropSettings restored) {
+    final index = _editingFrameIndex;
+    if (index != null && index >= restored.totalCount) {
+      _editingFrameIndex = null;
+    }
+  }
+
+  void _applySettingsState(
     CropSettings nextSettings, {
     bool resetFrameEdits = false,
   }) {
@@ -402,78 +444,109 @@ class _EditorScreenState extends State<EditorScreen> {
   Widget build(BuildContext context) {
     final primaryColor = Colors.blue[700]!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI 스프라이트 시트 분할 도구'),
-        centerTitle: false,
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Row(
-        children: [
-          SizedBox(
-            width: 320,
-            child: ControlPanel(
-              fileName: _fileName,
-              imageWidth: _decoded?.width,
-              imageHeight: _decoded?.height,
-              settings: _settings,
-              busy: _busy,
-              removeBg: _removeBg,
-              horizontalController: _horizontalController,
-              verticalController: _verticalController,
-              topPaddingController: _topPaddingController,
-              bottomPaddingController: _bottomPaddingController,
-              leftPaddingController: _leftPaddingController,
-              rightPaddingController: _rightPaddingController,
-              onPickImage: _pickImage,
-              onRemoveBgChanged: _toggleAiBackgroundRemoval,
-              onSettingsChanged:
-                  ({
-                    int? horizontalCount,
-                    int? verticalCount,
-                    double? topPadding,
-                    double? bottomPadding,
-                    double? leftPadding,
-                    double? rightPadding,
-                    List<int>? columnBoundaries,
-                    List<int>? rowBoundaries,
-                  }) {
-                    var next = _settings.copyWith(
-                      horizontalCount:
-                          horizontalCount ?? _settings.horizontalCount,
-                      verticalCount: verticalCount ?? _settings.verticalCount,
-                      topPadding: topPadding ?? _settings.topPadding,
-                      bottomPadding: bottomPadding ?? _settings.bottomPadding,
-                      leftPadding: leftPadding ?? _settings.leftPadding,
-                      rightPadding: rightPadding ?? _settings.rightPadding,
-                      columnBoundaries:
-                          columnBoundaries ?? _settings.columnBoundaries,
-                      rowBoundaries: rowBoundaries ?? _settings.rowBoundaries,
-                    );
-                    // 수동 모드에서 분할 수를 바꾸면 경계선을 균등 간격으로 재초기화
-                    if (next.useManualBoundaries &&
-                        (horizontalCount != null || verticalCount != null)) {
-                      final decoded = _decoded;
-                      if (decoded != null) {
-                        next = next.withEqualBoundaries(
-                          imageWidth: decoded.width,
-                          imageHeight: decoded.height,
-                        );
-                      }
-                    }
-                    _updateSettings(next, resetFrameEdits: true);
-                  },
-              onManualModeChanged: _toggleManualMode,
-              onResetBoundaries: _resetBoundaries,
-              onSave: _saveZip,
-              colBoundaryControllers: _colBoundaryControllers,
-              rowBoundaryControllers: _rowBoundaryControllers,
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undo,
+        const SingleActivator(
+          LogicalKeyboardKey.keyZ,
+          control: true,
+          shift: true,
+        ): _redo,
+        const SingleActivator(LogicalKeyboardKey.keyY, control: true): _redo,
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('AI 스프라이트 시트 분할 도구'),
+          centerTitle: false,
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          actions: [
+            Tooltip(
+              message: '실행 취소 (Ctrl+Z)',
+              child: IconButton(
+                onPressed: _canUndo ? _undo : null,
+                icon: const Icon(Icons.undo),
+                color: Colors.white,
+                disabledColor: Colors.white60,
+              ),
             ),
-          ),
-          const VerticalDivider(width: 1),
-          Expanded(child: _buildPreview()),
-        ],
+            Tooltip(
+              message: '다시 실행 (Ctrl+Shift+Z)',
+              child: IconButton(
+                onPressed: _canRedo ? _redo : null,
+                icon: const Icon(Icons.redo),
+                color: Colors.white,
+                disabledColor: Colors.white60,
+              ),
+            ),
+          ],
+        ),
+        body: Row(
+          children: [
+            SizedBox(
+              width: 320,
+              child: ControlPanel(
+                fileName: _fileName,
+                imageWidth: _decoded?.width,
+                imageHeight: _decoded?.height,
+                settings: _settings,
+                busy: _busy,
+                removeBg: _removeBg,
+                horizontalController: _horizontalController,
+                verticalController: _verticalController,
+                topPaddingController: _topPaddingController,
+                bottomPaddingController: _bottomPaddingController,
+                leftPaddingController: _leftPaddingController,
+                rightPaddingController: _rightPaddingController,
+                onPickImage: _pickImage,
+                onRemoveBgChanged: _toggleAiBackgroundRemoval,
+                onSettingsChanged:
+                    ({
+                      int? horizontalCount,
+                      int? verticalCount,
+                      double? topPadding,
+                      double? bottomPadding,
+                      double? leftPadding,
+                      double? rightPadding,
+                      List<int>? columnBoundaries,
+                      List<int>? rowBoundaries,
+                    }) {
+                      var next = _settings.copyWith(
+                        horizontalCount:
+                            horizontalCount ?? _settings.horizontalCount,
+                        verticalCount: verticalCount ?? _settings.verticalCount,
+                        topPadding: topPadding ?? _settings.topPadding,
+                        bottomPadding: bottomPadding ?? _settings.bottomPadding,
+                        leftPadding: leftPadding ?? _settings.leftPadding,
+                        rightPadding: rightPadding ?? _settings.rightPadding,
+                        columnBoundaries:
+                            columnBoundaries ?? _settings.columnBoundaries,
+                        rowBoundaries: rowBoundaries ?? _settings.rowBoundaries,
+                      );
+                      // 수동 모드에서 분할 수를 바꾸면 경계선을 균등 간격으로 재초기화
+                      if (next.useManualBoundaries &&
+                          (horizontalCount != null || verticalCount != null)) {
+                        final decoded = _decoded;
+                        if (decoded != null) {
+                          next = next.withEqualBoundaries(
+                            imageWidth: decoded.width,
+                            imageHeight: decoded.height,
+                          );
+                        }
+                      }
+                      _updateSettings(next, resetFrameEdits: true);
+                    },
+                onManualModeChanged: _toggleManualMode,
+                onResetBoundaries: _resetBoundaries,
+                onSave: _saveZip,
+                colBoundaryControllers: _colBoundaryControllers,
+                rowBoundaryControllers: _rowBoundaryControllers,
+              ),
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: _buildPreview()),
+          ],
+        ),
       ),
     );
   }
