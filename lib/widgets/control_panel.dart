@@ -12,6 +12,8 @@ class ControlPanel extends StatelessWidget {
     required this.settings,
     required this.busy,
     required this.removeBg,
+    required this.bgColor,
+    required this.tolerance,
     required this.horizontalController,
     required this.verticalController,
     required this.topPaddingController,
@@ -20,6 +22,7 @@ class ControlPanel extends StatelessWidget {
     required this.rightPaddingController,
     required this.onPickImage,
     required this.onRemoveBgChanged,
+    required this.onToleranceChanged,
     required this.onSettingsChanged,
     required this.onManualModeChanged,
     required this.onResetBoundaries,
@@ -35,6 +38,12 @@ class ControlPanel extends StatelessWidget {
   final bool busy;
   final bool removeBg;
 
+  /// 감지된 배경색 (배경 제거가 켜져 있고 감지 성공 시에만 표시).
+  final Color? bgColor;
+
+  /// 배경 제거 오차 (0.0 ~ 0.3).
+  final double tolerance;
+
   final TextEditingController horizontalController;
   final TextEditingController verticalController;
   final TextEditingController topPaddingController;
@@ -44,6 +53,7 @@ class ControlPanel extends StatelessWidget {
 
   final VoidCallback onPickImage;
   final ValueChanged<bool> onRemoveBgChanged;
+  final ValueChanged<double> onToleranceChanged;
   final void Function({
     int? horizontalCount,
     int? verticalCount,
@@ -105,22 +115,81 @@ class ControlPanel extends StatelessWidget {
               const SizedBox(height: 12),
               const Divider(),
 
-              // ── AI 배경 투명화 ────────────────────────────────
-              Text('AI 배경 처리', style: theme.textTheme.titleSmall),
+              // ── 배경 투명화 ─────────────────────────────────────
+              Text('배경 처리', style: theme.textTheme.titleSmall),
               const SizedBox(height: 4),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'AI 배경 제거 (누끼 따기)',
-                  style: TextStyle(fontSize: 14),
-                ),
+                title: const Text('배경 제거', style: TextStyle(fontSize: 14)),
                 subtitle: const Text(
-                  '브라우저 AI가 캐릭터 외의 배경을 자동으로 분석해 지웁니다.',
+                  '단색 배경을 자동 감지해 투명하게 처리합니다.',
                   style: TextStyle(fontSize: 11),
                 ),
                 value: removeBg,
                 onChanged: busy || !hasImage ? null : onRemoveBgChanged,
               ),
+              if (removeBg && bgColor != null) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: theme.colorScheme.outline),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: theme.colorScheme.outline),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '감지된 배경색  #'
+                          '${(bgColor!.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (removeBg && hasImage) ...[
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '오차 (유사색 제거 범위)',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    Text(
+                      '${(tolerance.clamp(0.0, 0.3) * 100).round()}%',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: tolerance.clamp(0.0, 0.3),
+                  min: 0.0,
+                  max: 0.3,
+                  divisions: 30,
+                  onChanged: busy ? null : onToleranceChanged,
+                ),
+              ],
               const SizedBox(height: 8),
               const Divider(),
 

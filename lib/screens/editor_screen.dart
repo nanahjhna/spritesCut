@@ -9,7 +9,7 @@ import 'package:image/image.dart' as img;
 
 import '../models/crop_settings.dart';
 import '../models/undo_history.dart';
-import '../services/ai_bg_remover.dart';
+import '../services/color_bg_remover.dart';
 import '../services/sprite_cropper.dart';
 import '../widgets/control_panel.dart';
 import '../widgets/image_canvas.dart';
@@ -30,6 +30,11 @@ class _EditorScreenState extends State<EditorScreen> {
 
   bool _removeBg = false;
   bool _busy = false;
+
+  /// 배경 처리 상태 (색상 기반 크로마키).
+  RgbColor? _bgColor;
+  double _bgTolerance = 0.1;
+  Timer? _bgApplyDebounce;
 
   // ── 결과물 미리보기 / 프레임별 편집 상태 ──────────────
   Timer? _previewDebounce;
@@ -67,6 +72,7 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   void dispose() {
     _previewDebounce?.cancel();
+    _bgApplyDebounce?.cancel();
     _horizontalController.dispose();
     _verticalController.dispose();
     _topPaddingController.dispose();
@@ -98,6 +104,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
       if (!mounted) return;
 
+      _bgApplyDebounce?.cancel();
       setState(() {
         _undoHistory.clear();
         _rawOriginalBytes = bytes;
@@ -105,6 +112,7 @@ class _EditorScreenState extends State<EditorScreen> {
         _decoded = decoded;
         _fileName = file.name;
         _removeBg = false;
+        _bgColor = null;
         _editingFrameIndex = null;
 
         _settings = _settings
@@ -129,8 +137,8 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  // ── AI 배경 제거 연동 처리 ─────────────────────────────
-  Future<void> _toggleAiBackgroundRemoval(bool enable) async {
+  // ── 배경 제거 연동 처리 (단색 배경 크로마키) ─────────
+  Future<void> _toggleBackgroundRemoval(bool enable) async {
     final raw = _rawOriginalBytes;
     if (raw == null) return;
 
@@ -140,6 +148,7 @@ class _EditorScreenState extends State<EditorScreen> {
       setState(() {
         _undoHistory.clear();
         _removeBg = false;
+        _bgColor = null;
         _sourceBytes = raw;
         _decoded = decoded;
         _editingFrameIndex = null;
@@ -152,27 +161,89 @@ class _EditorScreenState extends State<EditorScreen> {
     setState(() {
       _busy = true;
     });
-
-    _showSnack('AI가 배경을 분석하여 지우는 중입니다… (최초 실행 시 모델 다운로드로 몇 초 소요)');
+    _showSnack('단색 배경을 감지해 제거하는 중입니다…');
 
     try {
-      final processedBytes = await AiBgRemover.removeBackground(raw);
+      final detected = ColorBgRemover.detectBackgroundColor(
+        SpriteCropper.decode(raw),
+      );
+      if (detected == null) {
+        if (!mounted) return;
+        _showSnack('배경색을 감지하지 못했습니다. 배경이 단색인지 확인해 주세요.');
+        return;
+      }
+      final processedBytes = ColorBgRemover.removeBackground(
+        raw,
+        backgroundColor: detected,
+        tolerance: _bgTolerance,
+      );
       final decoded = SpriteCropper.decode(processedBytes);
 
       if (!mounted) return;
       setState(() {
         _undoHistory.clear();
         _removeBg = true;
+        _bgColor = detected;
         _sourceBytes = processedBytes;
         _decoded = decoded;
         _editingFrameIndex = null;
         _settings = _settings.clearFrameRects();
       });
       _schedulePreviewUpdate();
-      _showSnack('AI 배경 제거 완료!');
+      _showSnack('배경 제거 완료!');
     } catch (e) {
       if (!mounted) return;
-      _showSnack('AI 배경 제거 실패: $e');
+      _showSnack('배경 제거 실패: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  /// 오차 슬라이더 변경 시 지연 적용 (드래그 중 반복 실행 방지).
+  void _onBgToleranceChanged(double value) {
+    _bgApplyDebounce?.cancel();
+    setState(() => _bgTolerance = value);
+    if (!_removeBg || _rawOriginalBytes == null) return;
+    _bgApplyDebounce = Timer(const Duration(milliseconds: 200), () {
+      _reapplyBackgroundRemoval();
+    });
+  }
+
+  /// 새 오차 값으로 배경 제거를 원본 이미지에 다시 적용한다.
+  Future<void> _reapplyBackgroundRemoval() async {
+    final raw = _rawOriginalBytes;
+    if (!_removeBg || raw == null) return;
+
+    setState(() {
+      _busy = true;
+    });
+    try {
+      final detected =
+          _bgColor ??
+          ColorBgRemover.detectBackgroundColor(SpriteCropper.decode(raw));
+      if (detected == null) return;
+      final processedBytes = ColorBgRemover.removeBackground(
+        raw,
+        backgroundColor: detected,
+        tolerance: _bgTolerance,
+      );
+      final decoded = SpriteCropper.decode(processedBytes);
+
+      if (!mounted) return;
+      setState(() {
+        _undoHistory.clear();
+        _bgColor = detected;
+        _sourceBytes = processedBytes;
+        _decoded = decoded;
+        _editingFrameIndex = null;
+        _settings = _settings.clearFrameRects();
+      });
+      _schedulePreviewUpdate();
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('배경 제거 재적용 실패: $e');
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -492,6 +563,15 @@ class _EditorScreenState extends State<EditorScreen> {
                 settings: _settings,
                 busy: _busy,
                 removeBg: _removeBg,
+                bgColor: _bgColor == null
+                    ? null
+                    : Color.fromARGB(
+                        255,
+                        _bgColor!.r,
+                        _bgColor!.g,
+                        _bgColor!.b,
+                      ),
+                tolerance: _bgTolerance,
                 horizontalController: _horizontalController,
                 verticalController: _verticalController,
                 topPaddingController: _topPaddingController,
@@ -499,7 +579,8 @@ class _EditorScreenState extends State<EditorScreen> {
                 leftPaddingController: _leftPaddingController,
                 rightPaddingController: _rightPaddingController,
                 onPickImage: _pickImage,
-                onRemoveBgChanged: _toggleAiBackgroundRemoval,
+                onRemoveBgChanged: _toggleBackgroundRemoval,
+                onToleranceChanged: _onBgToleranceChanged,
                 onSettingsChanged:
                     ({
                       int? horizontalCount,

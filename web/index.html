@@ -18,32 +18,6 @@
 
   <title>AI 스프라이트 시트 분할 도구</title>
   <link rel="manifest" href="manifest.json">
-
-  <!-- imgly Background Removal (ESM CDN - <script type="module"> 필수) -->
-  <script type="module">
-    import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm';
-
-    // Flutter(Dart)의 window.removeAiBg(dataUrl) 호출에 대응하는 브릿지
-    window.removeAiBg = async function (dataUrl) {
-      if (typeof removeBackground !== 'function') {
-        throw new Error('AI 라이브러리가 로드되지 않았습니다.');
-      }
-      try {
-        const blob = await removeBackground(dataUrl, {
-          model: 'large', // small(~40MB) / medium(~80MB) — 크기·속도 대비 품질 조절
-          output: { format: 'image/png' },
-        });
-
-        // Blob을 ArrayBuffer로 변환하여 Dart로 전달
-        const arrayBuffer = await blob.arrayBuffer();
-        return new Uint8Array(arrayBuffer);
-      } catch (err) {
-        const message = err && err.message ? err.message : String(err);
-        console.error('AI BG Removal Error:', message);
-        throw new Error(message);
-      }
-    };
-  </script>
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
