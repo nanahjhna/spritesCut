@@ -91,6 +91,96 @@ void main() {
       // spriteWidth = (256 - 20) / 4 = 59
       expect(last.x + last.width, 10 + 4 * 59);
     });
+
+    test('withEqualBoundaries: 256×64 이미지 4×1 분할 시 경계 = [0,64,128,192,256]', () {
+      const s = CropSettings(horizontalCount: 4, verticalCount: 1);
+      final manual = s.withEqualBoundaries(imageWidth: 256, imageHeight: 64);
+      expect(manual.useManualBoundaries, isTrue);
+      expect(manual.columnBoundaries, [0, 64, 128, 192, 256]);
+      expect(manual.rowBoundaries, [0, 64]);
+      expect(manual.totalCount, 4);
+    });
+
+    test('withEqualBoundaries: 여백을 반영한 균등 경계 생성', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 2,
+        leftPadding: 10,
+        rightPadding: 10,
+        topPadding: 8,
+        bottomPadding: 8,
+      );
+      final manual = s.withEqualBoundaries(imageWidth: 256, imageHeight: 64);
+      expect(manual.columnBoundaries, [10, 69, 128, 187, 246]);
+      expect(manual.rowBoundaries, [8, 32, 56]);
+    });
+
+    test('수동 경계 totalCount/effectiveCount는 경계 개수에서 파생된다', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 2,
+        useManualBoundaries: true,
+        columnBoundaries: [0, 40, 100, 190],
+        rowBoundaries: [0, 30, 50],
+      );
+      expect(s.effectiveHorizontalCount, 3);
+      expect(s.effectiveVerticalCount, 2);
+      expect(s.totalCount, 6);
+    });
+
+    test('cropRectFor: 수동 경계 위치대로 잘라낸다', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 2,
+        useManualBoundaries: true,
+        columnBoundaries: [0, 40, 100, 190],
+        rowBoundaries: [0, 30, 50],
+      );
+      final r0 = s.cropRectFor(0, 256, 64);
+      expect((r0.x, r0.y, r0.width, r0.height), (0, 0, 40, 30));
+      final r1 = s.cropRectFor(1, 256, 64);
+      expect((r1.x, r1.y, r1.width, r1.height), (40, 0, 60, 30));
+      final r4 = s.cropRectFor(4, 256, 64);
+      expect((r4.x, r4.y, r4.width, r4.height), (40, 30, 60, 20));
+      final r5 = s.cropRectFor(5, 256, 64);
+      expect((r5.x, r5.y, r5.width, r5.height), (100, 30, 90, 20));
+    });
+
+    test('withUpdatedColumnBoundary: 인접 경계 사이로만 clamp된다', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 1,
+        useManualBoundaries: true,
+        columnBoundaries: [0, 64, 128, 192, 256],
+        rowBoundaries: [0, 64],
+      );
+      // 중간 경계를 인접 경계 밖으로 밀어도 clamp
+      final a = s.withUpdatedColumnBoundary(2, 500, imageWidth: 256);
+      expect(a.columnBoundaries[2], 192 - 10); // 오른쪽(192) - 최소간격(10)
+      final b = s.withUpdatedColumnBoundary(2, -50, imageWidth: 256);
+      expect(b.columnBoundaries[2], 64 + 10); // 왼쪽(64) + 최소간격(10)
+      // 외곽 경계 0번은 0 ~ (다음-10)
+      final c = s.withUpdatedColumnBoundary(0, -100, imageWidth: 256);
+      expect(c.columnBoundaries[0], 0);
+      // 외곽 경계 마지막은 (이전+10) ~ imageWidth
+      final d = s.withUpdatedColumnBoundary(4, 999, imageWidth: 256);
+      expect(d.columnBoundaries[4], 256);
+    });
+
+    test('frameSizeRange: 수동 모드에서 프레임별 최소/최대 크기를 반환한다', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 2,
+        useManualBoundaries: true,
+        columnBoundaries: [0, 40, 100, 190],
+        rowBoundaries: [0, 30, 50],
+      );
+      final range = s.frameSizeRange(imageWidth: 256, imageHeight: 64);
+      expect(range.minWidth, 40);
+      expect(range.maxWidth, 90);
+      expect(range.minHeight, 20);
+      expect(range.maxHeight, 30);
+    });
   });
 
   group('SpriteCropper', () {

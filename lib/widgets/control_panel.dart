@@ -21,7 +21,11 @@ class ControlPanel extends StatelessWidget {
     required this.onPickImage,
     required this.onRemoveBgChanged,
     required this.onSettingsChanged,
+    required this.onManualModeChanged,
+    required this.onResetBoundaries,
     required this.onSave,
+    required this.colBoundaryControllers,
+    required this.rowBoundaryControllers,
   });
 
   final String? fileName;
@@ -47,8 +51,14 @@ class ControlPanel extends StatelessWidget {
   double? bottomPadding,
   double? leftPadding,
   double? rightPadding,
+  List<int>? columnBoundaries,
+  List<int>? rowBoundaries,
   }) onSettingsChanged;
+  final ValueChanged<bool> onManualModeChanged;
+  final VoidCallback onResetBoundaries;
   final VoidCallback onSave;
+  final List<TextEditingController> colBoundaryControllers;
+  final List<TextEditingController> rowBoundaryControllers;
 
   @override
   Widget build(BuildContext context) {
@@ -133,62 +143,182 @@ class ControlPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // ── 영역 여백 입력 ─────────────────────────────
-          Text('영역 여백 (상단 / 하단)', style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _NumberField(
-                  controller: topPaddingController,
-                  label: '상단 여백',
-                  icon: Icons.vertical_align_top,
-                  suffixText: 'px',
-                  primaryColor: primaryColor,
-                  onChanged: (v) => onSettingsChanged(topPadding: v.toDouble()),
-                ),
+          // ── 분할 모드 ─────────────────────────────────
+          Text('분할 모드', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 6),
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment(
+                value: false,
+                label: Text('균등 분할'),
+                icon: Icon(Icons.grid_on, size: 18),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _NumberField(
-                  controller: bottomPaddingController,
-                  label: '하단 여백',
-                  icon: Icons.vertical_align_bottom,
-                  suffixText: 'px',
-                  primaryColor: primaryColor,
-                  onChanged: (v) => onSettingsChanged(bottomPadding: v.toDouble()),
-                ),
+              ButtonSegment(
+                value: true,
+                label: Text('수동 조절'),
+                icon: Icon(Icons.tune, size: 18),
               ),
             ],
+            selected: {settings.useManualBoundaries},
+            onSelectionChanged: busy || !hasImage
+                ? null
+                : (selection) => onManualModeChanged(selection.first),
+            showSelectedIcon: false,
+            style: const ButtonStyle(
+              visualDensity: VisualDensity.compact,
+            ),
           ),
-          const SizedBox(height: 8),
-          Text('영역 여백 (좌측 / 우측)', style: theme.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _NumberField(
-                  controller: leftPaddingController,
-                  label: '좌측 여백',
-                  icon: Icons.arrow_left,
-                  suffixText: 'px',
-                  primaryColor: primaryColor,
-                  onChanged: (v) => onSettingsChanged(leftPadding: v.toDouble()),
+          const SizedBox(height: 12),
+
+          // ── 균등 분할: 영역 여백 입력 ────────────────
+          if (!settings.useManualBoundaries) ...[
+            Text('영역 여백 (상단 / 하단)', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _NumberField(
+                    controller: topPaddingController,
+                    label: '상단 여백',
+                    icon: Icons.vertical_align_top,
+                    suffixText: 'px',
+                    primaryColor: primaryColor,
+                    onChanged: (v) => onSettingsChanged(topPadding: v.toDouble()),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _NumberField(
-                  controller: rightPaddingController,
-                  label: '우측 여백',
-                  icon: Icons.arrow_right,
-                  suffixText: 'px',
-                  primaryColor: primaryColor,
-                  onChanged: (v) => onSettingsChanged(rightPadding: v.toDouble()),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _NumberField(
+                    controller: bottomPaddingController,
+                    label: '하단 여백',
+                    icon: Icons.vertical_align_bottom,
+                    suffixText: 'px',
+                    primaryColor: primaryColor,
+                    onChanged: (v) => onSettingsChanged(bottomPadding: v.toDouble()),
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text('영역 여백 (좌측 / 우측)', style: theme.textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _NumberField(
+                    controller: leftPaddingController,
+                    label: '좌측 여백',
+                    icon: Icons.arrow_left,
+                    suffixText: 'px',
+                    primaryColor: primaryColor,
+                    onChanged: (v) => onSettingsChanged(leftPadding: v.toDouble()),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _NumberField(
+                    controller: rightPaddingController,
+                    label: '우측 여백',
+                    icon: Icons.arrow_right,
+                    suffixText: 'px',
+                    primaryColor: primaryColor,
+                    onChanged: (v) => onSettingsChanged(rightPadding: v.toDouble()),
+                  ),
+                ),
+              ],
+            ),
+          ]
+
+          // ── 수동 조절: 경계선 위치 입력 ───────────────
+          else ...[
+            Text(
+              '가로 경계선 위치 (px)',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '세로선 1개당 절대 좌표  •  0 ~ 이미지 폭',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < colBoundaryControllers.length; i++)
+                  SizedBox(
+                    width: 128,
+                    child: _NumberField(
+                      controller: colBoundaryControllers[i],
+                      label: '가로 경계 ${i + 1}',
+                      icon: Icons.swap_horiz,
+                      suffixText: 'px',
+                      primaryColor: primaryColor,
+                      onChanged: (v) {
+                        final updated = settings.withUpdatedColumnBoundary(
+                          i,
+                          v,
+                          imageWidth: imageWidth!,
+                        );
+                        onSettingsChanged(
+                          columnBoundaries: updated.columnBoundaries,
+                          rowBoundaries: updated.rowBoundaries,
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '세로 경계선 위치 (px)',
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '가로선 1개당 절대 좌표  •  0 ~ 이미지 높이',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (var i = 0; i < rowBoundaryControllers.length; i++)
+                  SizedBox(
+                    width: 128,
+                    child: _NumberField(
+                      controller: rowBoundaryControllers[i],
+                      label: '세로 경계 ${i + 1}',
+                      icon: Icons.swap_vert,
+                      suffixText: 'px',
+                      primaryColor: primaryColor,
+                      onChanged: (v) {
+                        final updated = settings.withUpdatedRowBoundary(
+                          i,
+                          v,
+                          imageHeight: imageHeight!,
+                        );
+                        onSettingsChanged(
+                          columnBoundaries: updated.columnBoundaries,
+                          rowBoundaries: updated.rowBoundaries,
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: busy ? null : onResetBoundaries,
+              icon: const Icon(Icons.restart_alt, size: 18),
+              label: const Text('균등 간격으로 초기화'),
+            ),
+          ],
           const SizedBox(height: 12),
 
           // ── 미리보기 정보 ──────────────────────────────
@@ -196,8 +326,8 @@ class ControlPanel extends StatelessWidget {
             _InfoTile(
               icon: Icons.check_circle_outline,
               title: '전체 이미지: $imageWidth × $imageHeight px',
-              subtitle:
-              '1컷 크기: ${_spriteWidth(imageWidth!)} × ${_spriteHeight(imageHeight!)} px  •  총 ${settings.totalCount}개',
+              subtitle: '1컷 크기: ${_spriteSizeInfo(imageWidth!, imageHeight!)}  •  '
+                  '총 ${settings.totalCount}개',
               iconColor: primaryColor,
             ),
             const SizedBox(height: 12),
@@ -236,17 +366,17 @@ class ControlPanel extends StatelessWidget {
     );
   }
 
-  int _spriteWidth(int w) {
-    final count = settings.horizontalCount <= 0 ? 1 : settings.horizontalCount;
-    final activeW =
-    (w - settings.leftPadding - settings.rightPadding).clamp(1.0, w.toDouble());
-    return (activeW / count).round();
-  }
-
-  int _spriteHeight(int h) {
-    final activeH = (h - settings.topPadding - settings.bottomPadding).clamp(1.0, h.toDouble());
-    final count = settings.verticalCount <= 0 ? 1 : settings.verticalCount;
-    return (activeH / count).round();
+  /// 1컷 크기 문자열 (수동 모드면 최소~최대 범위 표시).
+  String _spriteSizeInfo(int w, int h) {
+    if (settings.useManualBoundaries) {
+      final range = settings.frameSizeRange(imageWidth: w, imageHeight: h);
+      if (range.minWidth == range.maxWidth && range.minHeight == range.maxHeight) {
+        return '${range.maxWidth} × ${range.maxHeight} px';
+      }
+      return '${range.minWidth}×${range.minHeight} ~ ${range.maxWidth}×${range.maxHeight} px';
+    }
+    final sprite = settings.calcSpriteSize(imageWidth: w, imageHeight: h);
+    return '${sprite.spriteWidth} × ${sprite.spriteHeight} px';
   }
 }
 

@@ -61,8 +61,14 @@ class _ImageCanvasState extends State<ImageCanvas> {
         final leftPx = widget.settings.leftPadding * fitScale;
         final rightPx = widget.settings.rightPadding * fitScale;
 
-        // 가이드 박스 영역 (실제 자르기 영역)
-        final boxRect = Rect.fromLTWH(
+        // 수동 조절 모드 여부 (경계선 기반으로 자르기)
+        final useManual = widget.settings.useManualBoundaries;
+
+        // 가이드 박스 영역 (실제 자르기 영역).
+        // 수동 모드에서는 여백을 무시하고 이미지 전체를 기준으로 삼는다.
+        final boxRect = useManual
+            ? Rect.fromLTWH(imgX, imgY, dispW, dispH)
+            : Rect.fromLTWH(
           imgX + leftPx,
           imgY + topPx,
           dispW - leftPx - rightPx,
@@ -129,156 +135,18 @@ class _ImageCanvasState extends State<ImageCanvas> {
               ),
             ),
 
-            // 3) 상단 조절 핸들
-            Positioned(
-              left: imgX,
-              top: boxRect.top - (handleLength / 2),
-              width: dispW,
-              height: handleLength,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeUpDown,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) {
-                    final deltaImg = details.delta.dy / fitScale;
-                    final maxTop = widget.imageHeight - widget.settings.bottomPadding - 10.0;
-                    final newTop = (widget.settings.topPadding + deltaImg)
-                        .clamp(0.0, maxTop);
-
-                    widget.onSettingsChanged(
-                      widget.settings.copyWith(topPadding: newTop),
-                    );
-                  },
-                  child: Center(
-                    child: Container(
-                      height: 4,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black38, blurRadius: 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 4) 하단 조절 핸들
-            Positioned(
-              left: imgX,
-              top: boxRect.bottom - (handleLength / 2),
-              width: dispW,
-              height: handleLength,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeUpDown,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) {
-                    final deltaImg = details.delta.dy / fitScale;
-                    final maxBottom = widget.imageHeight - widget.settings.topPadding - 10.0;
-                    final newBottom = (widget.settings.bottomPadding - deltaImg)
-                        .clamp(0.0, maxBottom);
-
-                    widget.onSettingsChanged(
-                      widget.settings.copyWith(bottomPadding: newBottom),
-                    );
-                  },
-                  child: Center(
-                    child: Container(
-                      height: 4,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black38, blurRadius: 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 5) 좌측 조절 핸들
-            Positioned(
-              left: boxRect.left - (handleLength / 2),
-              top: imgY,
-              width: handleLength,
-              height: dispH,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeLeftRight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragUpdate: (details) {
-                    final deltaImg = details.delta.dx / fitScale;
-                    final maxLeft = widget.imageWidth -
-                        widget.settings.rightPadding -
-                        10.0;
-                    final newLeft = (widget.settings.leftPadding + deltaImg)
-                        .clamp(0.0, maxLeft);
-
-                    widget.onSettingsChanged(
-                      widget.settings.copyWith(leftPadding: newLeft),
-                    );
-                  },
-                  child: Center(
-                    child: Container(
-                      width: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black38, blurRadius: 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // 6) 우측 조절 핸들
-            Positioned(
-              left: boxRect.right - (handleLength / 2),
-              top: imgY,
-              width: handleLength,
-              height: dispH,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.resizeLeftRight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragUpdate: (details) {
-                    final deltaImg = details.delta.dx / fitScale;
-                    final maxRight = widget.imageWidth -
-                        widget.settings.leftPadding -
-                        10.0;
-                    final newRight = (widget.settings.rightPadding - deltaImg)
-                        .clamp(0.0, maxRight);
-
-                    widget.onSettingsChanged(
-                      widget.settings.copyWith(rightPadding: newRight),
-                    );
-                  },
-                  child: Center(
-                    child: Container(
-                      width: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black38, blurRadius: 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            // 3) 핸들: 수동 조절 모드 → 경계선 핸들 / 균등 모드 → 여백 핸들
+            ..._buildHandles(
+              useManual: useManual,
+              colorScheme: colorScheme,
+              fitScale: fitScale,
+              handleLength: handleLength,
+              imgX: imgX,
+              imgY: imgY,
+              dispW: dispW,
+              dispH: dispH,
+              imageRect: imageRect,
+              boxRect: boxRect,
             ),
 
             // 7) 안내 문구
@@ -292,7 +160,10 @@ class _ImageCanvasState extends State<ImageCanvas> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '상/하/좌/우 경계선을 드래그하여 영역을 조절하세요  •  가로 ${widget.settings.safeHorizontalCount} × 세로 ${widget.settings.safeVerticalCount} 분할',
+                  useManual
+                      ? '각 경계선을 드래그하거나 좌측 패널에서 위치(px)를 조절하세요  •  수동 조절 모드'
+                      : '상/하/좌/우 경계선을 드래그하여 영역을 조절하세요  •  '
+                      '가로 ${widget.settings.effectiveHorizontalCount} × 세로 ${widget.settings.effectiveVerticalCount} 분할',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
@@ -300,6 +171,228 @@ class _ImageCanvasState extends State<ImageCanvas> {
           ],
         );
       },
+    );
+  }
+
+  /// 수동 모드일 땐 모든 경계선에 핸들을, 균등 모드일 땐 상/하/좌/우 여백 핸들을 만든다.
+  List<Widget> _buildHandles({
+    required bool useManual,
+    required ColorScheme colorScheme,
+    required double fitScale,
+    required double handleLength,
+    required double imgX,
+    required double imgY,
+    required double dispW,
+    required double dispH,
+    required Rect imageRect,
+    required Rect boxRect,
+  }) {
+    if (!useManual) {
+      final primary = colorScheme.primary;
+      return [
+        // 상단
+        Positioned(
+          left: imgX,
+          top: boxRect.top - (handleLength / 2),
+          width: dispW,
+          height: handleLength,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeUpDown,
+            color: primary,
+            horizontal: true,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            onDrag: (delta) {
+              final deltaImg = delta / fitScale;
+              final maxTop = widget.imageHeight -
+                  widget.settings.bottomPadding -
+                  10.0;
+              final newTop =
+                  (widget.settings.topPadding + deltaImg).clamp(0.0, maxTop);
+              widget.onSettingsChanged(
+                widget.settings.copyWith(topPadding: newTop),
+              );
+            },
+          ),
+        ),
+        // 하단
+        Positioned(
+          left: imgX,
+          top: boxRect.bottom - (handleLength / 2),
+          width: dispW,
+          height: handleLength,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeUpDown,
+            color: primary,
+            horizontal: true,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            onDrag: (delta) {
+              final deltaImg = delta / fitScale;
+              final maxBottom = widget.imageHeight -
+                  widget.settings.topPadding -
+                  10.0;
+              final newBottom =
+                  (widget.settings.bottomPadding - deltaImg).clamp(0.0, maxBottom);
+              widget.onSettingsChanged(
+                widget.settings.copyWith(bottomPadding: newBottom),
+              );
+            },
+          ),
+        ),
+        // 좌측
+        Positioned(
+          left: boxRect.left - (handleLength / 2),
+          top: imgY,
+          width: handleLength,
+          height: dispH,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            color: primary,
+            horizontal: false,
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            onDrag: (delta) {
+              final deltaImg = delta / fitScale;
+              final maxLeft = widget.imageWidth -
+                  widget.settings.rightPadding -
+                  10.0;
+              final newLeft =
+                  (widget.settings.leftPadding + deltaImg).clamp(0.0, maxLeft);
+              widget.onSettingsChanged(
+                widget.settings.copyWith(leftPadding: newLeft),
+              );
+            },
+          ),
+        ),
+        // 우측
+        Positioned(
+          left: boxRect.right - (handleLength / 2),
+          top: imgY,
+          width: handleLength,
+          height: dispH,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            color: primary,
+            horizontal: false,
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            onDrag: (delta) {
+              final deltaImg = delta / fitScale;
+              final maxRight = widget.imageWidth -
+                  widget.settings.leftPadding -
+                  10.0;
+              final newRight =
+                  (widget.settings.rightPadding - deltaImg).clamp(0.0, maxRight);
+              widget.onSettingsChanged(
+                widget.settings.copyWith(rightPadding: newRight),
+              );
+            },
+          ),
+        ),
+      ];
+    }
+
+    // ── 수동 조절: 모든 경계선에 핸들 생성 ──
+    final colB = widget.settings.columnBoundaries;
+    final rowB = widget.settings.rowBoundaries;
+    if (colB.length < 2 || rowB.length < 2) {
+      return const [];
+    }
+
+    final primary = colorScheme.primary;
+    final handles = <Widget>[];
+
+    // 세로 경계선 핸들 (좌우 드래그)
+    for (var i = 0; i < colB.length; i++) {
+      final index = i;
+      handles.add(
+        Positioned(
+          left: imageRect.left + colB[index] * fitScale - (handleLength / 2),
+          top: imgY,
+          width: handleLength,
+          height: dispH,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            color: primary,
+            horizontal: false,
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            onDrag: (delta) {
+              final newVal = (colB[index] + delta / fitScale).round();
+              widget.onSettingsChanged(
+                widget.settings.withUpdatedColumnBoundary(
+                  index,
+                  newVal,
+                  imageWidth: widget.imageWidth,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    // 가로 경계선 핸들 (상하 드래그)
+    for (var i = 0; i < rowB.length; i++) {
+      final index = i;
+      handles.add(
+        Positioned(
+          left: imgX,
+          top: imageRect.top + rowB[index] * fitScale - (handleLength / 2),
+          width: dispW,
+          height: handleLength,
+          child: _buildPaddingBar(
+            cursor: SystemMouseCursors.resizeUpDown,
+            color: primary,
+            horizontal: true,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            onDrag: (delta) {
+              final newVal = (rowB[index] + delta / fitScale).round();
+              widget.onSettingsChanged(
+                widget.settings.withUpdatedRowBoundary(
+                  index,
+                  newVal,
+                  imageHeight: widget.imageHeight,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    return handles;
+  }
+
+  /// 여백/경계선 핸들의 드래그 바 한 개를 만든다.
+  Widget _buildPaddingBar({
+    required MouseCursor cursor,
+    required Color color,
+    required bool horizontal,
+    required EdgeInsets margin,
+    required ValueChanged<double> onDrag,
+  }) {
+    return MouseRegion(
+      cursor: cursor,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragUpdate: horizontal
+            ? null
+            : (details) => onDrag(details.delta.dx),
+        onVerticalDragUpdate: !horizontal
+            ? null
+            : (details) => onDrag(details.delta.dy),
+        child: Center(
+          child: Container(
+            width: horizontal ? null : 4,
+            height: horizontal ? 4 : null,
+            margin: margin,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+              boxShadow: const [
+                BoxShadow(color: Colors.black38, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -342,41 +435,72 @@ class _OverlayPainter extends CustomPainter {
       ..color = borderColor;
     canvas.drawRect(boxRect, borderPaint);
 
-    // 3) 격자선 (1컷 크기 기준)
-    final sprite = settings.calcSpriteSize(
-      imageWidth: imageWidth,
-      imageHeight: imageHeight,
-    );
-    final cellW = sprite.spriteWidth * scale;
-    final cellH = sprite.spriteHeight * scale;
-
+    // 3) 격자선
     final gridPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..color = Colors.white.withValues(alpha: 0.85);
 
-    // 세로 격자선 (가로 분할)
-    for (var i = 1; i < settings.safeHorizontalCount; i++) {
-      final gx = boxRect.left + i * cellW;
-      canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
-    }
-    // 가로 격자선 (세로 분할)
-    for (var i = 1; i < settings.safeVerticalCount; i++) {
-      final gy = boxRect.top + i * cellH;
-      canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
-    }
+    final useManual = settings.useManualBoundaries;
+    final colB = settings.columnBoundaries;
+    final rowB = settings.rowBoundaries;
+    final colCount = settings.effectiveHorizontalCount;
+    final rowCount = settings.effectiveVerticalCount;
 
-    // 4) 각 컷 번호
-    for (var row = 0; row < settings.safeVerticalCount; row++) {
-      for (var col = 0; col < settings.safeHorizontalCount; col++) {
-        final index = row * settings.safeHorizontalCount + col;
-        final cell = Rect.fromLTWH(
-          boxRect.left + col * cellW,
-          boxRect.top + row * cellH,
-          cellW,
-          cellH,
-        );
-        _paintNumberChip(canvas, cell, index + 1);
+    if (useManual && colB.length >= 2 && rowB.length >= 2) {
+      // 수동 모드: 경계선 위치대로 격자와 번호 표시
+      for (var i = 1; i < colB.length - 1; i++) {
+        final gx = boxRect.left + colB[i] * scale;
+        canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
+      }
+      for (var i = 1; i < rowB.length - 1; i++) {
+        final gy = boxRect.top + rowB[i] * scale;
+        canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
+      }
+      for (var row = 0; row < rowCount; row++) {
+        for (var col = 0; col < colCount; col++) {
+          final index = row * colCount + col;
+          final cell = Rect.fromLTWH(
+            boxRect.left + colB[col] * scale,
+            boxRect.top + rowB[row] * scale,
+            (colB[col + 1] - colB[col]) * scale,
+            (rowB[row + 1] - rowB[row]) * scale,
+          );
+          _paintNumberChip(canvas, cell, index + 1);
+        }
+      }
+    } else {
+      // 균등 모드: 1컷 크기 기준 균등 격자
+      final sprite = settings.calcSpriteSize(
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+      );
+      final cellW = sprite.spriteWidth * scale;
+      final cellH = sprite.spriteHeight * scale;
+
+      // 세로 격자선 (가로 분할)
+      for (var i = 1; i < colCount; i++) {
+        final gx = boxRect.left + i * cellW;
+        canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
+      }
+      // 가로 격자선 (세로 분할)
+      for (var i = 1; i < rowCount; i++) {
+        final gy = boxRect.top + i * cellH;
+        canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
+      }
+
+      // 각 컷 번호
+      for (var row = 0; row < rowCount; row++) {
+        for (var col = 0; col < colCount; col++) {
+          final index = row * colCount + col;
+          final cell = Rect.fromLTWH(
+            boxRect.left + col * cellW,
+            boxRect.top + row * cellH,
+            cellW,
+            cellH,
+          );
+          _paintNumberChip(canvas, cell, index + 1);
+        }
       }
     }
   }
@@ -420,8 +544,11 @@ class _OverlayPainter extends CustomPainter {
   @override
   bool shouldRepaint(_OverlayPainter oldDelegate) {
     return oldDelegate.boxRect != boxRect ||
+        oldDelegate.imageRect != imageRect ||
         oldDelegate.settings != settings ||
-        oldDelegate.scale != scale;
+        oldDelegate.scale != scale ||
+        oldDelegate.settings.columnBoundaries != settings.columnBoundaries ||
+        oldDelegate.settings.rowBoundaries != settings.rowBoundaries;
   }
 }
 

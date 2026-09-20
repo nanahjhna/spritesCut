@@ -46,6 +46,10 @@ late final TextEditingController _leftPaddingController =
 late final TextEditingController _rightPaddingController =
   TextEditingController(text: '${_settings.rightPadding.round()}');
 
+// 수동 경계선 위치 입력용 컨트롤러 (경계 개수 변동 시 동기화)
+final List<TextEditingController> _colBoundaryControllers = [];
+final List<TextEditingController> _rowBoundaryControllers = [];
+
   @override
   void dispose() {
     _horizontalController.dispose();
@@ -54,6 +58,12 @@ late final TextEditingController _rightPaddingController =
     _bottomPaddingController.dispose();
     _leftPaddingController.dispose();
     _rightPaddingController.dispose();
+    for (final c in _colBoundaryControllers) {
+      c.dispose();
+    }
+    for (final c in _rowBoundaryControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -85,6 +95,7 @@ late final TextEditingController _rightPaddingController =
           bottomPadding: 0.0,
           leftPadding: 0.0,
           rightPadding: 0.0,
+          useManualBoundaries: false,
         );
         _topPaddingController.text = '0';
         _bottomPaddingController.text = '0';
@@ -174,6 +185,66 @@ late final TextEditingController _rightPaddingController =
       if (_verticalController.text != vText) {
         _verticalController.text = vText;
       }
+
+      _syncBoundaryControllers(nextSettings);
+    });
+  }
+
+  /// 경계선 컨트롤러 목록을 설정값과 동기화한다 (개수 변동 시 재구성).
+  void _syncBoundaryControllers(CropSettings next) {
+    void sync(
+      List<TextEditingController> controllers,
+      List<int> values,
+    ) {
+      while (controllers.length < values.length) {
+        final i = controllers.length;
+        controllers.add(TextEditingController(text: '${values[i]}'));
+      }
+      if (controllers.length > values.length) {
+        for (var i = values.length; i < controllers.length; i++) {
+          controllers[i].dispose();
+        }
+        controllers.removeRange(values.length, controllers.length);
+      }
+      for (var i = 0; i < values.length; i++) {
+        final v = '${values[i]}';
+        if (controllers[i].text != v) {
+          controllers[i].text = v;
+        }
+      }
+    }
+
+    sync(_colBoundaryControllers, next.columnBoundaries);
+    sync(_rowBoundaryControllers, next.rowBoundaries);
+  }
+
+  // ── 수동 경계선 모드 전환 ─────────────────────────────
+  void _toggleManualMode(bool enable) {
+    final decoded = _decoded;
+    if (decoded == null) return;
+    setState(() {
+      if (enable) {
+        _settings = _settings.withEqualBoundaries(
+          imageWidth: decoded.width,
+          imageHeight: decoded.height,
+        );
+      } else {
+        _settings = _settings.copyWith(useManualBoundaries: false);
+      }
+      _syncBoundaryControllers(_settings);
+    });
+  }
+
+  /// 수동 모드에서 경계선을 균등 간격으로 되돌린다.
+  void _resetBoundaries() {
+    final decoded = _decoded;
+    if (decoded == null) return;
+    setState(() {
+      _settings = _settings.withEqualBoundaries(
+        imageWidth: decoded.width,
+        imageHeight: decoded.height,
+      );
+      _syncBoundaryControllers(_settings);
     });
   }
 
@@ -192,7 +263,7 @@ late final TextEditingController _rightPaddingController =
       );
 
       final decoded = _decoded!;
-      final sprite = _settings.calcSpriteSize(
+      final sizeRange = _settings.frameSizeRange(
         imageWidth: decoded.width,
         imageHeight: decoded.height,
       );
@@ -213,8 +284,8 @@ late final TextEditingController _rightPaddingController =
         extraFiles: extraFiles,
         previewHtml: SpriteCropper.buildPreviewHtml(
           totalCount: _settings.totalCount,
-          spriteWidth: sprite.spriteWidth,
-          spriteHeight: sprite.spriteHeight,
+          spriteWidth: sizeRange.maxWidth,
+          spriteHeight: sizeRange.maxHeight,
         ),
       );
 
@@ -281,19 +352,37 @@ late final TextEditingController _rightPaddingController =
                 double? bottomPadding,
                 double? leftPadding,
                 double? rightPadding,
+                List<int>? columnBoundaries,
+                List<int>? rowBoundaries,
               }) {
-                _updateSettings(
-                  _settings.copyWith(
-                    horizontalCount: horizontalCount ?? _settings.horizontalCount,
-                    verticalCount: verticalCount ?? _settings.verticalCount,
-                    topPadding: topPadding ?? _settings.topPadding,
-                    bottomPadding: bottomPadding ?? _settings.bottomPadding,
-                    leftPadding: leftPadding ?? _settings.leftPadding,
-                    rightPadding: rightPadding ?? _settings.rightPadding,
-                  ),
+                var next = _settings.copyWith(
+                  horizontalCount: horizontalCount ?? _settings.horizontalCount,
+                  verticalCount: verticalCount ?? _settings.verticalCount,
+                  topPadding: topPadding ?? _settings.topPadding,
+                  bottomPadding: bottomPadding ?? _settings.bottomPadding,
+                  leftPadding: leftPadding ?? _settings.leftPadding,
+                  rightPadding: rightPadding ?? _settings.rightPadding,
+                  columnBoundaries: columnBoundaries ?? _settings.columnBoundaries,
+                  rowBoundaries: rowBoundaries ?? _settings.rowBoundaries,
                 );
+                // 수동 모드에서 분할 수를 바꾸면 경계선을 균등 간격으로 재초기화
+                if (next.useManualBoundaries &&
+                    (horizontalCount != null || verticalCount != null)) {
+                  final decoded = _decoded;
+                  if (decoded != null) {
+                    next = next.withEqualBoundaries(
+                      imageWidth: decoded.width,
+                      imageHeight: decoded.height,
+                    );
+                  }
+                }
+                _updateSettings(next);
               },
+              onManualModeChanged: _toggleManualMode,
+              onResetBoundaries: _resetBoundaries,
               onSave: _saveZip,
+              colBoundaryControllers: _colBoundaryControllers,
+              rowBoundaryControllers: _rowBoundaryControllers,
             ),
           ),
           const VerticalDivider(width: 1),
@@ -310,7 +399,7 @@ late final TextEditingController _rightPaddingController =
       return const _EmptyState();
     }
 
-    final sprite = _settings.calcSpriteSize(
+    final range = _settings.frameSizeRange(
       imageWidth: decoded.width,
       imageHeight: decoded.height,
     );
@@ -323,6 +412,22 @@ late final TextEditingController _rightPaddingController =
     (decoded.height - _settings.topPadding - _settings.bottomPadding)
         .round()
         .clamp(0, decoded.height);
+
+    final infoText = _settings.useManualBoundaries
+        ? '전체: ${decoded.width} × ${decoded.height} px  •  '
+            '1컷: ${range.minWidth}×${range.minHeight} ~ '
+            '${range.maxWidth}×${range.maxHeight} px  •  '
+            '총 ${_settings.totalCount}개 '
+            '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})  •  수동 조절'
+        : '전체: ${decoded.width} × ${decoded.height} px  •  '
+            '영역: $activeWidth × $activeHeight px '
+            '(상: ${_settings.topPadding.round()}, '
+            '하: ${_settings.bottomPadding.round()}, '
+            '좌: ${_settings.leftPadding.round()}, '
+            '우: ${_settings.rightPadding.round()})  •  '
+            '1컷: ${range.maxWidth} × ${range.maxHeight} px  •  '
+            '총 ${_settings.totalCount}개 '
+            '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})';
 
     return Column(
       children: [
@@ -351,10 +456,7 @@ late final TextEditingController _rightPaddingController =
               ),
             ),
             child: Text(
-              '전체: ${decoded.width} × ${decoded.height} px  •  '
-                  '영역: $activeWidth × $activeHeight px (상: ${_settings.topPadding.round()}, 하: ${_settings.bottomPadding.round()}, 좌: ${_settings.leftPadding.round()}, 우: ${_settings.rightPadding.round()})  •  '
-                  '1컷: ${sprite.spriteWidth} × ${sprite.spriteHeight} px  •  '
-                  '총 ${_settings.totalCount}개 (${_settings.safeHorizontalCount}×${_settings.safeVerticalCount})',
+              infoText,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.blue[800],
                 fontWeight: FontWeight.w500,
