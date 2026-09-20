@@ -169,7 +169,21 @@ class _EditorScreenState extends State<EditorScreen> {
         sourceBytes: bytes,
         settings: _settings,
       );
-      final zip = SpriteCropper.buildZip(frames);
+
+      final decoded = _decoded!;
+      final sprite = _settings.calcSpriteSize(
+        imageWidth: decoded.width,
+        imageHeight: decoded.height,
+      );
+
+      final zip = SpriteCropper.buildZip(
+        frames,
+        previewHtml: SpriteCropper.buildPreviewHtml(
+          totalCount: _settings.totalCount,
+          spriteWidth: sprite.spriteWidth,
+          spriteHeight: sprite.spriteHeight,
+        ),
+      );
 
       await FileSaver.instance.saveFile(
         name: 'sprites',

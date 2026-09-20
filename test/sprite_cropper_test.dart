@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -157,6 +158,40 @@ void main() {
       for (var i = 0; i < frames.length; i++) {
         expect(archive.files[i].content, frames[i].bytes);
       }
+    });
+
+    test('buildZip은 previewHtml이 주어지면 index.html을 포함한다', () {
+      final sheet = makeSheet(128, 128);
+      final frames = SpriteCropper.cropFrames(
+        sourceBytes: encodePng(sheet),
+        settings: const CropSettings(horizontalCount: 2, verticalCount: 2),
+      );
+
+      final zip = SpriteCropper.buildZip(
+        frames,
+        previewHtml: SpriteCropper.buildPreviewHtml(
+          totalCount: 4,
+          spriteWidth: 64,
+          spriteHeight: 64,
+        ),
+      );
+
+      final archive = ZipDecoder().decodeBytes(zip);
+      expect(archive.length, 5);
+
+      final names = archive.files.map((f) => f.name).toList();
+      expect(names, [
+        'sprite_1.png',
+        'sprite_2.png',
+        'sprite_3.png',
+        'sprite_4.png',
+        'index.html',
+      ]);
+
+      final html = utf8.decode(archive.files.last.content as List<int>);
+      expect(html, contains('const totalFrames = 4;'));
+      expect(html, contains('sprite_1.png'));
+      expect(html, contains('체커보드'));
     });
   });
 }
