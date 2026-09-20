@@ -72,7 +72,11 @@ void main() {
     });
 
     test('cropRectFor: 좌측 여백만큼 자르기 시작 위치가 이동한다', () {
-      const s = CropSettings(horizontalCount: 4, verticalCount: 1, leftPadding: 16);
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 1,
+        leftPadding: 16,
+      );
       final r0 = s.cropRectFor(0, 256, 64);
       final r1 = s.cropRectFor(1, 256, 64);
       // spriteWidth = (256 - 16) / 4 = 60
@@ -92,14 +96,17 @@ void main() {
       expect(last.x + last.width, 10 + 4 * 59);
     });
 
-    test('withEqualBoundaries: 256×64 이미지 4×1 분할 시 경계 = [0,64,128,192,256]', () {
-      const s = CropSettings(horizontalCount: 4, verticalCount: 1);
-      final manual = s.withEqualBoundaries(imageWidth: 256, imageHeight: 64);
-      expect(manual.useManualBoundaries, isTrue);
-      expect(manual.columnBoundaries, [0, 64, 128, 192, 256]);
-      expect(manual.rowBoundaries, [0, 64]);
-      expect(manual.totalCount, 4);
-    });
+    test(
+      'withEqualBoundaries: 256×64 이미지 4×1 분할 시 경계 = [0,64,128,192,256]',
+      () {
+        const s = CropSettings(horizontalCount: 4, verticalCount: 1);
+        final manual = s.withEqualBoundaries(imageWidth: 256, imageHeight: 64);
+        expect(manual.useManualBoundaries, isTrue);
+        expect(manual.columnBoundaries, [0, 64, 128, 192, 256]);
+        expect(manual.rowBoundaries, [0, 64]);
+        expect(manual.totalCount, 4);
+      },
+    );
 
     test('withEqualBoundaries: 여백을 반영한 균등 경계 생성', () {
       const s = CropSettings(
@@ -196,29 +203,58 @@ void main() {
 
     test('withFrameRect(null)은 해당 프레임을 기본값으로 되돌린다', () {
       const s = CropSettings(horizontalCount: 2, verticalCount: 1);
-      final overridden = s.withFrameRect(0, rect: (x: 0, y: 0, width: 30, height: 64));
-      expect(overridden.cropRectFor(0, 128, 64), (x: 0, y: 0, width: 30, height: 64));
+      final overridden = s.withFrameRect(
+        0,
+        rect: (x: 0, y: 0, width: 30, height: 64),
+      );
+      expect(overridden.cropRectFor(0, 128, 64), (
+        x: 0,
+        y: 0,
+        width: 30,
+        height: 64,
+      ));
 
       final restored = overridden.withFrameRect(0, rect: null);
-      expect(restored.cropRectFor(0, 128, 64), (x: 0, y: 0, width: 64, height: 64));
+      expect(restored.cropRectFor(0, 128, 64), (
+        x: 0,
+        y: 0,
+        width: 64,
+        height: 64,
+      ));
     });
 
     test('clearFrameRects는 모든 오버라이드를 제거한다', () {
       const s = CropSettings(horizontalCount: 2, verticalCount: 1);
-      final overridden = s.withFrameRect(1, rect: (x: 70, y: 0, width: 50, height: 64));
+      final overridden = s.withFrameRect(
+        1,
+        rect: (x: 70, y: 0, width: 50, height: 64),
+      );
       expect(overridden.frameRects.where((r) => r != null).length, 1);
 
       final cleared = overridden.clearFrameRects();
       expect(cleared.frameRects, isEmpty);
-      expect(cleared.cropRectFor(1, 128, 64), (x: 64, y: 0, width: 64, height: 64));
+      expect(cleared.cropRectFor(1, 128, 64), (
+        x: 64,
+        y: 0,
+        width: 64,
+        height: 64,
+      ));
     });
 
     test('frameRectFor는 오버라이드가 없으면 계산된 기본 rect를 반환한다', () {
       const s = CropSettings(horizontalCount: 2, verticalCount: 2);
       expect(s.frameRectFor(1, 128, 128), (x: 64, y: 0, width: 64, height: 64));
 
-      final overridden = s.withFrameRect(1, rect: (x: 60, y: 0, width: 40, height: 80));
-      expect(overridden.frameRectFor(1, 128, 128), (x: 60, y: 0, width: 40, height: 80));
+      final overridden = s.withFrameRect(
+        1,
+        rect: (x: 60, y: 0, width: 40, height: 80),
+      );
+      expect(overridden.frameRectFor(1, 128, 128), (
+        x: 60,
+        y: 0,
+        width: 40,
+        height: 80,
+      ));
     });
 
     test('clampFrameRect는 이미지 경계와 최소 크기를 보장한다', () {
@@ -243,13 +279,21 @@ void main() {
       final image = img.Image(width: w, height: h, numChannels: 4);
       for (var y = 0; y < h; y++) {
         for (var x = 0; x < w; x++) {
-          image.setPixelRgba(x, y, (x * 13) % 256, (y * 7 + x) % 256, (x + y) % 256, 255);
+          image.setPixelRgba(
+            x,
+            y,
+            (x * 13) % 256,
+            (y * 7 + x) % 256,
+            (x + y) % 256,
+            255,
+          );
         }
       }
       return image;
     }
 
-    Uint8List encodePng(img.Image image) => Uint8List.fromList(img.encodePng(image));
+    Uint8List encodePng(img.Image image) =>
+        Uint8List.fromList(img.encodePng(image));
 
     test('256×64 이미지를 4×1 분할해 4컷(64×64) 잘라낸다', () {
       final sheet = makeSheet(256, 64);
@@ -260,7 +304,7 @@ void main() {
 
       expect(frames.length, 4);
       for (var i = 0; i < 4; i++) {
-        expect(frames[i].name, 'sprite_${i + 1}.png');
+        expect(frames[i].name, 'sprite_4_1_${i + 1}.png');
 
         final frame = img.decodePng(frames[i].bytes);
         expect(frame, isNotNull);
@@ -313,9 +357,15 @@ void main() {
     test('cropFrames는 프레임별 오버라이드 크롭 크기를 반영한다', () {
       final sheet = makeSheet(128, 64);
       var settings = const CropSettings(horizontalCount: 2, verticalCount: 1);
-      settings = settings.withFrameRect(1, rect: (x: 64, y: 8, width: 64, height: 48));
+      settings = settings.withFrameRect(
+        1,
+        rect: (x: 64, y: 8, width: 64, height: 48),
+      );
 
-      final frames = SpriteCropper.cropFrames(sourceBytes: encodePng(sheet), settings: settings);
+      final frames = SpriteCropper.cropFrames(
+        sourceBytes: encodePng(sheet),
+        settings: settings,
+      );
       expect(frames.length, 2);
 
       final f0 = img.decodePng(frames[0].bytes)!;
@@ -339,7 +389,7 @@ void main() {
       );
     });
 
-    test('buildZip은 모든 프레임을 sprite_N.png 이름으로 압축한다', () {
+    test('buildZip은 프레임을 {접두어}_{가로}_{세로}_{번호}.png 이름으로 압축한다', () {
       final sheet = makeSheet(128, 128);
       final frames = SpriteCropper.cropFrames(
         sourceBytes: encodePng(sheet),
@@ -352,7 +402,12 @@ void main() {
       expect(archive.length, 4);
 
       final names = archive.files.map((f) => f.name).toList();
-      expect(names, ['sprite_1.png', 'sprite_2.png', 'sprite_3.png', 'sprite_4.png']);
+      expect(names, [
+        'sprite_2_2_1.png',
+        'sprite_2_2_2.png',
+        'sprite_2_2_3.png',
+        'sprite_2_2_4.png',
+      ]);
 
       for (var i = 0; i < frames.length; i++) {
         expect(archive.files[i].content, frames[i].bytes);
@@ -369,7 +424,7 @@ void main() {
       final zip = SpriteCropper.buildZip(
         frames,
         previewHtml: SpriteCropper.buildPreviewHtml(
-          totalCount: 4,
+          frameNames: [for (final frame in frames) frame.name],
           spriteWidth: 64,
           spriteHeight: 64,
         ),
@@ -380,16 +435,16 @@ void main() {
 
       final names = archive.files.map((f) => f.name).toList();
       expect(names, [
-        'sprite_1.png',
-        'sprite_2.png',
-        'sprite_3.png',
-        'sprite_4.png',
+        'sprite_2_2_1.png',
+        'sprite_2_2_2.png',
+        'sprite_2_2_3.png',
+        'sprite_2_2_4.png',
         'index.html',
       ]);
 
       final html = utf8.decode(archive.files.last.content as List<int>);
       expect(html, contains('const totalFrames = 4;'));
-      expect(html, contains('sprite_1.png'));
+      expect(html, contains('sprite_2_2_1.png'));
       expect(html, contains('체커보드'));
     });
 
@@ -410,12 +465,82 @@ void main() {
       final archive = ZipDecoder().decodeBytes(zip);
       final names = archive.files.map((f) => f.name).toList();
       expect(names, [
-        'sprite_1.png',
-        'sprite_2.png',
+        'sprite_2_1_1.png',
+        'sprite_2_1_2.png',
         'index.html',
         'stage.jpg',
       ]);
       expect(archive.files.last.content, stageBytes);
+    });
+
+    test('frameFileNames는 {접두어}_{가로}_{세로}_{번호}.png 규칙을 따른다', () {
+      final names = SpriteCropper.frameFileNames(
+        namePrefix: 'dino',
+        settings: const CropSettings(horizontalCount: 4, verticalCount: 2),
+      );
+      expect(names, [
+        'dino_4_2_1.png',
+        'dino_4_2_2.png',
+        'dino_4_2_3.png',
+        'dino_4_2_4.png',
+        'dino_4_2_5.png',
+        'dino_4_2_6.png',
+        'dino_4_2_7.png',
+        'dino_4_2_8.png',
+      ]);
+    });
+
+    test('cropFrames에 원본 파일명 접두어를 넘기면 파일명에 반영된다', () {
+      final sheet = makeSheet(256, 64);
+      final frames = SpriteCropper.cropFrames(
+        sourceBytes: encodePng(sheet),
+        settings: const CropSettings(horizontalCount: 4, verticalCount: 1),
+        namePrefix: 'dino',
+      );
+
+      expect(frames.map((f) => f.name), [
+        'dino_4_1_1.png',
+        'dino_4_1_2.png',
+        'dino_4_1_3.png',
+        'dino_4_1_4.png',
+      ]);
+    });
+
+    test('sanitizeName은 파일명에 못 쓰는 문자를 정리한다', () {
+      expect(SpriteCropper.sanitizeName('my sheet'), 'my_sheet');
+      expect(SpriteCropper.sanitizeName('  a/b:c*?  '), 'a_b_c');
+      expect(SpriteCropper.sanitizeName('///'), 'sprite');
+      expect(SpriteCropper.sanitizeName(''), 'sprite');
+    });
+
+    test('zipBaseName은 {접두어}_{가로}_{세로} 규칙을 따른다', () {
+      expect(
+        SpriteCropper.zipBaseName(
+          namePrefix: 'dino',
+          settings: const CropSettings(horizontalCount: 4, verticalCount: 2),
+        ),
+        'dino_4_2',
+      );
+      expect(
+        SpriteCropper.zipBaseName(
+          namePrefix: ' ',
+          settings: const CropSettings(horizontalCount: 1, verticalCount: 1),
+        ),
+        'sprite_1_1',
+      );
+    });
+
+    test('미리보기 HTML은 전달된 실제 파일명을 참조한다', () {
+      final html = SpriteCropper.buildPreviewHtml(
+        frameNames: const ['dino_4_1_1.png', 'dino_4_1_2.png'],
+        spriteWidth: 64,
+        spriteHeight: 64,
+      );
+
+      expect(html, contains('const totalFrames = 2;'));
+      expect(html, contains('"dino_4_1_1.png"'));
+      expect(html, contains('src="dino_4_1_1.png"'));
+      expect(html, isNot(contains('sprite_1.png')));
     });
   });
 }

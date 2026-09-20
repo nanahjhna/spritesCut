@@ -13,6 +13,7 @@ import '../services/color_bg_remover.dart';
 import '../services/sprite_cropper.dart';
 import '../widgets/control_panel.dart';
 import '../widgets/image_canvas.dart';
+import '../widgets/save_preview_dialog.dart';
 import '../widgets/sprite_preview_panel.dart';
 
 class EditorScreen extends StatefulWidget {
@@ -384,6 +385,14 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
+  /// 저장 파일명 접두어: 원본 파일명에서 확장자를 제거한 값 (없으면 'sprite').
+  String get _namePrefix {
+    final name = _fileName;
+    if (name == null || name.isEmpty) return 'sprite';
+    final dot = name.lastIndexOf('.');
+    return dot > 0 ? name.substring(0, dot) : name;
+  }
+
   Future<void> _saveZip() async {
     final bytes = _sourceBytes;
     if (bytes == null) {
@@ -391,13 +400,47 @@ class _EditorScreenState extends State<EditorScreen> {
       return;
     }
 
-    setState(() => _busy = true);
+    // 1단계: 프레임 크롭 + 파일명/크기 준비
+    List<({String name, Uint8List bytes})> frames;
+    List<({int w, int h})> sizes;
+    late String zipBase;
     try {
-      final frames = SpriteCropper.cropFrames(
+      setState(() => _busy = true);
+      frames = SpriteCropper.cropFrames(
         sourceBytes: bytes,
         settings: _settings,
+        namePrefix: _namePrefix,
       );
+      zipBase = SpriteCropper.zipBaseName(
+        namePrefix: _namePrefix,
+        settings: _settings,
+      );
+      sizes = [];
+      for (final frame in frames) {
+        final decoded = img.decodeImage(frame.bytes);
+        sizes.add((w: decoded?.width ?? 0, h: decoded?.height ?? 0));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('저장 준비에 실패했습니다: $e');
+      return;
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
 
+    // 2단계: 저장 전 검토 팝업 (삭제 가능)
+    final remaining = await showDialog<List<({String name, Uint8List bytes})>>(
+      context: context,
+      builder: (_) =>
+          SavePreviewDialog(baseName: zipBase, frames: frames, sizes: sizes),
+    );
+    if (!mounted || remaining == null) return; // 취소
+
+    // 3단계: ZIP 생성 + 저장
+    setState(() => _busy = true);
+    try {
       final decoded = _decoded!;
       final sizeRange = _settings.frameSizeRange(
         imageWidth: decoded.width,
@@ -416,24 +459,24 @@ class _EditorScreenState extends State<EditorScreen> {
       }
 
       final zip = SpriteCropper.buildZip(
-        frames,
+        remaining,
         extraFiles: extraFiles,
         previewHtml: SpriteCropper.buildPreviewHtml(
-          totalCount: _settings.totalCount,
+          frameNames: [for (final frame in remaining) frame.name],
           spriteWidth: sizeRange.maxWidth,
           spriteHeight: sizeRange.maxHeight,
         ),
       );
 
       await FileSaver.instance.saveFile(
-        name: 'sprites',
+        name: zipBase,
         bytes: zip,
         fileExtension: 'zip',
         mimeType: MimeType.zip,
       );
 
       if (!mounted) return;
-      _showSnack('${frames.length}개의 스프라이트를 sprites.zip으로 저장했습니다.');
+      _showSnack('${remaining.length}개의 스프라이트를 $zipBase.zip으로 저장했습니다.');
     } catch (e) {
       if (!mounted) return;
       _showSnack('저장에 실패했습니다: $e');
@@ -563,6 +606,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 settings: _settings,
                 busy: _busy,
                 removeBg: _removeBg,
+                namePrefix: _namePrefix,
                 bgColor: _bgColor == null
                     ? null
                     : Color.fromARGB(

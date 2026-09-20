@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/crop_settings.dart';
+import '../services/sprite_cropper.dart';
 
 class ControlPanel extends StatelessWidget {
   const ControlPanel({
@@ -12,6 +13,7 @@ class ControlPanel extends StatelessWidget {
     required this.settings,
     required this.busy,
     required this.removeBg,
+    required this.namePrefix,
     required this.bgColor,
     required this.tolerance,
     required this.horizontalController,
@@ -37,6 +39,9 @@ class ControlPanel extends StatelessWidget {
   final CropSettings settings;
   final bool busy;
   final bool removeBg;
+
+  /// 저장 파일명 접두어 (원본 파일명에서 확장자 제거).
+  final String namePrefix;
 
   /// 감지된 배경색 (배경 제거가 켜져 있고 감지 성공 시에만 표시).
   final Color? bgColor;
@@ -76,6 +81,12 @@ class ControlPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final primaryColor = Colors.blue[700]!;
     final hasImage = imageWidth != null && imageHeight != null;
+
+    // 저장 예시 파일명: {접두어}_{가로}_{세로}_{번호}.png
+    final exportBase = SpriteCropper.zipBaseName(
+      namePrefix: namePrefix,
+      settings: settings,
+    );
 
     return AnimatedOpacity(
       opacity: busy ? 0.5 : 1.0,
@@ -431,7 +442,7 @@ class ControlPanel extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'sprite_1.png ~ sprite_${settings.totalCount}.png 로 ZIP 저장',
+                '${exportBase}_1.png ~ ${exportBase}_${settings.totalCount}.png 로 ZIP 저장',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,

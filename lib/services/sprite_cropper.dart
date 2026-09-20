@@ -23,19 +23,55 @@ abstract final class SpriteCropper {
     return image;
   }
 
+  /// 파일명으로 안전하지 않은 문자를 '_'로 치환한다.
+  ///
+  /// ZIP 내부의 미리보기 HTML이 상대 경로로 프레임을 참조하므로
+  /// 공백이나 URL 예약 문자를 제거해 브라우저에서도 안전하게 만든다.
+  static String sanitizeName(String name) {
+    final replaced = name
+        .trim()
+        .replaceAll(RegExp(r'''[\s/\\:*?"<>|#%]+'''), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    return replaced.isEmpty ? 'sprite' : replaced;
+  }
+
+  /// ZIP 파일명(확장자 제외): `{접두어}_{가로}_{세로}`
+  static String zipBaseName({
+    required String namePrefix,
+    required CropSettings settings,
+  }) =>
+      '${sanitizeName(namePrefix)}_${settings.horizontalCount}'
+      '_${settings.verticalCount}';
+
+  /// 프레임 파일명 목록: `{접두어}_{가로}_{세로}_{번호}.png` (번호 1부터)
+  ///
+  /// [namePrefix]는 보통 원본 파일명(확장자 제외)이며 [sanitizeName]으로 정제된다.
+  static List<String> frameFileNames({
+    required String namePrefix,
+    required CropSettings settings,
+  }) {
+    final base = zipBaseName(namePrefix: namePrefix, settings: settings);
+    return [
+      for (var i = 0; i < settings.totalCount; i++) '${base}_${i + 1}.png',
+    ];
+  }
+
   /// [settings]에 따라 전체 이미지를 분할해 프레임을 잘라낸다.
+  ///
+  /// [namePrefix]는 저장 파일명 접두어(기본 'sprite')로, 원본 파일명을 넘기면
+  /// `{접두어}_{가로}_{세로}_{번호}.png` 규칙으로 이름이 만들어진다.
   static List<({String name, Uint8List bytes})> cropFrames({
     required Uint8List sourceBytes,
     required CropSettings settings,
+    String namePrefix = 'sprite',
   }) {
     final image = decode(sourceBytes);
     final frames = cropFrameImagesFrom(image, settings: settings);
+    final names = frameFileNames(namePrefix: namePrefix, settings: settings);
     return [
       for (var i = 0; i < frames.length; i++)
-        (
-          name: 'sprite_${i + 1}.png',
-          bytes: Uint8List.fromList(img.encodePng(frames[i])),
-        ),
+        (name: names[i], bytes: Uint8List.fromList(img.encodePng(frames[i]))),
     ];
   }
 
@@ -58,13 +94,7 @@ abstract final class SpriteCropper {
     for (var i = 0; i < settings.totalCount; i++) {
       final r = settings.cropRectFor(i, image.width, image.height);
       frames.add(
-        img.copyCrop(
-          image,
-          x: r.x,
-          y: r.y,
-          width: r.width,
-          height: r.height,
-        ),
+        img.copyCrop(image, x: r.x, y: r.y, width: r.width, height: r.height),
       );
     }
     return frames;
@@ -84,7 +114,9 @@ abstract final class SpriteCropper {
       archive.addFile(ArchiveFile.bytes(file.name, file.bytes));
     }
     if (previewHtml != null) {
-      archive.addFile(ArchiveFile.bytes('index.html', utf8.encode(previewHtml)));
+      archive.addFile(
+        ArchiveFile.bytes('index.html', utf8.encode(previewHtml)),
+      );
     }
     if (extraFiles != null) {
       for (final extra in extraFiles) {
@@ -96,14 +128,16 @@ abstract final class SpriteCropper {
 
   /// 프레임들을 브라우저에서 순환 재생할 수 있는 미리보기 HTML을 생성한다.
   ///
-  /// - [totalCount]: 잘라낸 스프라이트 전체 개수 (sprite_1.png ~ sprite_N.png)
+  /// - [frameNames]: 프레임 파일명 목록 (순서대로). HTML이 이 이름들을 참조한다.
   /// - 같은 폴더에 `stage.jpg`가 있으면 배경으로 사용하고,
   ///   없으면 투명 배경 확인용 체커보드가 표시된다.
   static String buildPreviewHtml({
-    required int totalCount,
+    required List<String> frameNames,
     required int spriteWidth,
     required int spriteHeight,
   }) {
+    final totalCount = frameNames.length;
+    final firstFrame = frameNames.isNotEmpty ? frameNames.first : '';
     // 미리보기 박스 크기 (최대 400px, 스프라이트 비율 유지)
     const double maxBox = 400.0;
     double w = spriteWidth > 0 ? spriteWidth.toDouble() : 1.0;
@@ -223,7 +257,7 @@ abstract final class SpriteCropper {
     <p class="info">총 $totalCount컷 ($spriteWidth × ${spriteHeight}px)</p>
 
     <div class="preview-box" id="preview-box">
-        <img id="sprite-view" src="sprite_1.png" alt="Sprite Frame">
+        <img id="sprite-view" src="$firstFrame" alt="Sprite Frame">
     </div>
 
     <div class="controls">
@@ -239,12 +273,9 @@ abstract final class SpriteCropper {
 </div>
 
 <script>
-    // sprite_1.png ~ sprite_$totalCount.png 경로 배열
+    // 잘라낸 프레임 파일명 목록
     const totalFrames = $totalCount;
-    const frames = [];
-    for (let i = 1; i <= totalFrames; i++) {
-        frames.push('sprite_' + i + '.png');
-    }
+    const frames = ${jsonEncode(frameNames)};
 
     let currentFrame = 0;
     let fps = 10;
