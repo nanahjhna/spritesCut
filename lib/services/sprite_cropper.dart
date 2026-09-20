@@ -85,9 +85,11 @@ abstract final class SpriteCropper {
   /// 잘라낸 프레임들을 하나의 ZIP 아카이브로 압축해 바이트로 돌려준다.
   ///
   /// [previewHtml]이 주어지면 `index.html` 이름으로 ZIP 루트에 함께 넣는다.
+  /// [extraFiles]는 stage.jpg 같은 추가 파일을 ZIP 루트에 함께 넣는다.
   static Uint8List buildZip(
     List<({String name, Uint8List bytes})> files, {
     String? previewHtml,
+    List<({String name, Uint8List bytes})>? extraFiles,
   }) {
     final archive = Archive();
     for (final file in files) {
@@ -95,6 +97,11 @@ abstract final class SpriteCropper {
     }
     if (previewHtml != null) {
       archive.addFile(ArchiveFile.bytes('index.html', utf8.encode(previewHtml)));
+    }
+    if (extraFiles != null) {
+      for (final extra in extraFiles) {
+        archive.addFile(ArchiveFile.bytes(extra.name, extra.bytes));
+      }
     }
     return Uint8List.fromList(ZipEncoder().encodeBytes(archive));
   }

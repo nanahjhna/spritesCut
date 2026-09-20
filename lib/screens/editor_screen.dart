@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:image/image.dart' as img;
 
 import '../models/crop_settings.dart';
@@ -196,8 +197,20 @@ late final TextEditingController _rightPaddingController =
         imageHeight: decoded.height,
       );
 
+      // stage.jpg 배경 이미지를 ZIP에 포함 (asset이 없으면 생략)
+      List<({String name, Uint8List bytes})>? extraFiles;
+      try {
+        final stageBytes = await rootBundle.load('assets/images/stage.jpg');
+        extraFiles = [
+          (name: 'stage.jpg', bytes: stageBytes.buffer.asUint8List()),
+        ];
+      } catch (_) {
+        extraFiles = null; // 배경 이미지가 없으면 포함하지 않음
+      }
+
       final zip = SpriteCropper.buildZip(
         frames,
+        extraFiles: extraFiles,
         previewHtml: SpriteCropper.buildPreviewHtml(
           totalCount: _settings.totalCount,
           spriteWidth: sprite.spriteWidth,

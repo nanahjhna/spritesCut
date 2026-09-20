@@ -226,5 +226,30 @@ void main() {
       expect(html, contains('sprite_1.png'));
       expect(html, contains('체커보드'));
     });
+
+    test('buildZip은 extraFiles(stage.jpg)를 ZIP 루트에 포함한다', () {
+      final sheet = makeSheet(128, 128);
+      final frames = SpriteCropper.cropFrames(
+        sourceBytes: encodePng(sheet),
+        settings: const CropSettings(horizontalCount: 2, verticalCount: 1),
+      );
+      final stageBytes = Uint8List.fromList([1, 2, 3, 4]);
+
+      final zip = SpriteCropper.buildZip(
+        frames,
+        previewHtml: 'preview',
+        extraFiles: [(name: 'stage.jpg', bytes: stageBytes)],
+      );
+
+      final archive = ZipDecoder().decodeBytes(zip);
+      final names = archive.files.map((f) => f.name).toList();
+      expect(names, [
+        'sprite_1.png',
+        'sprite_2.png',
+        'index.html',
+        'stage.jpg',
+      ]);
+      expect(archive.files.last.content, stageBytes);
+    });
   });
 }
