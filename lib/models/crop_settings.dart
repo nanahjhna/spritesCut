@@ -5,6 +5,8 @@ class CropSettings {
     required this.verticalCount,
     this.topPadding = 0.0,
     this.bottomPadding = 0.0,
+    this.leftPadding = 0.0,
+    this.rightPadding = 0.0,
   });
 
   /// 가로 분할 수 (열 개수).
@@ -18,6 +20,12 @@ class CropSettings {
 
   /// 하단 여백 (픽셀 단위).
   final double bottomPadding;
+
+  /// 좌측 여백 (픽셀 단위).
+  final double leftPadding;
+
+  /// 우측 여백 (픽셀 단위).
+  final double rightPadding;
 
   /// 안전한 가로 분할 수 (0 이하 입력 방지)
   int get safeHorizontalCount => horizontalCount <= 0 ? 1 : horizontalCount;
@@ -34,12 +42,16 @@ class CropSettings {
     int? verticalCount,
     double? topPadding,
     double? bottomPadding,
+    double? leftPadding,
+    double? rightPadding,
   }) {
     return CropSettings(
       horizontalCount: horizontalCount ?? this.horizontalCount,
       verticalCount: verticalCount ?? this.verticalCount,
       topPadding: topPadding ?? this.topPadding,
       bottomPadding: bottomPadding ?? this.bottomPadding,
+      leftPadding: leftPadding ?? this.leftPadding,
+      rightPadding: rightPadding ?? this.rightPadding,
     );
   }
 
@@ -52,12 +64,14 @@ class CropSettings {
     final hCount = safeHorizontalCount;
     final vCount = safeVerticalCount;
 
-    // 상/하단 여백을 제외한 실제 분할 영역의 높이 계산 (1.0 미만으로 떨어지는 것 방지)
+    // 좌/우 여백과 상/하단 여백을 제외한 실제 분할 영역 크기 계산 (1.0 미만으로 떨어지는 것 방지)
+    final activeWidth = (imageWidth - leftPadding - rightPadding)
+        .clamp(1.0, imageWidth.toDouble());
     final activeHeight = (imageHeight - topPadding - bottomPadding)
         .clamp(1.0, imageHeight.toDouble());
 
     return (
-    spriteWidth: (imageWidth / hCount).round(),
+    spriteWidth: (activeWidth / hCount).round(),
     spriteHeight: (activeHeight / vCount).round(),
     );
   }
@@ -83,7 +97,8 @@ class CropSettings {
     final row = safeIndex ~/ hCount;
 
     return (
-    x: col * sprite.spriteWidth,
+    // leftPadding 만큼 x 시작 위치 이동
+    x: leftPadding.round() + (col * sprite.spriteWidth),
     // topPadding 만큼 y 시작 위치 이동
     y: topPadding.round() + (row * sprite.spriteHeight),
     width: sprite.spriteWidth,
@@ -93,5 +108,5 @@ class CropSettings {
 
   @override
   String toString() =>
-      'CropSettings($horizontalCount×$verticalCount = $totalCount컷, topPadding: $topPadding, bottomPadding: $bottomPadding)';
+      'CropSettings($horizontalCount×$verticalCount = $totalCount컷, top: $topPadding, bottom: $bottomPadding, left: $leftPadding, right: $rightPadding)';
 }

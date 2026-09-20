@@ -8,7 +8,7 @@ import '../models/crop_settings.dart';
 /// 이미지 프리뷰 캔버스.
 ///
 /// 업로드된 이미지를 화면에 100% 피팅해서 표시하고,
-/// 투명 배경(체커보드) 및 상/하단 여백 조절 가이드 라인을 제공합니다.
+/// 투명 배경(체커보드) 및 상/하/좌/우 여백 조절 가이드 라인을 제공합니다.
 class ImageCanvas extends StatefulWidget {
   const ImageCanvas({
     super.key,
@@ -55,22 +55,24 @@ class _ImageCanvasState extends State<ImageCanvas> {
         final imgX = (availW - dispW) / 2;
         final imgY = (availH - dispH) / 2;
 
-        // 화면 스케일이 적용된 여백 높이 (px)
+        // 화면 스케일이 적용된 여백 길이 (px)
         final topPx = widget.settings.topPadding * fitScale;
         final bottomPx = widget.settings.bottomPadding * fitScale;
+        final leftPx = widget.settings.leftPadding * fitScale;
+        final rightPx = widget.settings.rightPadding * fitScale;
 
         // 가이드 박스 영역 (실제 자르기 영역)
         final boxRect = Rect.fromLTWH(
-          imgX,
+          imgX + leftPx,
           imgY + topPx,
-          dispW,
+          dispW - leftPx - rightPx,
           dispH - topPx - bottomPx,
         );
 
         // 원본 전체 이미지 영역
         final imageRect = Rect.fromLTWH(imgX, imgY, dispW, dispH);
 
-        const handleHeight = 12.0; // 드래그 터치 영역 높이
+        const handleLength = 12.0; // 드래그 터치 영역 두께 (높이/폭)
 
         return Stack(
           children: [
@@ -130,9 +132,9 @@ class _ImageCanvasState extends State<ImageCanvas> {
             // 3) 상단 조절 핸들
             Positioned(
               left: imgX,
-              top: boxRect.top - (handleHeight / 2),
+              top: boxRect.top - (handleLength / 2),
               width: dispW,
-              height: handleHeight,
+              height: handleLength,
               child: MouseRegion(
                 cursor: SystemMouseCursors.resizeUpDown,
                 child: GestureDetector(
@@ -167,9 +169,9 @@ class _ImageCanvasState extends State<ImageCanvas> {
             // 4) 하단 조절 핸들
             Positioned(
               left: imgX,
-              top: boxRect.bottom - (handleHeight / 2),
+              top: boxRect.bottom - (handleLength / 2),
               width: dispW,
-              height: handleHeight,
+              height: handleLength,
               child: MouseRegion(
                 cursor: SystemMouseCursors.resizeUpDown,
                 child: GestureDetector(
@@ -201,7 +203,85 @@ class _ImageCanvasState extends State<ImageCanvas> {
               ),
             ),
 
-            // 5) 안내 문구
+            // 5) 좌측 조절 핸들
+            Positioned(
+              left: boxRect.left - (handleLength / 2),
+              top: imgY,
+              width: handleLength,
+              height: dispH,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeLeftRight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (details) {
+                    final deltaImg = details.delta.dx / fitScale;
+                    final maxLeft = widget.imageWidth -
+                        widget.settings.rightPadding -
+                        10.0;
+                    final newLeft = (widget.settings.leftPadding + deltaImg)
+                        .clamp(0.0, maxLeft);
+
+                    widget.onSettingsChanged(
+                      widget.settings.copyWith(leftPadding: newLeft),
+                    );
+                  },
+                  child: Center(
+                    child: Container(
+                      width: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black38, blurRadius: 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 6) 우측 조절 핸들
+            Positioned(
+              left: boxRect.right - (handleLength / 2),
+              top: imgY,
+              width: handleLength,
+              height: dispH,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.resizeLeftRight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (details) {
+                    final deltaImg = details.delta.dx / fitScale;
+                    final maxRight = widget.imageWidth -
+                        widget.settings.leftPadding -
+                        10.0;
+                    final newRight = (widget.settings.rightPadding - deltaImg)
+                        .clamp(0.0, maxRight);
+
+                    widget.onSettingsChanged(
+                      widget.settings.copyWith(rightPadding: newRight),
+                    );
+                  },
+                  child: Center(
+                    child: Container(
+                      width: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(2),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black38, blurRadius: 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 7) 안내 문구
             Positioned(
               left: 12,
               bottom: 12,
@@ -212,7 +292,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '상/하단 경계선을 드래그하여 높이를 조절하세요  •  가로 ${widget.settings.safeHorizontalCount} × 세로 ${widget.settings.safeVerticalCount} 분할',
+                  '상/하/좌/우 경계선을 드래그하여 영역을 조절하세요  •  가로 ${widget.settings.safeHorizontalCount} × 세로 ${widget.settings.safeVerticalCount} 분할',
                   style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),

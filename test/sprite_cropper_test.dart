@@ -58,6 +58,39 @@ void main() {
       expect((r2.x, r2.y), (0, 64));
       expect((r3.x, r3.y), (64, 64));
     });
+
+    test('calcSpriteSize: 좌우 여백을 제외한 활성 폭으로 1컷 너비 계산', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 1,
+        leftPadding: 16,
+        rightPadding: 16,
+      );
+      final sprite = s.calcSpriteSize(imageWidth: 256, imageHeight: 64);
+      // (256 - 16 - 16) / 4 = 56
+      expect((sprite.spriteWidth, sprite.spriteHeight), (56, 64));
+    });
+
+    test('cropRectFor: 좌측 여백만큼 자르기 시작 위치가 이동한다', () {
+      const s = CropSettings(horizontalCount: 4, verticalCount: 1, leftPadding: 16);
+      final r0 = s.cropRectFor(0, 256, 64);
+      final r1 = s.cropRectFor(1, 256, 64);
+      // spriteWidth = (256 - 16) / 4 = 60
+      expect((r0.x, r0.y), (16, 0));
+      expect((r1.x, r1.y), (76, 0));
+    });
+
+    test('cropRectFor: 좌우 여백만큼 마지막 컷이 이미지 경계 안에 들어온다', () {
+      const s = CropSettings(
+        horizontalCount: 4,
+        verticalCount: 1,
+        leftPadding: 10,
+        rightPadding: 10,
+      );
+      final last = s.cropRectFor(3, 256, 64);
+      // spriteWidth = (256 - 20) / 4 = 59
+      expect(last.x + last.width, 10 + 4 * 59);
+    });
   });
 
   group('SpriteCropper', () {

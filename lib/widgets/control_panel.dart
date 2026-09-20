@@ -16,6 +16,8 @@ class ControlPanel extends StatelessWidget {
     required this.verticalController,
     required this.topPaddingController,
     required this.bottomPaddingController,
+    required this.leftPaddingController,
+    required this.rightPaddingController,
     required this.onPickImage,
     required this.onRemoveBgChanged,
     required this.onSettingsChanged,
@@ -33,6 +35,8 @@ class ControlPanel extends StatelessWidget {
   final TextEditingController verticalController;
   final TextEditingController topPaddingController;
   final TextEditingController bottomPaddingController;
+  final TextEditingController leftPaddingController;
+  final TextEditingController rightPaddingController;
 
   final VoidCallback onPickImage;
   final ValueChanged<bool> onRemoveBgChanged;
@@ -41,6 +45,8 @@ class ControlPanel extends StatelessWidget {
   int? verticalCount,
   double? topPadding,
   double? bottomPadding,
+  double? leftPadding,
+  double? rightPadding,
   }) onSettingsChanged;
   final VoidCallback onSave;
 
@@ -127,7 +133,7 @@ class ControlPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // ── 상/하단 여백 입력 ─────────────────────────────
+          // ── 영역 여백 입력 ─────────────────────────────
           Text('영역 여백 (상단 / 하단)', style: theme.textTheme.titleSmall),
           const SizedBox(height: 8),
           Row(
@@ -151,6 +157,34 @@ class ControlPanel extends StatelessWidget {
                   suffixText: 'px',
                   primaryColor: primaryColor,
                   onChanged: (v) => onSettingsChanged(bottomPadding: v.toDouble()),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text('영역 여백 (좌측 / 우측)', style: theme.textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _NumberField(
+                  controller: leftPaddingController,
+                  label: '좌측 여백',
+                  icon: Icons.arrow_left,
+                  suffixText: 'px',
+                  primaryColor: primaryColor,
+                  onChanged: (v) => onSettingsChanged(leftPadding: v.toDouble()),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _NumberField(
+                  controller: rightPaddingController,
+                  label: '우측 여백',
+                  icon: Icons.arrow_right,
+                  suffixText: 'px',
+                  primaryColor: primaryColor,
+                  onChanged: (v) => onSettingsChanged(rightPadding: v.toDouble()),
                 ),
               ),
             ],
@@ -204,7 +238,9 @@ class ControlPanel extends StatelessWidget {
 
   int _spriteWidth(int w) {
     final count = settings.horizontalCount <= 0 ? 1 : settings.horizontalCount;
-    return (w / count).round();
+    final activeW =
+    (w - settings.leftPadding - settings.rightPadding).clamp(1.0, w.toDouble());
+    return (activeW / count).round();
   }
 
   int _spriteHeight(int h) {

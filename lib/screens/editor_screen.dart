@@ -40,6 +40,10 @@ class _EditorScreenState extends State<EditorScreen> {
   TextEditingController(text: '${_settings.topPadding.round()}');
   late final TextEditingController _bottomPaddingController =
   TextEditingController(text: '${_settings.bottomPadding.round()}');
+late final TextEditingController _leftPaddingController =
+  TextEditingController(text: '${_settings.leftPadding.round()}');
+late final TextEditingController _rightPaddingController =
+  TextEditingController(text: '${_settings.rightPadding.round()}');
 
   @override
   void dispose() {
@@ -47,6 +51,8 @@ class _EditorScreenState extends State<EditorScreen> {
     _verticalController.dispose();
     _topPaddingController.dispose();
     _bottomPaddingController.dispose();
+    _leftPaddingController.dispose();
+    _rightPaddingController.dispose();
     super.dispose();
   }
 
@@ -76,9 +82,13 @@ class _EditorScreenState extends State<EditorScreen> {
         _settings = _settings.copyWith(
           topPadding: 0.0,
           bottomPadding: 0.0,
+          leftPadding: 0.0,
+          rightPadding: 0.0,
         );
         _topPaddingController.text = '0';
         _bottomPaddingController.text = '0';
+        _leftPaddingController.text = '0';
+        _rightPaddingController.text = '0';
       });
     } on FormatException catch (e) {
       _showSnack(e.message);
@@ -142,6 +152,16 @@ class _EditorScreenState extends State<EditorScreen> {
       final bottomText = '${nextSettings.bottomPadding.round()}';
       if (_bottomPaddingController.text != bottomText) {
         _bottomPaddingController.text = bottomText;
+      }
+
+      final leftText = '${nextSettings.leftPadding.round()}';
+      if (_leftPaddingController.text != leftText) {
+        _leftPaddingController.text = leftText;
+      }
+
+      final rightText = '${nextSettings.rightPadding.round()}';
+      if (_rightPaddingController.text != rightText) {
+        _rightPaddingController.text = rightText;
       }
 
       final hText = '${nextSettings.horizontalCount}';
@@ -237,6 +257,8 @@ class _EditorScreenState extends State<EditorScreen> {
               verticalController: _verticalController,
               topPaddingController: _topPaddingController,
               bottomPaddingController: _bottomPaddingController,
+              leftPaddingController: _leftPaddingController,
+              rightPaddingController: _rightPaddingController,
               onPickImage: _pickImage,
               onRemoveBgChanged: _toggleAiBackgroundRemoval,
               onSettingsChanged: ({
@@ -244,6 +266,8 @@ class _EditorScreenState extends State<EditorScreen> {
                 int? verticalCount,
                 double? topPadding,
                 double? bottomPadding,
+                double? leftPadding,
+                double? rightPadding,
               }) {
                 _updateSettings(
                   _settings.copyWith(
@@ -251,6 +275,8 @@ class _EditorScreenState extends State<EditorScreen> {
                     verticalCount: verticalCount ?? _settings.verticalCount,
                     topPadding: topPadding ?? _settings.topPadding,
                     bottomPadding: bottomPadding ?? _settings.bottomPadding,
+                    leftPadding: leftPadding ?? _settings.leftPadding,
+                    rightPadding: rightPadding ?? _settings.rightPadding,
                   ),
                 );
               },
@@ -276,6 +302,10 @@ class _EditorScreenState extends State<EditorScreen> {
       imageHeight: decoded.height,
     );
 
+    final activeWidth =
+    (decoded.width - _settings.leftPadding - _settings.rightPadding)
+        .round()
+        .clamp(0, decoded.width);
     final activeHeight =
     (decoded.height - _settings.topPadding - _settings.bottomPadding)
         .round()
@@ -309,7 +339,7 @@ class _EditorScreenState extends State<EditorScreen> {
             ),
             child: Text(
               '전체: ${decoded.width} × ${decoded.height} px  •  '
-                  '영역 높이: $activeHeight px (상단: ${_settings.topPadding.round()}px, 하단: ${_settings.bottomPadding.round()}px)  •  '
+                  '영역: $activeWidth × $activeHeight px (상: ${_settings.topPadding.round()}, 하: ${_settings.bottomPadding.round()}, 좌: ${_settings.leftPadding.round()}, 우: ${_settings.rightPadding.round()})  •  '
                   '1컷: ${sprite.spriteWidth} × ${sprite.spriteHeight} px  •  '
                   '총 ${_settings.totalCount}개 (${_settings.safeHorizontalCount}×${_settings.safeVerticalCount})',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
