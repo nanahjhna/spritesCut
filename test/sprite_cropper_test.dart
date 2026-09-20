@@ -183,6 +183,60 @@ void main() {
     });
   });
 
+  group('프레임별 크롭 오버라이드', () {
+    test('withFrameRect는 해당 프레임의 크롭 영역만 변경한다', () {
+      const s = CropSettings(horizontalCount: 4, verticalCount: 1);
+      final s2 = s.withFrameRect(1, rect: (x: 50, y: 0, width: 40, height: 64));
+
+      expect(s2.cropRectFor(0, 256, 64), (x: 0, y: 0, width: 64, height: 64));
+      expect(s2.cropRectFor(1, 256, 64), (x: 50, y: 0, width: 40, height: 64));
+      expect(s2.cropRectFor(2, 256, 64), (x: 128, y: 0, width: 64, height: 64));
+      expect(s2.cropRectFor(3, 256, 64), (x: 192, y: 0, width: 64, height: 64));
+    });
+
+    test('withFrameRect(null)은 해당 프레임을 기본값으로 되돌린다', () {
+      const s = CropSettings(horizontalCount: 2, verticalCount: 1);
+      final overridden = s.withFrameRect(0, rect: (x: 0, y: 0, width: 30, height: 64));
+      expect(overridden.cropRectFor(0, 128, 64), (x: 0, y: 0, width: 30, height: 64));
+
+      final restored = overridden.withFrameRect(0, rect: null);
+      expect(restored.cropRectFor(0, 128, 64), (x: 0, y: 0, width: 64, height: 64));
+    });
+
+    test('clearFrameRects는 모든 오버라이드를 제거한다', () {
+      const s = CropSettings(horizontalCount: 2, verticalCount: 1);
+      final overridden = s.withFrameRect(1, rect: (x: 70, y: 0, width: 50, height: 64));
+      expect(overridden.frameRects.where((r) => r != null).length, 1);
+
+      final cleared = overridden.clearFrameRects();
+      expect(cleared.frameRects, isEmpty);
+      expect(cleared.cropRectFor(1, 128, 64), (x: 64, y: 0, width: 64, height: 64));
+    });
+
+    test('frameRectFor는 오버라이드가 없으면 계산된 기본 rect를 반환한다', () {
+      const s = CropSettings(horizontalCount: 2, verticalCount: 2);
+      expect(s.frameRectFor(1, 128, 128), (x: 64, y: 0, width: 64, height: 64));
+
+      final overridden = s.withFrameRect(1, rect: (x: 60, y: 0, width: 40, height: 80));
+      expect(overridden.frameRectFor(1, 128, 128), (x: 60, y: 0, width: 40, height: 80));
+    });
+
+    test('clampFrameRect는 이미지 경계와 최소 크기를 보장한다', () {
+      final r = CropSettings.clampFrameRect(
+        x: 300,
+        y: 300,
+        width: 500,
+        height: 80,
+        imageWidth: 256,
+        imageHeight: 64,
+      );
+      expect(r.width, 256);
+      expect(r.height, 64);
+      expect(r.x, 0);
+      expect(r.y, 0);
+    });
+  });
+
   group('SpriteCropper', () {
     /// (x, y)에 따라 고유한 색을 가진 테스트 이미지를 만든다.
     img.Image makeSheet(int w, int h) {
@@ -254,6 +308,28 @@ void main() {
         expect(frame.width, 64);
         expect(frame.height, 64);
       }
+    });
+
+    test('cropFrames는 프레임별 오버라이드 크롭 크기를 반영한다', () {
+      final sheet = makeSheet(128, 64);
+      var settings = const CropSettings(horizontalCount: 2, verticalCount: 1);
+      settings = settings.withFrameRect(1, rect: (x: 64, y: 8, width: 64, height: 48));
+
+      final frames = SpriteCropper.cropFrames(sourceBytes: encodePng(sheet), settings: settings);
+      expect(frames.length, 2);
+
+      final f0 = img.decodePng(frames[0].bytes)!;
+      expect((f0.width, f0.height), (64, 64));
+
+      final f1 = img.decodePng(frames[1].bytes)!;
+      expect((f1.width, f1.height), (64, 48));
+
+      // 1번(0-index) 프레임 좌상단 픽셀이 원본 (64, 8) 위치와 일치해야 한다.
+      final src = sheet.getPixel(64, 8);
+      final dst = f1.getPixel(0, 0);
+      expect(dst.r, src.r);
+      expect(dst.g, src.g);
+      expect(dst.b, src.b);
     });
 
     test('지원하지 않는 형식이면 FormatException', () {

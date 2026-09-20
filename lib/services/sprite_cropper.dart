@@ -65,19 +65,43 @@ abstract final class SpriteCropper {
     required CropSettings settings,
   }) {
     final image = decode(sourceBytes);
+    final frames = cropFrameImagesFrom(image, settings: settings);
+    return [
+      for (var i = 0; i < frames.length; i++)
+        (
+          name: 'sprite_${i + 1}.png',
+          bytes: Uint8List.fromList(img.encodePng(frames[i])),
+        ),
+    ];
+  }
 
-    final frames = <({String name, Uint8List bytes})>[];
+  /// [settings]에 따라 크롭된 프레임 이미지 목록을 반환한다 (인코딩 전).
+  ///
+  /// 미리보기 등에서 PNG 인코딩 없이 사용하려 할 때 유용하다.
+  static List<img.Image> cropFrameImages({
+    required Uint8List sourceBytes,
+    required CropSettings settings,
+  }) {
+    return cropFrameImagesFrom(decode(sourceBytes), settings: settings);
+  }
+
+  /// 이미 디코딩된 [image]에서 [settings]에 따라 프레임을 잘라낸다.
+  static List<img.Image> cropFrameImagesFrom(
+    img.Image image, {
+    required CropSettings settings,
+  }) {
+    final frames = <img.Image>[];
     for (var i = 0; i < settings.totalCount; i++) {
       final r = settings.cropRectFor(i, image.width, image.height);
-      final frame = img.copyCrop(
-        image,
-        x: r.x,
-        y: r.y,
-        width: r.width,
-        height: r.height,
+      frames.add(
+        img.copyCrop(
+          image,
+          x: r.x,
+          y: r.y,
+          width: r.width,
+          height: r.height,
+        ),
       );
-      final png = img.encodePng(frame);
-      frames.add((name: 'sprite_${i + 1}.png', bytes: Uint8List.fromList(png)));
     }
     return frames;
   }

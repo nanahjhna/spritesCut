@@ -17,6 +17,9 @@ class ImageCanvas extends StatefulWidget {
     required this.imageHeight,
     required this.settings,
     required this.onSettingsChanged,
+    this.editingFrameIndex,
+    this.onFrameRectChanged,
+    this.interactive = true,
   });
 
   final Uint8List imageBytes;
@@ -24,6 +27,15 @@ class ImageCanvas extends StatefulWidget {
   final int imageHeight;
   final CropSettings settings;
   final ValueChanged<CropSettings> onSettingsChanged;
+
+  /// 개별 편집 중인 프레임 인덱스. null이면 전체 그리드 편집 모드.
+  final int? editingFrameIndex;
+
+  /// 선택한 프레임의 크롭 영역이 변경될 때 호출 (rect = null이면 기본값 복원).
+  final void Function(int index, CropRect? rect)? onFrameRectChanged;
+
+  /// false면 드래그 핸들을 그리지 않아 이동/크기 조절 조작을 막는다 (처리 중 등).
+  final bool interactive;
 
   @override
   State<ImageCanvas> createState() => _ImageCanvasState();
@@ -69,14 +81,22 @@ class _ImageCanvasState extends State<ImageCanvas> {
         final boxRect = useManual
             ? Rect.fromLTWH(imgX, imgY, dispW, dispH)
             : Rect.fromLTWH(
-          imgX + leftPx,
-          imgY + topPx,
-          dispW - leftPx - rightPx,
-          dispH - topPx - bottomPx,
-        );
+                imgX + leftPx,
+                imgY + topPx,
+                dispW - leftPx - rightPx,
+                dispH - topPx - bottomPx,
+              );
 
         // 원본 전체 이미지 영역
         final imageRect = Rect.fromLTWH(imgX, imgY, dispW, dispH);
+
+        // 프레임 개별 편집 인덱스 (유효성 보호: 현재 컷 수 범위 안에서만)
+        final effEditing =
+            widget.editingFrameIndex != null &&
+                widget.settings.totalCount > 0 &&
+                widget.editingFrameIndex! < widget.settings.totalCount
+            ? widget.editingFrameIndex
+            : null;
 
         const handleLength = 12.0; // 드래그 터치 영역 두께 (높이/폭)
 
@@ -84,9 +104,7 @@ class _ImageCanvasState extends State<ImageCanvas> {
           children: [
             // 0) 전체 캔버스 영역 투명 체커보드 배경 (추가됨)
             const Positioned.fill(
-              child: CustomPaint(
-                painter: CheckerboardPainter(squareSize: 12),
-              ),
+              child: CustomPaint(painter: CheckerboardPainter(squareSize: 12)),
             ),
 
             // 1) 이미지 영역 직하단 체커보드 + 이미지 표시
@@ -130,13 +148,14 @@ class _ImageCanvasState extends State<ImageCanvas> {
                     scale: fitScale,
                     dimColor: Colors.black.withValues(alpha: 0.6),
                     borderColor: colorScheme.primary,
+                    editingIndex: effEditing,
                   ),
                 ),
               ),
             ),
 
-            // 3) 핸들: 수동 조절 모드 → 경계선 핸들 / 균등 모드 → 여백 핸들
-            ..._buildHandles(
+            // 3) 핸들: 프레임 편집 모드 → 해당 프레임 핸들 / 그 외 수동·균등 모드 핸들
+            ..._buildActiveHandles(
               useManual: useManual,
               colorScheme: colorScheme,
               fitScale: fitScale,
@@ -148,29 +167,295 @@ class _ImageCanvasState extends State<ImageCanvas> {
               imageRect: imageRect,
               boxRect: boxRect,
             ),
-
-            // 7) 안내 문구
-            Positioned(
-              left: 12,
-              bottom: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  useManual
-                      ? '각 경계선을 드래그하거나 좌측 패널에서 위치(px)를 조절하세요  •  수동 조절 모드'
-                      : '상/하/좌/우 경계선을 드래그하여 영역을 조절하세요  •  '
-                      '가로 ${widget.settings.effectiveHorizontalCount} × 세로 ${widget.settings.effectiveVerticalCount} 분할',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ),
           ],
         );
       },
+    );
+  }
+
+  /// 프레임 개별 편집 모드면 해당 프레임 핸들, 아니면 기존 그리드 핸들을 만든다.
+  List<Widget> _buildActiveHandles({
+    required bool useManual,
+    required ColorScheme colorScheme,
+    required double fitScale,
+    required double handleLength,
+    required double imgX,
+    required double imgY,
+    required double dispW,
+    required double dispH,
+    required Rect imageRect,
+    required Rect boxRect,
+  }) {
+    if (!widget.interactive) return const [];
+
+    final editing =
+        widget.editingFrameIndex != null &&
+        widget.settings.totalCount > 0 &&
+        widget.editingFrameIndex! < widget.settings.totalCount;
+    if (editing) {
+      return _buildFrameEditHandles(fitScale: fitScale, imgX: imgX, imgY: imgY);
+    }
+    return _buildHandles(
+      useManual: useManual,
+      colorScheme: colorScheme,
+      fitScale: fitScale,
+      handleLength: handleLength,
+      imgX: imgX,
+      imgY: imgY,
+      dispW: dispW,
+      dispH: dispH,
+      imageRect: imageRect,
+      boxRect: boxRect,
+    );
+  }
+
+  /// 개별 편집 중인 프레임의 이동(내부) / 크기 조절(테두리·모서리) 핸들.
+  List<Widget> _buildFrameEditHandles({
+    required double fitScale,
+    required double imgX,
+    required double imgY,
+  }) {
+    final index = widget.editingFrameIndex;
+    if (index == null) return const [];
+
+    final rect = widget.settings.frameRectFor(
+      index,
+      widget.imageWidth,
+      widget.imageHeight,
+    );
+    final r = Rect.fromLTWH(
+      imgX + rect.x * fitScale,
+      imgY + rect.y * fitScale,
+      rect.width * fitScale,
+      rect.height * fitScale,
+    );
+
+    const zone = 16.0; // 터치 영역 두께
+    const minSize = 8; // 최소 크기 (이미지 px)
+
+    // 새 rect를 적용한다 (드래그 이벤트 시점의 최신 설정 기준으로 계산).
+    void update({int? x, int? y, int? w, int? h}) {
+      final cur = widget.settings.frameRectFor(
+        index,
+        widget.imageWidth,
+        widget.imageHeight,
+      );
+      final next = CropSettings.clampFrameRect(
+        x: x ?? cur.x,
+        y: y ?? cur.y,
+        width: w ?? cur.width,
+        height: h ?? cur.height,
+        imageWidth: widget.imageWidth,
+        imageHeight: widget.imageHeight,
+        minSize: minSize,
+      );
+      widget.onFrameRectChanged?.call(index, next);
+    }
+
+    // 가장자리/모서리 크기 조절.
+    void resize({
+      required double dx,
+      required double dy,
+      required bool left,
+      required bool right,
+      required bool top,
+      required bool bottom,
+    }) {
+      final cur = widget.settings.frameRectFor(
+        index,
+        widget.imageWidth,
+        widget.imageHeight,
+      );
+      final d = (dx / fitScale).round();
+      final e = (dy / fitScale).round();
+      var x = cur.x, y = cur.y, w = cur.width, h = cur.height;
+
+      if (left) {
+        final nx = _clampInt(cur.x + d, 0, cur.x + cur.width - minSize);
+        x = nx;
+        w = cur.width - (nx - cur.x);
+      } else if (right) {
+        w = _clampInt(cur.width + d, minSize, widget.imageWidth - cur.x);
+      }
+
+      if (top) {
+        final ny = _clampInt(cur.y + e, 0, cur.y + cur.height - minSize);
+        y = ny;
+        h = cur.height - (ny - cur.y);
+      } else if (bottom) {
+        h = _clampInt(cur.height + e, minSize, widget.imageHeight - cur.y);
+      }
+
+      update(x: x, y: y, w: w, h: h);
+    }
+
+    // 내부 드래그: 전체 이동.
+    void move(double dx, double dy) {
+      final cur = widget.settings.frameRectFor(
+        index,
+        widget.imageWidth,
+        widget.imageHeight,
+      );
+      update(
+        x: cur.x + (dx / fitScale).round(),
+        y: cur.y + (dy / fitScale).round(),
+      );
+    }
+
+    return [
+      // 내부 드래그 영역 (이동)
+      _editZone(
+        rect: Rect.fromLTWH(
+          r.left + zone / 2,
+          r.top + zone / 2,
+          math.max(r.width - zone, 1),
+          math.max(r.height - zone, 1),
+        ),
+        cursor: SystemMouseCursors.move,
+        onDrag: move,
+      ),
+      // 상/하/좌/우 가장자리 (크기 조절)
+      _editZone(
+        rect: Rect.fromLTWH(r.left, r.top - zone / 2, r.width, zone),
+        cursor: SystemMouseCursors.resizeUpDown,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: false,
+          right: false,
+          top: true,
+          bottom: false,
+        ),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(r.left, r.bottom - zone / 2, r.width, zone),
+        cursor: SystemMouseCursors.resizeUpDown,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: false,
+          right: false,
+          top: false,
+          bottom: true,
+        ),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(r.left - zone / 2, r.top, zone, r.height),
+        cursor: SystemMouseCursors.resizeLeftRight,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: true,
+          right: false,
+          top: false,
+          bottom: false,
+        ),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(r.right - zone / 2, r.top, zone, r.height),
+        cursor: SystemMouseCursors.resizeLeftRight,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: false,
+          right: true,
+          top: false,
+          bottom: false,
+        ),
+      ),
+      // 모서리 (자유 크기 조절)
+      _editZone(
+        rect: Rect.fromLTWH(r.left - zone / 2, r.top - zone / 2, zone, zone),
+        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: true,
+          right: false,
+          top: true,
+          bottom: false,
+        ),
+        child: _cornerHandle(),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(r.right - zone / 2, r.top - zone / 2, zone, zone),
+        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: false,
+          right: true,
+          top: true,
+          bottom: false,
+        ),
+        child: _cornerHandle(),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(r.left - zone / 2, r.bottom - zone / 2, zone, zone),
+        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: true,
+          right: false,
+          top: false,
+          bottom: true,
+        ),
+        child: _cornerHandle(),
+      ),
+      _editZone(
+        rect: Rect.fromLTWH(
+          r.right - zone / 2,
+          r.bottom - zone / 2,
+          zone,
+          zone,
+        ),
+        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+        onDrag: (dx, dy) => resize(
+          dx: dx,
+          dy: dy,
+          left: false,
+          right: true,
+          top: false,
+          bottom: true,
+        ),
+        child: _cornerHandle(),
+      ),
+    ];
+  }
+
+  /// 한 개의 드래그 터치 영역을 만든다.
+  Widget _editZone({
+    required Rect rect,
+    required MouseCursor cursor,
+    required void Function(double dx, double dy) onDrag,
+    Widget? child,
+  }) {
+    return Positioned.fromRect(
+      rect: rect,
+      child: MouseRegion(
+        cursor: cursor,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanUpdate: (d) => onDrag(d.delta.dx, d.delta.dy),
+          child: child ?? const SizedBox.expand(),
+        ),
+      ),
+    );
+  }
+
+  /// 모서리 핸들 표시용 작은 주황색 사각형.
+  Widget _cornerHandle() {
+    return Center(
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(
+          color: Colors.orange,
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(color: Colors.white, width: 1),
+        ),
+      ),
     );
   }
 
@@ -203,11 +488,12 @@ class _ImageCanvasState extends State<ImageCanvas> {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             onDrag: (delta) {
               final deltaImg = delta / fitScale;
-              final maxTop = widget.imageHeight -
-                  widget.settings.bottomPadding -
-                  10.0;
-              final newTop =
-                  (widget.settings.topPadding + deltaImg).clamp(0.0, maxTop);
+              final maxTop =
+                  widget.imageHeight - widget.settings.bottomPadding - 10.0;
+              final newTop = (widget.settings.topPadding + deltaImg).clamp(
+                0.0,
+                maxTop,
+              );
               widget.onSettingsChanged(
                 widget.settings.copyWith(topPadding: newTop),
               );
@@ -227,11 +513,10 @@ class _ImageCanvasState extends State<ImageCanvas> {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             onDrag: (delta) {
               final deltaImg = delta / fitScale;
-              final maxBottom = widget.imageHeight -
-                  widget.settings.topPadding -
-                  10.0;
-              final newBottom =
-                  (widget.settings.bottomPadding - deltaImg).clamp(0.0, maxBottom);
+              final maxBottom =
+                  widget.imageHeight - widget.settings.topPadding - 10.0;
+              final newBottom = (widget.settings.bottomPadding - deltaImg)
+                  .clamp(0.0, maxBottom);
               widget.onSettingsChanged(
                 widget.settings.copyWith(bottomPadding: newBottom),
               );
@@ -251,11 +536,12 @@ class _ImageCanvasState extends State<ImageCanvas> {
             margin: const EdgeInsets.symmetric(vertical: 16),
             onDrag: (delta) {
               final deltaImg = delta / fitScale;
-              final maxLeft = widget.imageWidth -
-                  widget.settings.rightPadding -
-                  10.0;
-              final newLeft =
-                  (widget.settings.leftPadding + deltaImg).clamp(0.0, maxLeft);
+              final maxLeft =
+                  widget.imageWidth - widget.settings.rightPadding - 10.0;
+              final newLeft = (widget.settings.leftPadding + deltaImg).clamp(
+                0.0,
+                maxLeft,
+              );
               widget.onSettingsChanged(
                 widget.settings.copyWith(leftPadding: newLeft),
               );
@@ -275,11 +561,12 @@ class _ImageCanvasState extends State<ImageCanvas> {
             margin: const EdgeInsets.symmetric(vertical: 16),
             onDrag: (delta) {
               final deltaImg = delta / fitScale;
-              final maxRight = widget.imageWidth -
-                  widget.settings.leftPadding -
-                  10.0;
-              final newRight =
-                  (widget.settings.rightPadding - deltaImg).clamp(0.0, maxRight);
+              final maxRight =
+                  widget.imageWidth - widget.settings.leftPadding - 10.0;
+              final newRight = (widget.settings.rightPadding - deltaImg).clamp(
+                0.0,
+                maxRight,
+              );
               widget.onSettingsChanged(
                 widget.settings.copyWith(rightPadding: newRight),
               );
@@ -408,6 +695,7 @@ class _OverlayPainter extends CustomPainter {
     required this.scale,
     required this.dimColor,
     required this.borderColor,
+    this.editingIndex,
   });
 
   final Rect imageRect;
@@ -419,23 +707,73 @@ class _OverlayPainter extends CustomPainter {
   final Color dimColor;
   final Color borderColor;
 
+  /// 개별 편집 중인 프레임 인덱스 (강조 표시용).
+  final int? editingIndex;
+
   @override
   void paint(Canvas canvas, Size size) {
-    // 1) 전체 화면 기준 어둡게 처리 후, 가이드 박스 영역만 투명화
-    canvas.saveLayer(Offset.zero & size, Paint());
-    canvas.drawRect(Offset.zero & size, Paint()..color = dimColor);
-    // 가이드 박스 부분 뚫기
-    canvas.drawRect(boxRect, Paint()..blendMode = BlendMode.clear);
-    canvas.restore();
+    final colCount = settings.effectiveHorizontalCount;
+    final rowCount = settings.effectiveVerticalCount;
+    final total = settings.totalCount;
 
-    // 2) 가이드 박스 테두리
-    final borderPaint = Paint()
+    // 프레임별 오버라이드가 있거나 개별 편집 중이면 디밍을 건너뛴다
+    // (개별 편집 영역이 그리드 밖으로 벗어나도 모두 보이도록).
+    final hasFrameEdit =
+        settings.frameRects.any((r) => r != null) || editingIndex != null;
+
+    // 1) 영역 밖 디밍 + 가이드 박스 테두리 (개별 편집 미사용 시에만)
+    if (!hasFrameEdit) {
+      canvas.saveLayer(Offset.zero & size, Paint());
+      canvas.drawRect(Offset.zero & size, Paint()..color = dimColor);
+      // 가이드 박스 부분 뚫기
+      canvas.drawRect(boxRect, Paint()..blendMode = BlendMode.clear);
+      canvas.restore();
+
+      final borderPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = borderColor;
+      canvas.drawRect(boxRect, borderPaint);
+    }
+
+    // 2) 격자선 + 컷 번호
+    if (hasFrameEdit && total > 0 && colCount > 0 && rowCount > 0) {
+      _paintCellRects(canvas);
+    } else {
+      _paintGridCells(canvas, colCount, rowCount);
+    }
+  }
+
+  /// 프레임별 유효 크롭 영역(오버라이드 반영)을 하나씩 그린다.
+  void _paintCellRects(Canvas canvas) {
+    final linePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = borderColor;
-    canvas.drawRect(boxRect, borderPaint);
+      ..strokeWidth = 1
+      ..color = Colors.white.withValues(alpha: 0.85);
 
-    // 3) 격자선
+    final total = settings.totalCount;
+    for (var i = 0; i < total; i++) {
+      final r = settings.frameRectFor(i, imageWidth, imageHeight);
+      final cell = Rect.fromLTWH(
+        imageRect.left + r.x * scale,
+        imageRect.top + r.y * scale,
+        r.width * scale,
+        r.height * scale,
+      );
+      final isEditing = editingIndex == i;
+      final paint = isEditing
+          ? (Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 3
+              ..color = const Color(0xFFFF9800))
+          : linePaint;
+      canvas.drawRect(cell, paint);
+      _paintNumberChip(canvas, cell, i + 1);
+    }
+  }
+
+  /// 기존 격자선/컷 번호 그리기 (균등 분할 or 수동 경계선).
+  void _paintGridCells(Canvas canvas, int colCount, int rowCount) {
     final gridPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
@@ -444,18 +782,24 @@ class _OverlayPainter extends CustomPainter {
     final useManual = settings.useManualBoundaries;
     final colB = settings.columnBoundaries;
     final rowB = settings.rowBoundaries;
-    final colCount = settings.effectiveHorizontalCount;
-    final rowCount = settings.effectiveVerticalCount;
 
     if (useManual && colB.length >= 2 && rowB.length >= 2) {
       // 수동 모드: 경계선 위치대로 격자와 번호 표시
       for (var i = 1; i < colB.length - 1; i++) {
         final gx = boxRect.left + colB[i] * scale;
-        canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
+        canvas.drawLine(
+          Offset(gx, boxRect.top),
+          Offset(gx, boxRect.bottom),
+          gridPaint,
+        );
       }
       for (var i = 1; i < rowB.length - 1; i++) {
         final gy = boxRect.top + rowB[i] * scale;
-        canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
+        canvas.drawLine(
+          Offset(boxRect.left, gy),
+          Offset(boxRect.right, gy),
+          gridPaint,
+        );
       }
       for (var row = 0; row < rowCount; row++) {
         for (var col = 0; col < colCount; col++) {
@@ -481,12 +825,20 @@ class _OverlayPainter extends CustomPainter {
       // 세로 격자선 (가로 분할)
       for (var i = 1; i < colCount; i++) {
         final gx = boxRect.left + i * cellW;
-        canvas.drawLine(Offset(gx, boxRect.top), Offset(gx, boxRect.bottom), gridPaint);
+        canvas.drawLine(
+          Offset(gx, boxRect.top),
+          Offset(gx, boxRect.bottom),
+          gridPaint,
+        );
       }
       // 가로 격자선 (세로 분할)
       for (var i = 1; i < rowCount; i++) {
         final gy = boxRect.top + i * cellH;
-        canvas.drawLine(Offset(boxRect.left, gy), Offset(boxRect.right, gy), gridPaint);
+        canvas.drawLine(
+          Offset(boxRect.left, gy),
+          Offset(boxRect.right, gy),
+          gridPaint,
+        );
       }
 
       // 각 컷 번호
@@ -547,6 +899,7 @@ class _OverlayPainter extends CustomPainter {
         oldDelegate.imageRect != imageRect ||
         oldDelegate.settings != settings ||
         oldDelegate.scale != scale ||
+        oldDelegate.editingIndex != editingIndex ||
         oldDelegate.settings.columnBoundaries != settings.columnBoundaries ||
         oldDelegate.settings.rowBoundaries != settings.rowBoundaries;
   }
@@ -571,7 +924,8 @@ class CheckerboardPainter extends CustomPainter {
 
     for (double y = 0; y < size.height; y += squareSize) {
       for (double x = 0; x < size.width; x += squareSize) {
-        final isEven = ((x / squareSize).floor() + (y / squareSize).floor()) % 2 == 0;
+        final isEven =
+            ((x / squareSize).floor() + (y / squareSize).floor()) % 2 == 0;
         final rect = Rect.fromLTWH(
           x,
           y,
@@ -586,3 +940,7 @@ class CheckerboardPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+/// [min]~[max] 범위로 clamp하는 int 헬퍼.
+int _clampInt(int value, int min, int max) =>
+    value < min ? min : (value > max ? max : value);

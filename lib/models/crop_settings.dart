@@ -1,3 +1,6 @@
+/// 프레임(컷) 하나의 크롭 영역 (이미지 픽셀 좌표).
+typedef CropRect = ({int x, int y, int width, int height});
+
 /// 스프라이트 시트 분할 설정 (균등 분할 또는 수동 경계선 기반).
 class CropSettings {
   const CropSettings({
@@ -10,6 +13,7 @@ class CropSettings {
     this.useManualBoundaries = false,
     this.columnBoundaries = const [],
     this.rowBoundaries = const [],
+    this.frameRects = const [],
   });
 
   /// 가로 분할 수 (열 개수, 균등 분할 모드 기준).
@@ -38,6 +42,12 @@ class CropSettings {
 
   /// 가로 경계선들의 절대 y 좌표 (px, 오름차순, 길이 = 행 수 + 1).
   final List<int> rowBoundaries;
+
+  /// 프레임별 개별 크롭 오버라이드.
+  ///
+  /// 인덱스 = 프레임 번호(0부터), `null`이면 전역 그리드 계산값을 사용한다.
+  /// 길이가 `totalCount`보다 짧아도 안전 (없는 인덱스는 기본값).
+  final List<CropRect?> frameRects;
 
   /// 안전한 가로 분할 수 (0 이하 입력 방지)
   int get safeHorizontalCount => horizontalCount <= 0 ? 1 : horizontalCount;
@@ -75,6 +85,7 @@ class CropSettings {
     bool? useManualBoundaries,
     List<int>? columnBoundaries,
     List<int>? rowBoundaries,
+    List<CropRect?>? frameRects,
   }) {
     return CropSettings(
       horizontalCount: horizontalCount ?? this.horizontalCount,
@@ -86,6 +97,7 @@ class CropSettings {
       useManualBoundaries: useManualBoundaries ?? this.useManualBoundaries,
       columnBoundaries: columnBoundaries ?? this.columnBoundaries,
       rowBoundaries: rowBoundaries ?? this.rowBoundaries,
+      frameRects: frameRects ?? this.frameRects,
     );
   }
 
@@ -207,6 +219,8 @@ class CropSettings {
   }
 
   /// index번째 컷의 크롭 영역 반환 (이미지 픽셀 좌표).
+  ///
+  /// 해당 프레임에 개별 오버라이드([frameRects])가 있으면 그것을 우선 사용한다.
   ({int x, int y, int width, int height}) cropRectFor(
       int index,
       int imageWidth,
@@ -218,6 +232,10 @@ class CropSettings {
 
     // 인덱스 범위 초과 예외 방지 (clamp 적용)
     final safeIndex = index.clamp(0, total > 0 ? total - 1 : 0);
+
+    // 프레임별 개별 크롭 오버라이드 우선 적용
+    final override = _frameRectAt(safeIndex);
+    if (override != null) return override;
 
     final col = safeIndex % hCount;
     final row = safeIndex ~/ hCount;
@@ -248,6 +266,62 @@ class CropSettings {
       width: cellW,
       height: cellH,
     );
+  }
+
+  /// [index]번째 프레임의 최종 크롭 영역.
+  ///
+  /// 오버라이드가 있으면 그것을, 없으면 전역 그리드 계산값을 반환한다.
+  CropRect frameRectFor(int index, int imageWidth, int imageHeight) {
+    final override = _frameRectAt(index);
+    if (override != null) return override;
+    return cropRectFor(index, imageWidth, imageHeight);
+  }
+
+  /// [index]번째 프레임의 크롭 영역을 [rect]로 교체한다.
+  ///
+  /// [rect]가 `null`이면 해당 프레임을 전역 그리드 기본값으로 되돌린다.
+  CropSettings withFrameRect(int index, {required CropRect? rect}) {
+    final count = totalCount;
+    if (count <= 0) return this;
+    final safe = index.clamp(0, count - 1);
+
+    final list = List<CropRect?>.filled(count, null);
+    for (var i = 0; i < frameRects.length && i < count; i++) {
+      list[i] = frameRects[i];
+    }
+    list[safe] = rect;
+    return copyWith(frameRects: list);
+  }
+
+  /// 모든 프레임별 오버라이드를 제거한다.
+  CropSettings clearFrameRects() => copyWith(frameRects: const []);
+
+  /// 이미지 경계 안 + 최소 크기([minSize])를 보장하도록 크롭 rect를 보정한다.
+  static CropRect clampFrameRect({
+    required int x,
+    required int y,
+    required int width,
+    required int height,
+    required int imageWidth,
+    required int imageHeight,
+    int minSize = 8,
+  }) {
+    if (imageWidth <= 0 || imageHeight <= 0) {
+      return (x: 0, y: 0, width: 0, height: 0);
+    }
+    final minW = minSize < imageWidth ? minSize : imageWidth;
+    final minH = minSize < imageHeight ? minSize : imageHeight;
+
+    var w = width < minW ? minW : (width > imageWidth ? imageWidth : width);
+    var h = height < minH ? minH : (height > imageHeight ? imageHeight : height);
+    var cx = x < 0 ? 0 : (x > imageWidth - w ? imageWidth - w : x);
+    var cy = y < 0 ? 0 : (y > imageHeight - h ? imageHeight - h : y);
+    return (x: cx, y: cy, width: w, height: h);
+  }
+
+  CropRect? _frameRectAt(int index) {
+    if (index < 0 || index >= frameRects.length) return null;
+    return frameRects[index];
   }
 
   @override

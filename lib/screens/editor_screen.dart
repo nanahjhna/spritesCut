@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -11,6 +12,7 @@ import '../services/ai_bg_remover.dart';
 import '../services/sprite_cropper.dart';
 import '../widgets/control_panel.dart';
 import '../widgets/image_canvas.dart';
+import '../widgets/sprite_preview_panel.dart';
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key});
@@ -28,30 +30,39 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _removeBg = false;
   bool _busy = false;
 
+  // ── 결과물 미리보기 / 프레임별 편집 상태 ──────────────
+  Timer? _previewDebounce;
+  List<Uint8List> _previewFrames = [];
+  List<({int w, int h})> _previewSizes = [];
+  int? _editingFrameIndex;
+  bool _previewCollapsed = false;
+
   CropSettings _settings = const CropSettings(
     horizontalCount: 4,
     verticalCount: 1,
   );
 
   late final TextEditingController _horizontalController =
-  TextEditingController(text: '${_settings.horizontalCount}');
-  late final TextEditingController _verticalController =
-  TextEditingController(text: '${_settings.verticalCount}');
+      TextEditingController(text: '${_settings.horizontalCount}');
+  late final TextEditingController _verticalController = TextEditingController(
+    text: '${_settings.verticalCount}',
+  );
   late final TextEditingController _topPaddingController =
-  TextEditingController(text: '${_settings.topPadding.round()}');
+      TextEditingController(text: '${_settings.topPadding.round()}');
   late final TextEditingController _bottomPaddingController =
-  TextEditingController(text: '${_settings.bottomPadding.round()}');
-late final TextEditingController _leftPaddingController =
-  TextEditingController(text: '${_settings.leftPadding.round()}');
-late final TextEditingController _rightPaddingController =
-  TextEditingController(text: '${_settings.rightPadding.round()}');
+      TextEditingController(text: '${_settings.bottomPadding.round()}');
+  late final TextEditingController _leftPaddingController =
+      TextEditingController(text: '${_settings.leftPadding.round()}');
+  late final TextEditingController _rightPaddingController =
+      TextEditingController(text: '${_settings.rightPadding.round()}');
 
-// 수동 경계선 위치 입력용 컨트롤러 (경계 개수 변동 시 동기화)
-final List<TextEditingController> _colBoundaryControllers = [];
-final List<TextEditingController> _rowBoundaryControllers = [];
+  // 수동 경계선 위치 입력용 컨트롤러 (경계 개수 변동 시 동기화)
+  final List<TextEditingController> _colBoundaryControllers = [];
+  final List<TextEditingController> _rowBoundaryControllers = [];
 
   @override
   void dispose() {
+    _previewDebounce?.cancel();
     _horizontalController.dispose();
     _verticalController.dispose();
     _topPaddingController.dispose();
@@ -75,7 +86,7 @@ final List<TextEditingController> _rowBoundaryControllers = [];
         dialogTitle: '스프라이트 시트 이미지 선택',
       );
 
-      if (files == null || files.isEmpty) return;
+      if (files.isEmpty) return;
 
       final file = files.first;
       final bytes = await file.readAsBytes();
@@ -89,19 +100,23 @@ final List<TextEditingController> _rowBoundaryControllers = [];
         _decoded = decoded;
         _fileName = file.name;
         _removeBg = false;
+        _editingFrameIndex = null;
 
-        _settings = _settings.copyWith(
-          topPadding: 0.0,
-          bottomPadding: 0.0,
-          leftPadding: 0.0,
-          rightPadding: 0.0,
-          useManualBoundaries: false,
-        );
+        _settings = _settings
+            .copyWith(
+              topPadding: 0.0,
+              bottomPadding: 0.0,
+              leftPadding: 0.0,
+              rightPadding: 0.0,
+              useManualBoundaries: false,
+            )
+            .clearFrameRects();
         _topPaddingController.text = '0';
         _bottomPaddingController.text = '0';
         _leftPaddingController.text = '0';
         _rightPaddingController.text = '0';
       });
+      _schedulePreviewUpdate();
     } on FormatException catch (e) {
       _showSnack(e.message);
     } catch (e) {
@@ -121,7 +136,10 @@ final List<TextEditingController> _rowBoundaryControllers = [];
         _removeBg = false;
         _sourceBytes = raw;
         _decoded = decoded;
+        _editingFrameIndex = null;
+        _settings = _settings.clearFrameRects();
       });
+      _schedulePreviewUpdate();
       return;
     }
 
@@ -140,7 +158,10 @@ final List<TextEditingController> _rowBoundaryControllers = [];
         _removeBg = true;
         _sourceBytes = processedBytes;
         _decoded = decoded;
+        _editingFrameIndex = null;
+        _settings = _settings.clearFrameRects();
       });
+      _schedulePreviewUpdate();
       _showSnack('AI 배경 제거 완료!');
     } catch (e) {
       if (!mounted) return;
@@ -152,8 +173,16 @@ final List<TextEditingController> _rowBoundaryControllers = [];
     }
   }
 
-  void _updateSettings(CropSettings nextSettings) {
+  void _updateSettings(
+    CropSettings nextSettings, {
+    bool resetFrameEdits = false,
+  }) {
     setState(() {
+      if (resetFrameEdits) {
+        // 분할 수/여백/경계선 같은 전역 설정이 바뀌면 프레임별 편집을 초기화
+        _editingFrameIndex = null;
+        nextSettings = nextSettings.clearFrameRects();
+      }
       _settings = nextSettings;
 
       final topText = '${nextSettings.topPadding.round()}';
@@ -188,14 +217,12 @@ final List<TextEditingController> _rowBoundaryControllers = [];
 
       _syncBoundaryControllers(nextSettings);
     });
+    _schedulePreviewUpdate();
   }
 
   /// 경계선 컨트롤러 목록을 설정값과 동기화한다 (개수 변동 시 재구성).
   void _syncBoundaryControllers(CropSettings next) {
-    void sync(
-      List<TextEditingController> controllers,
-      List<int> values,
-    ) {
+    void sync(List<TextEditingController> controllers, List<int> values) {
       while (controllers.length < values.length) {
         final i = controllers.length;
         controllers.add(TextEditingController(text: '${values[i]}'));
@@ -222,30 +249,26 @@ final List<TextEditingController> _rowBoundaryControllers = [];
   void _toggleManualMode(bool enable) {
     final decoded = _decoded;
     if (decoded == null) return;
-    setState(() {
-      if (enable) {
-        _settings = _settings.withEqualBoundaries(
-          imageWidth: decoded.width,
-          imageHeight: decoded.height,
-        );
-      } else {
-        _settings = _settings.copyWith(useManualBoundaries: false);
-      }
-      _syncBoundaryControllers(_settings);
-    });
+    final next = enable
+        ? _settings.withEqualBoundaries(
+            imageWidth: decoded.width,
+            imageHeight: decoded.height,
+          )
+        : _settings.copyWith(useManualBoundaries: false);
+    _updateSettings(next, resetFrameEdits: true);
   }
 
   /// 수동 모드에서 경계선을 균등 간격으로 되돌린다.
   void _resetBoundaries() {
     final decoded = _decoded;
     if (decoded == null) return;
-    setState(() {
-      _settings = _settings.withEqualBoundaries(
+    _updateSettings(
+      _settings.withEqualBoundaries(
         imageWidth: decoded.width,
         imageHeight: decoded.height,
-      );
-      _syncBoundaryControllers(_settings);
-    });
+      ),
+      resetFrameEdits: true,
+    );
   }
 
   Future<void> _saveZip() async {
@@ -308,6 +331,66 @@ final List<TextEditingController> _rowBoundaryControllers = [];
     }
   }
 
+  // ── 결과물 미리보기 (디바운스) ─────────────────────────
+  void _schedulePreviewUpdate() {
+    _previewDebounce?.cancel();
+    _previewDebounce = Timer(
+      const Duration(milliseconds: 150),
+      _updatePreviewFrames,
+    );
+  }
+
+  void _updatePreviewFrames() {
+    final decoded = _decoded;
+    final settings = _settings;
+    if (decoded == null || settings.totalCount == 0) {
+      if (mounted && (_previewFrames.isNotEmpty || _previewSizes.isNotEmpty)) {
+        setState(() {
+          _previewFrames = [];
+          _previewSizes = [];
+        });
+      }
+      return;
+    }
+
+    try {
+      final images = SpriteCropper.cropFrameImagesFrom(
+        decoded,
+        settings: settings,
+      );
+      final frames = <Uint8List>[];
+      final sizes = <({int w, int h})>[];
+      for (final im in images) {
+        frames.add(Uint8List.fromList(img.encodePng(im)));
+        sizes.add((w: im.width, h: im.height));
+      }
+      if (!mounted) return;
+      setState(() {
+        _previewFrames = frames;
+        _previewSizes = sizes;
+      });
+    } catch (_) {
+      // 크롭 실패는 무시 (설정 변경 중 잠깐 발생할 수 있음)
+    }
+  }
+
+  // ── 프레임별 개별 편집 ────────────────────────────────
+  void _onSelectFrame(int? index) {
+    setState(() => _editingFrameIndex = index);
+  }
+
+  void _onCloseFrameEdit() {
+    setState(() => _editingFrameIndex = null);
+  }
+
+  void _onFrameRectChanged(int index, CropRect? rect) {
+    _updateSettings(_settings.withFrameRect(index, rect: rect));
+  }
+
+  void _clearAllFrameOverrides() {
+    _updateSettings(_settings.clearFrameRects());
+  }
+
   void _showSnack(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
@@ -345,39 +428,42 @@ final List<TextEditingController> _rowBoundaryControllers = [];
               rightPaddingController: _rightPaddingController,
               onPickImage: _pickImage,
               onRemoveBgChanged: _toggleAiBackgroundRemoval,
-              onSettingsChanged: ({
-                int? horizontalCount,
-                int? verticalCount,
-                double? topPadding,
-                double? bottomPadding,
-                double? leftPadding,
-                double? rightPadding,
-                List<int>? columnBoundaries,
-                List<int>? rowBoundaries,
-              }) {
-                var next = _settings.copyWith(
-                  horizontalCount: horizontalCount ?? _settings.horizontalCount,
-                  verticalCount: verticalCount ?? _settings.verticalCount,
-                  topPadding: topPadding ?? _settings.topPadding,
-                  bottomPadding: bottomPadding ?? _settings.bottomPadding,
-                  leftPadding: leftPadding ?? _settings.leftPadding,
-                  rightPadding: rightPadding ?? _settings.rightPadding,
-                  columnBoundaries: columnBoundaries ?? _settings.columnBoundaries,
-                  rowBoundaries: rowBoundaries ?? _settings.rowBoundaries,
-                );
-                // 수동 모드에서 분할 수를 바꾸면 경계선을 균등 간격으로 재초기화
-                if (next.useManualBoundaries &&
-                    (horizontalCount != null || verticalCount != null)) {
-                  final decoded = _decoded;
-                  if (decoded != null) {
-                    next = next.withEqualBoundaries(
-                      imageWidth: decoded.width,
-                      imageHeight: decoded.height,
+              onSettingsChanged:
+                  ({
+                    int? horizontalCount,
+                    int? verticalCount,
+                    double? topPadding,
+                    double? bottomPadding,
+                    double? leftPadding,
+                    double? rightPadding,
+                    List<int>? columnBoundaries,
+                    List<int>? rowBoundaries,
+                  }) {
+                    var next = _settings.copyWith(
+                      horizontalCount:
+                          horizontalCount ?? _settings.horizontalCount,
+                      verticalCount: verticalCount ?? _settings.verticalCount,
+                      topPadding: topPadding ?? _settings.topPadding,
+                      bottomPadding: bottomPadding ?? _settings.bottomPadding,
+                      leftPadding: leftPadding ?? _settings.leftPadding,
+                      rightPadding: rightPadding ?? _settings.rightPadding,
+                      columnBoundaries:
+                          columnBoundaries ?? _settings.columnBoundaries,
+                      rowBoundaries: rowBoundaries ?? _settings.rowBoundaries,
                     );
-                  }
-                }
-                _updateSettings(next);
-              },
+                    // 수동 모드에서 분할 수를 바꾸면 경계선을 균등 간격으로 재초기화
+                    if (next.useManualBoundaries &&
+                        (horizontalCount != null || verticalCount != null)) {
+                      final decoded = _decoded;
+                      if (decoded != null) {
+                        next = next.withEqualBoundaries(
+                          imageWidth: decoded.width,
+                          imageHeight: decoded.height,
+                        );
+                      }
+                    }
+                    _updateSettings(next, resetFrameEdits: true);
+                  },
               onManualModeChanged: _toggleManualMode,
               onResetBoundaries: _resetBoundaries,
               onSave: _saveZip,
@@ -405,29 +491,29 @@ final List<TextEditingController> _rowBoundaryControllers = [];
     );
 
     final activeWidth =
-    (decoded.width - _settings.leftPadding - _settings.rightPadding)
-        .round()
-        .clamp(0, decoded.width);
+        (decoded.width - _settings.leftPadding - _settings.rightPadding)
+            .round()
+            .clamp(0, decoded.width);
     final activeHeight =
-    (decoded.height - _settings.topPadding - _settings.bottomPadding)
-        .round()
-        .clamp(0, decoded.height);
+        (decoded.height - _settings.topPadding - _settings.bottomPadding)
+            .round()
+            .clamp(0, decoded.height);
 
     final infoText = _settings.useManualBoundaries
         ? '전체: ${decoded.width} × ${decoded.height} px  •  '
-            '1컷: ${range.minWidth}×${range.minHeight} ~ '
-            '${range.maxWidth}×${range.maxHeight} px  •  '
-            '총 ${_settings.totalCount}개 '
-            '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})  •  수동 조절'
+              '1컷: ${range.minWidth}×${range.minHeight} ~ '
+              '${range.maxWidth}×${range.maxHeight} px  •  '
+              '총 ${_settings.totalCount}개 '
+              '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})  •  수동 조절'
         : '전체: ${decoded.width} × ${decoded.height} px  •  '
-            '영역: $activeWidth × $activeHeight px '
-            '(상: ${_settings.topPadding.round()}, '
-            '하: ${_settings.bottomPadding.round()}, '
-            '좌: ${_settings.leftPadding.round()}, '
-            '우: ${_settings.rightPadding.round()})  •  '
-            '1컷: ${range.maxWidth} × ${range.maxHeight} px  •  '
-            '총 ${_settings.totalCount}개 '
-            '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})';
+              '영역: $activeWidth × $activeHeight px '
+              '(상: ${_settings.topPadding.round()}, '
+              '하: ${_settings.bottomPadding.round()}, '
+              '좌: ${_settings.leftPadding.round()}, '
+              '우: ${_settings.rightPadding.round()})  •  '
+              '1컷: ${range.maxWidth} × ${range.maxHeight} px  •  '
+              '총 ${_settings.totalCount}개 '
+              '(${_settings.effectiveHorizontalCount}×${_settings.effectiveVerticalCount})';
 
     return Column(
       children: [
@@ -440,8 +526,30 @@ final List<TextEditingController> _rowBoundaryControllers = [];
               imageWidth: decoded.width,
               imageHeight: decoded.height,
               settings: _settings,
-              onSettingsChanged: _updateSettings,
+              onSettingsChanged: (s) =>
+                  _updateSettings(s, resetFrameEdits: true),
+              editingFrameIndex: _editingFrameIndex,
+              onFrameRectChanged: _onFrameRectChanged,
+              interactive: !_busy,
             ),
+          ),
+        ),
+        SizedBox(
+          height: _previewCollapsed ? 44 : 240,
+          child: SpritePreviewPanel(
+            frames: _previewFrames,
+            sizes: _previewSizes,
+            settings: _settings,
+            imageWidth: decoded.width,
+            imageHeight: decoded.height,
+            selectedIndex: _editingFrameIndex,
+            collapsed: _previewCollapsed,
+            onCollapseChanged: (v) => setState(() => _previewCollapsed = v),
+            onSelectFrame: _onSelectFrame,
+            onFrameRectChanged: _onFrameRectChanged,
+            onCloseEdit: _onCloseFrameEdit,
+            onClearAllOverrides: _clearAllFrameOverrides,
+            enabled: !_busy,
           ),
         ),
         SafeArea(
@@ -451,9 +559,7 @@ final List<TextEditingController> _rowBoundaryControllers = [];
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.blue[50],
-              border: Border(
-                top: BorderSide(color: Colors.blue[200]!),
-              ),
+              border: Border(top: BorderSide(color: Colors.blue[200]!)),
             ),
             child: Text(
               infoText,
@@ -479,11 +585,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.crop,
-            size: 96,
-            color: Colors.blue[200],
-          ),
+          Icon(Icons.crop, size: 96, color: Colors.blue[200]),
           const SizedBox(height: 16),
           Text(
             '스프라이트 시트를 업로드해 주세요',

@@ -30,7 +30,7 @@
       }
       try {
         const blob = await removeBackground(dataUrl, {
-          model: 'small', // small(~40MB) / medium(~80MB) — 크기·속도 대비 품질 조절
+          model: 'large', // small(~40MB) / medium(~80MB) — 크기·속도 대비 품질 조절
           output: { format: 'image/png' },
         });
 
