@@ -338,6 +338,7 @@ class ControlPanel extends StatelessWidget {
                   children: [
                     for (var i = 0; i < colBoundaryControllers.length; i++)
                       SizedBox(
+                        key: ValueKey('col-boundary-$i'),
                         width: 128,
                         child: _BoundaryField(
                           controller: colBoundaryControllers[i],
@@ -376,6 +377,7 @@ class ControlPanel extends StatelessWidget {
                   children: [
                     for (var i = 0; i < rowBoundaryControllers.length; i++)
                       SizedBox(
+                        key: ValueKey('row-boundary-$i'),
                         width: 128,
                         child: _BoundaryField(
                           controller: rowBoundaryControllers[i],
@@ -557,16 +559,18 @@ class _BoundaryFieldState extends State<_BoundaryField> {
   void initState() {
     super.initState();
     _editStartText = widget.controller.text;
+    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
     _focusNode.dispose();
     super.dispose();
   }
 
-  void _onFocusChanged(bool hasFocus) {
-    if (hasFocus) {
+  void _handleFocusChange() {
+    if (_focusNode.hasFocus) {
       _editStartText = widget.controller.text;
       _committed = false;
     } else {
@@ -592,34 +596,30 @@ class _BoundaryFieldState extends State<_BoundaryField> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
+    return TextField(
+      controller: widget.controller,
       focusNode: _focusNode,
-      onFocusChange: _onFocusChanged,
-      child: TextField(
-        controller: widget.controller,
-        focusNode: _focusNode,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        textInputAction: TextInputAction.done,
-        onTap: () {
-          widget.controller.selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: widget.controller.text.length,
-          );
-        },
-        onEditingComplete: () {
-          _commit();
-          _focusNode.unfocus();
-        },
-        decoration: InputDecoration(
-          labelText: widget.label,
-          suffixText: widget.suffixText,
-          prefixIcon: Icon(widget.icon, size: 18, color: widget.primaryColor),
-          border: const OutlineInputBorder(),
-          isDense: true,
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: widget.primaryColor, width: 2),
-          ),
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      textInputAction: TextInputAction.done,
+      onTap: () {
+        widget.controller.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: widget.controller.text.length,
+        );
+      },
+      onEditingComplete: () {
+        _commit();
+        _focusNode.unfocus();
+      },
+      decoration: InputDecoration(
+        labelText: widget.label,
+        suffixText: widget.suffixText,
+        prefixIcon: Icon(widget.icon, size: 18, color: widget.primaryColor),
+        border: const OutlineInputBorder(),
+        isDense: true,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: widget.primaryColor, width: 2),
         ),
       ),
     );

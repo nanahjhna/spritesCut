@@ -335,16 +335,21 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   /// 경계선 컨트롤러 목록을 설정값과 동기화한다 (개수 변동 시 재구성).
+  ///
+  /// 사용이 끝난 컨트롤러는 같은 프레임에서 즉시 dispose하지 않고, 위젯
+  /// 재빌드가 끝난 뒤 정리한다. 그렇지 않으면 아직 화면에 붙어 있는
+  /// TextField가 dispose된 컨트롤러의 listener를 해제하려다
+  /// "A TextEditingController was used after being disposed" 예외가 발생한다.
   void _syncBoundaryControllers(CropSettings next) {
+    final retired = <TextEditingController>[];
+
     void sync(List<TextEditingController> controllers, List<int> values) {
       while (controllers.length < values.length) {
         final i = controllers.length;
         controllers.add(TextEditingController(text: '${values[i]}'));
       }
       if (controllers.length > values.length) {
-        for (var i = values.length; i < controllers.length; i++) {
-          controllers[i].dispose();
-        }
+        retired.addAll(controllers.sublist(values.length));
         controllers.removeRange(values.length, controllers.length);
       }
       for (var i = 0; i < values.length; i++) {
@@ -357,6 +362,15 @@ class _EditorScreenState extends State<EditorScreen> {
 
     sync(_colBoundaryControllers, next.columnBoundaries);
     sync(_rowBoundaryControllers, next.rowBoundaries);
+
+    // 같은 프레임 재빌드(TextField 언마운트)가 끝난 뒤에만 안전하게 정리한다.
+    if (retired.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final c in retired) {
+          c.dispose();
+        }
+      });
+    }
   }
 
   // ── 수동 경계선 모드 전환 ─────────────────────────────
