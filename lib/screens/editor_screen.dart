@@ -430,13 +430,26 @@ class _EditorScreenState extends State<EditorScreen> {
       }
     }
 
-    // 2단계: 저장 전 검토 팝업 (삭제 가능)
-    final remaining = await showDialog<List<({String name, Uint8List bytes})>>(
+    // 2단계: 저장 전 검토 팝업 (삭제/폴더 분류 가능)
+    final groups = await showDialog<List<SaveGroup>>(
       context: context,
       builder: (_) =>
           SavePreviewDialog(baseName: zipBase, frames: frames, sizes: sizes),
     );
-    if (!mounted || remaining == null) return; // 취소
+    if (!mounted || groups == null) return; // 취소
+
+    // 폴더 구조를 ZIP 경로로 펼친다 (예: 64x64/접두어_1.png)
+    final zipEntries = <({String name, Uint8List bytes})>[];
+    final frameNames = <String>[];
+    for (final group in groups) {
+      for (final frame in group.frames) {
+        final path = group.folder.isEmpty
+            ? frame.name
+            : '${group.folder}/${frame.name}';
+        zipEntries.add((name: path, bytes: frame.bytes));
+        frameNames.add(path);
+      }
+    }
 
     // 3단계: ZIP 생성 + 저장
     setState(() => _busy = true);
@@ -459,10 +472,10 @@ class _EditorScreenState extends State<EditorScreen> {
       }
 
       final zip = SpriteCropper.buildZip(
-        remaining,
+        zipEntries,
         extraFiles: extraFiles,
         previewHtml: SpriteCropper.buildPreviewHtml(
-          frameNames: [for (final frame in remaining) frame.name],
+          frameNames: frameNames,
           spriteWidth: sizeRange.maxWidth,
           spriteHeight: sizeRange.maxHeight,
         ),
@@ -476,7 +489,7 @@ class _EditorScreenState extends State<EditorScreen> {
       );
 
       if (!mounted) return;
-      _showSnack('${remaining.length}개의 스프라이트를 $zipBase.zip으로 저장했습니다.');
+      _showSnack('${zipEntries.length}개의 스프라이트를 $zipBase.zip으로 저장했습니다.');
     } catch (e) {
       if (!mounted) return;
       _showSnack('저장에 실패했습니다: $e');
