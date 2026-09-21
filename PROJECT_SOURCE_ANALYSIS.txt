@@ -1,0 +1,326 @@
+================================================================================
+ spritesCut — 프로젝트 소스 분석 문서
+--------------------------------------------------------------------------------
+ 작성 일시  : 2026-09-21
+ 대상 루트  : C:\Users\nanah\StudioProjects\spritesCut
+ 분석 범위  : lib/ (앱 소스), test/ (테스트), pubspec.yaml, 설정 파일
+================================================================================
+
+■ 1. 프로젝트 개요
+--------------------------------------------------------------------------------
+- 이름       : spritescut (표시명: "AI 스프라이트 시트 분할 도구")
+- 종류       : Flutter 데스크톱/모바일 앱 (Material 3)
+- 역할       : 스프라이트 시트(이미지)를 업로드 → 균등 또는 수동 경계선으로
+               프레임(컷) 단위 분할 → 배경 제거(크로마키) → ZIP 저장
+- 특징 요약  :
+  ・ 순수 Dart 기반 이미지 처리 (package:image, AI/신경망 미사용)
+  ・ ZIP 저장 전 미리보기 다이얼로그에서 사진 삭제·사용자 폴더 분류 지원
+  ・ 저장 ZIP에 index.html 애니메이션 미리보기와 stage.jpg 배경 포함
+  ・ Ctrl+Z / Ctrl+Shift+Z(또는 Ctrl+Y) 실행 취소/다시 실행
+- 버전       : 1.0.0+1 / Dart SDK ^3.12.2
+
+■ 2. 디렉터리 구조
+--------------------------------------------------------------------------------
+spritesCut/
+├─ lib/
+│  ├─ main.dart                          # 앱 진입점, 테마 설정
+│  ├─ screens/
+│  │  └─ editor_screen.dart              # 메인 에디터 화면(상태 관리의 중심)
+│  ├─ models/
+│  │  ├─ crop_settings.dart              # 분할 설정 불변 모델 (핵심 도메인)
+│  │  └─ undo_history.dart               # 제네릭 Undo/Redo 스택
+│  ├─ services/
+│  │  ├─ sprite_cropper.dart             # 디코딩/크롭/ZIP/HTML 생성
+│  │  └─ color_bg_remover.dart           # 단색 배경 감지+제거 (크로마키)
+│  └─ widgets/
+│     ├─ control_panel.dart              # 좌측 320px 컨트롤 패널
+│     ├─ image_canvas.dart               # 분할 가이드 캔버스 + 핸들
+│     ├─ sprite_preview_panel.dart       # 하단 결과물 미리보기 패널
+│     └─ save_preview_dialog.dart        # 저장 전 미리보기 다이얼로그
+│                                        #  (폴더 정리 기능의 핵심 구현)
+├─ test/
+│  ├─ widget_test.dart                   # 앱 기동/빈 상태/저장 비활성
+│  ├─ sprite_cropper_test.dart           # 크롭 로직 + ZIP 단위 테스트
+│  ├─ color_bg_remover_test.dart         # 배경 제거 로직 테스트
+│  ├─ undo_history_test.dart             # Undo/Redo 스택 테스트
+│  └─ save_preview_dialog_test.dart      # 저장 다이얼로그 위젯 테스트(최다)
+├─ assets/images/                        # stage.jpg (ZIP 배경 이미지)
+├─ pubspec.yaml
+├─ analysis_options.yaml                 # flutter_lints 기본 적용
+└─ README.md                             # (기본 생성 템플릿 그대로)
+
+■ 3. 의존성 (pubspec.yaml)
+--------------------------------------------------------------------------------
+  dart:        sdk ^3.12.2
+  packages:
+    cupertino_icons ^1.0.8
+    file_picker   ^13.1.0   # 이미지 파일 선택
+    image         ^4.10.1   # 디코딩/크롭/인코딩 (순수 Dart)
+    archive       ^4.3.0    # ZIP 생성
+    file_saver    ^0.4.0    # 파일 저장 다이얼로그 (MimeType.zip)
+  dev:
+    flutter_lints ^6.0.0
+
+■ 4. 파일별 상세 분석 (lib/)
+--------------------------------------------------------------------------------
+
+━━━ 4.1 lib/main.dart (32줄) ━━━
+- runApp(SpriteCutApp()) 후 MaterialApp 구성.
+- 테마: ColorScheme.fromSeed(indigo), Material3, 다크 테마 지원(시스템 모드).
+- home: EditorScreen.
+
+━━━ 4.2 lib/screens/editor_screen.dart (819줄) — 에디터의 상태 컨테이너 ━━━
+[상태 필드]
+- _rawOriginalBytes / _sourceBytes / _decoded / _fileName
+    : 원본 바이트 / 현재(배경 제거 반영) 바이트 / 디코딩 이미지 / 파일명
+- _removeBg, _busy, _bgColor(RgbColor?), _bgTolerance(0.1), _bgApplyDebounce
+- _previewDebounce, _previewFrames(List<Uint8List>), _previewSizes
+- _editingFrameIndex(int?), _previewCollapsed
+- _undoHistory(UndoHistory<CropSettings>, capacity 100)
+- _settings(CropSettings 기본 4×1)
+- TextEditingController 6종(가로/세로/상/하/좌/우 여백) + 경계선 컨트롤러 목록
+
+[주요 메서드]
+- _pickImage()            : FilePicker→readAsBytes→decode→설정 리셋→미리보기 스케줄
+- _toggleBackgroundRemoval : 배경 제거 ON/OFF. OFF면 원본 복원. ON이면 감지→제거
+- _onBgToleranceChanged   : 오차 슬라이더 200ms 디바운스 뒤 재적용
+- _reapplyBackgroundRemoval : _bgColor 캐시 또는 재감지로 크로마키 재적용
+- _updateSettings/_applySettingsState : Undo 기록→setState→컨트롤러 동기화→
+                                        미리보기 재생성
+- _undo/_redo/_guardEditingIndex : UndoHistory 조작, 프레임 수 축소 시 편집 해제
+- _toggleManualMode / _resetBoundaries : 균등↔수동 전환, 경계선 초기화
+- _saveZip()              : ①cropFrames ②SavePreviewDialog(폴더 분류)
+                            ③폴더 경로로 ZIP 엔트리 생성 ④buildZip+FileSaver
+                            ⑤stage.jpg asset 포함(없으면 생략)
+- _schedulePreviewUpdate/_updatePreviewFrames : 150ms 디바운스 후 크롭 미리보기
+- _onSelectFrame/_onFrameRectChanged/_clearAllFrameOverrides : 프레임 개별 편집
+- build()                 : CallbackShortcuts(Ctrl+Z/Y) + Scaffold +
+                            AppBar(Undo/Redo) + 좌측 ControlPanel + 미리보기 영역
+- _buildPreview()         : ImageCanvas + 하단 SpritePreviewPanel +
+                            정보 바(면적/1컷 크기/총컷)
+
+[ZIP 저장 데이터 흐름 (핵심)]
+  SavePreviewDialog 결과(List<SaveGroup>) → 각 group.frames를
+  group.folder.isEmpty ? 파일명 : '폴더명/파일명' 형태로 zipEntries에 추가
+  → buildZip → FileSaver.saveFile(확장자 zip)
+
+━━━ 4.3 lib/models/crop_settings.dart (331줄) — 도메인 핵심 모델 ━━━
+- typedef CropRect = ({int x, int y, int width, int height});  (레코드 타입)
+- 불변 클래스 CropSettings, copyWith 지원.
+- 필드: horizontalCount, verticalCount, 상/하/좌/우 padding,
+        useManualBoundaries, columnBoundaries, rowBoundaries, frameRects
+- 계산 getter:
+  - safeHorizontalCount/safeVerticalCount  (0 이하 방지)
+  - effectiveHorizontalCount/effectiveVerticalCount (수동이면 경계 개수-1)
+  - totalCount = effectiveH × effectiveV
+- 주요 메서드:
+  - withEqualBoundaries(imageWidth, imageHeight) : 여백 반영 균등 경계 생성
+  - withUpdatedColumnBoundary/withUpdatedRowBoundary : 인접 경계·이미지 경계로
+    clamp (최소 간격 minGap=10px, 인접 초과 시 중간값 고정)
+  - frameSizeRange : 전체 프레임의 min/max 크기
+  - calcSpriteSize / cropRectFor : 1컷 크기 및 해당 인덱스 크롭 영역
+  - frameRectFor : 오버라이드 우선 후 전역 계산값
+  - withFrameRect(index, rect) / clearFrameRects : 프레임별 개별 크롭
+  - clampFrameRect (static) : 이미지 경계+최소 크기(8px) 보장
+  - cropRectFor의 오버라이드 우선 순위: frameRects[i] != null → 전역 계산
+
+━━━ 4.4 lib/models/undo_history.dart (75줄) — 제네릭 Undo/Redo ━━━
+- UndoHistory<T>: capacity(100), coalesceInterval(350ms)
+- record(current) : "현재 상태를 이전 상태로" 저장. coalesce 구간 내 연속 기록은
+  단일 단계 합침(드래그 노이즈 방지). redo 스택 비움.
+- undo(current)/redo(current) : 스택 이동 후 이전/다음 스냅샷 반환(없으면 null)
+- clear() : 새 이미지 로드 시 사용
+
+━━━ 4.5 lib/services/sprite_cropper.dart (346줄) — 순수 함수 서비스 ━━━
+- abstract final class (인스턴스화 불가, 전부 static)
+- decode(bytes)            : img.decodeImage, 실패 시 FormatException
+- sanitizeName(name)       : 파일명 금지 문자/URL 예약자 → '_' 치환, 빈값→'sprite'
+- zipBaseName              : '{접두어}_{가로}_{세로}' (예: dino_4_2)
+- frameFileNames           : '{base}_{번호 1부터}.png' 목록 생성
+- cropFrames / cropFrameImages / cropFrameImagesFrom : 전체 이미지→프레임 크롭
+- buildZip(files, previewHtml?, extraFiles?) : Archive에 파일 추가 후 압축
+- buildPreviewHtml(frameNames, spriteWidth, spriteHeight)
+  : 프레임 순환 재생 index.html 생성 (FPS 슬라이더, stage.jpg 배경 fallback
+    체커보드, 이미지 프리로드, pixelated 렌더링)
+
+━━━ 4.6 lib/services/color_bg_remover.dart (149줄) — 크로마키 서비스 ━━━
+- typedef RgbColor = ({int r, int g, int b})
+- detectBackgroundColor(image, borderRatio=0.025)
+  : 가장자리 스트립만 샘플링, 채널당 16단계 양자화 히스토그램(4096 버킷)에서
+    최다 등장 색 반환. 투명 픽셀 제외. 실패 시 null.
+- removeBackground(imageBytes, backgroundColor, tolerance=0.1, feather=0.05)
+  : RGB 거리(제곱) 판정. inner(=tolerance·√3·255) 이내 완전 투명,
+    outer(=+feather 구간) 사이는 알파 그라데이션(경계 계단 완화).
+    항상 4채널 RGBA PNG로 출력(JPEG 3채널 입력 안전).
+- 내부 루프 최적화: sqrt 최소화, 거리 제곱 비교.
+
+━━━ 4.7 lib/widgets/control_panel.dart (686줄) — 좌측 패널 ━━━
+- StatelessWidget, 부모(_EditorScreenState)와 콜백으로 연결.
+- 구성: 이미지 업로드 버튼 / 이미지 정보 타일 / 배경 처리(스위치+오차 슬라이더
+  0~30%) / 분할 수 입력(가로·세로) / 분할 모드 SegmentedButton(균등·수동) /
+  균등 시 여백 4종 입력 / 수동 시 경계선 좌표 입력(Enter·포커스 이탈 시 적용) +
+  균등 초기화 버튼 / 저장 및 다운로드(ZIP) 버튼
+- busy 시 AnimatedOpacity 0.5 + AbsorbPointer로 전체 차단.
+- _NumberField : 숫자만 입력(digitsOnly), 빈 값→0 변환
+- _BoundaryField : 탭 시 전체 선택, 커밋 시에만 onCommitted 호출,
+  포커스 잃을 때 편집 전 값 복원/적용 로직
+- _InfoTile : 파란 배경 정보 박스
+
+━━━ 4.8 lib/widgets/image_canvas.dart (946줄) — 분할 가이드 캔버스 ━━━
+- LayoutBuilder로 이미지를 화면 100% 피팅(fitScale), 중앙 배치.
+- 레이어 구성:
+  0) 전체 체커보드 배경
+  1) 이미지(뒤에 체커보드, ClipRect)
+  2) _OverlayPainter : 영역 밖 디밍 + 경계 테두리 + 격자선 + 컷 번호 칩
+  3) 드래그 핸들
+- 모드:
+  - 프레임 개별 편집(editingFrameIndex): 해당 rect 이동(내부)/크기 조절(테두리·
+    모서리, zone 16px, minSize 8px) 핸들
+  - 균등 모드: 상/하/좌/우 여백 패딩 바 핸들(10px 최소 간격 clamp)
+  - 수동 모드: 모든 경계선에 핸들(withUpdatedColumnBoundary/RowBoundary)
+- interactive=false 시 핸들 미표시(처리 중 방지).
+- CheckerboardPainter : 투명 배경 표시 커스텀 페인터 (다이얼로그·미리보기에
+  재사용됨 — save_preview_dialog.dart와 sprite_preview_panel.dart에서 import)
+- _OverlayPainter.paint : 프레임 오버라이드 존재/개별 편집 중이면 디밍 생략 후
+  프레임별 실제 크롭 사각형(_paintCellRects)을, 아니면 격자(_paintGridCells)를 그림.
+
+━━━ 4.9 lib/widgets/sprite_preview_panel.dart (434줄) — 하단 결과물 미리보기 ━━━
+- 동작 중(enabled=false)엔 AnimatedOpacity+AbsorbPointer 차단.
+- 헤더: 접기/펼치기 토글, 오버라이드 존재 시 '전체 초기화' 버튼, 총컷 표시.
+- 프레임 개별 편집 스트립: x/y/w/h 숫자 입력(부분 적용) + 기본값 복원 +
+  '편집 종료' 버튼. 포커스 중에는 값 갱신하지 않는 _setIfNotFocused로 보호.
+- 썸네일 그리드: 체커보드+픽셀 이미지, 탭하면 해당 프레임 선택(편집 모드 진입).
+
+━━━ 4.10 lib/widgets/save_preview_dialog.dart (1115줄) — 저장 전 검토 다이얼로그 ━━━
+[typedef]
+- SaveFrame = ({String name, Uint8List bytes})
+- SaveGroup  = ({String folder, List<SaveFrame> frames})
+  (folder가 ''이면 ZIP 루트. 폴더명 있으면 하위 폴더 경로)
+[상태]
+- _frames/_sizes  : 프레임 복사본(삭제/재명명 대상)
+- _folders        : 사용자 폴더명(생성 순서)
+- _folderAssignments : 프레임별 폴더 배정('' = 루트). _frames와 인덱스 1:1.
+                       List.generate로 생성 (삭제 시 removeAt 크래시 방지)
+- _marked/_selection/_selectionAnchor : 단일 삭제 오버레이 / 멀티 선택 집합 /
+                                        Shift 범위 앵커
+- _activeFolder   : null=전체 보기, ''=기본(폴더 없음), 그 외=폴더명
+- _folderMode     : 폴더 정리 스위치(기본 ON)
+- _selectMode     : 탭만으로 멀티 선택하는 모드 토글
+[주요 흐름]
+- 폴더 관리: _addFolder(스낵바 안내 포함) / _renameFolder(배정 동기화) /
+  _deleteFolder(확인 후 내부 이미지는 루트로, active 폴더면 ''로 전환)
+- 선택: _onTileTap — 레거시(폴더 OFF)는 삭제 표시 토글 / 폴더 모드는
+  Shift=범위·Ctrl|선택모드=토글·그 외=단일 선택.
+- 삭제: _delete(단일) / _deleteSelected(일괄) — 인덱스 동기화
+  (_rebuildSelectionIndices, _markAllMissed) 후 _renumberAll(전역 연속 번호)와
+  _clearEmptyActiveFolder(빈 폴더면 전체 보기로).
+- 이동: _moveToFolder(indices, folder) — 배정 갱신+active 전환+선택 해제.
+  입력 방식 두 가지:
+  ① LongPressDraggable<Set<int>> 드래그(0.5초 길게 누른 뒤 이동) →
+     DragTarget(onAcceptWithDetails)이 사이드바 folder-root/folder-<i>에 배치.
+     드래그 데이터는 이미 선택된 타일이면 전체 _selection, 아니면 해당 타일 1개.
+  ② [이동](move-selected) 버튼(폴더가 1개 이상 있을 때 표시) →
+     SimpleDialog('이동할 폴더 선택') move-target-root / move-target-<i> →
+     _moveSelectionToFolder()가 _moveToFolder 호출.
+- 결과 반환: _buildResult() — 폴더 OFF면 [(folder:'', frames 전체)] 단일 그룹.
+  폴더 ON이면 배정 기준으로 그룹화하고 각 그룹은 폴더 안에서 1부터 재번호
+  (_renumberFolder). 루트 그룹이 맨 앞, 그 뒤 사용자 폴더 순.
+- UI: 헤더(총컷+삭제수) / 폴더 정리 스위치+선택 모드 / [사이드바 200px + 그리드]
+  / 하단 바(힌트 + [이동]/[선택 삭제] + [취소] + [다운로드 (ZIP)]).
+- 그리드 타일(_buildTile):
+  - 폴더 모드: 선택 시 파란 테두리+체크, 삭제 오버레이 없음(showDelete 게이트
+    = !_folderMode && _marked.contains(index)).
+  - 레거시 모드: 탭하면 빨간 테두리 + '삭제' 오버레이(delete-<index>).
+  - 이미지가 비었으면 broken_image 아이콘 표시, 이름 하단에 '· WxH' 크기 표시.
+- 내부 위젯: _FolderNameDialog(검증: 빈 값/부적합/중복) / _FolderItem(선택·
+  hover 강조, count 표시, trailing 액션) / _MiniIconButton / _DragFeedback.
+
+[주의 키(ValueKey) 목록 — 테스트와 앱이 공유]
+  add-folder, folder-name-field, folder-name-ok, folder-delete-ok,
+  folders-switch, select-mode, folder-all, folder-root, folder-<i>,
+  rename-folder-<i>, delete-folder-<i>, tile-<i>, delete-<i>,
+  move-selected, move-target-root, move-target-<i>, delete-selected
+
+■ 5. 테스트 분석 (test/)
+--------------------------------------------------------------------------------
+전체 실행: flutter test  →  65개 전부 통과 (flutter analyze: No issues)
+
+- widget_test.dart (2)  : 앱 기동 시 업로드 버튼/빈 상태/기본 분할 수 확인,
+                          이미지 없으면 저장 버튼 비활성
+- undo_history_test.dart (7) : record/undo/redo 파이프라인, coalesce 합침
+                          (연속 3회 기록→1단계), capacity 초과 시 오래된 항목
+                          제거, redo 버림, clear
+- color_bg_remover_test.dart (6) : 배경 감지(흰 배경+빨강 스프라이트), 배경
+                          제거 결과 픽셀 확인, tolerance 크기에 따른 제거 범위,
+                          feather 부분 투명, 3채널 JPEG→RGBA 출력, 1×1 이미지
+                          감지 실패(null)
+- sprite_cropper_test.dart (약 30) : CropSettings 계산(가로/세로/여백/수동
+                          경계/오버라이드/clamp), SpriteCropper 크롭 결과
+                          픽셀 정합성, ZIP 구조/파일명, index.html 내용,
+                          stage.jpg 포함, sanitizeName, zipBaseName
+- save_preview_dialog_test.dart (16+) : 위젯 테스트(전체 그리드, 레거시 탭
+                          삭제, 다운로드 루트 그룹, 취소 null, 폴더 스위치
+                          토글, 폴더 추가/중복 거부/이름 변경/삭제 시 루트
+                          이동, 멀티 선택 드래그, 루트 복귀 드래그, ZIP 폴더
+                          그룹, [이동] 버튼·다이얼로그·루트 복귀, 선택 삭제)
+  - fixtures: makePng(r,g,b) / makeFrames(count) / makeSizes(...)
+  - 헬퍼: pumpDialog(다이얼로그 단독), longPressDrag(kLongPressTimeout+100ms
+    길게 누른 뒤 moveTo→up: LongPressDraggable 인식 검증),
+    createFolder(add-folder→입력→확인→스낵바 타이머 정리)
+
+■ 6. 최근 주요 변경 (폴더 정리 UX — 드래그 미동작 문제 해결)
+--------------------------------------------------------------------------------
+- 원인: LongPressDraggable은 kLongPressTimeout(0.5초) 이상 길게 눌러야 드래그가
+  시작됨. 빠른 속성 드래그는 no-op (로직 버그가 아님, 테스트로 검증).
+- 해결(사용자 선택안):
+  ① 폴더 모드에서 삭제 오버레이 제거 — 선택은 파란 테두리+체크로만 표시
+     (showDelete = !_folderMode && _marked.contains(index))
+  ② 하단 [이동] 버튼 + '이동할 폴더 선택' 다이얼로그 추가 — 드래그 없이
+     확실하게 이동 가능 (move-selected / move-target-*)
+  ③ 힌트 문구 갱신: "이미지를 0.5초 길게 눌러 드래그하거나, 선택 후 [이동]
+     버튼으로 넣으세요."
+  ④ 폴더 생성 성공 시 스낵바 안내
+  ⑤ [이동] 버튼은 폴더가 1개 이상일 때만, [선택 삭제]는 항상 표시
+- 드래그 UX 자체(LongPressDraggable + DragTarget)는 유지 — 두 가지 방식 병행.
+
+■ 7. 아키텍처 / 데이터 흐름 요약
+--------------------------------------------------------------------------------
+[편집 흐름]
+  업로드 → decode → CropSettings 계산 → ImageCanvas 가이드/핸들 조작
+        → UndoHistory.record → 150ms 디바운스 → cropFrameImagesFrom → PNG
+        → SpritePreviewPanel 썸네일 (프레임별 오버라이드 편집 가능)
+
+[저장 흐름]
+  _saveZip
+   → SpriteCropper.cropFrames (전역 설정+오버라이드로 크롭, 파일명 생성)
+   → SavePreviewDialog (삭제·사용자 폴더 분류·재번호)
+   → group별 ZIP 경로 결정(루트 or '폴더명/...')
+   → buildZip(index.html + stage.jpg + 프레임들)
+   → FileSaver.saveFile(.zip)
+
+[레이어 규칙]
+  EditorScreen(상태 보유) ─ 콜백 전달 → ControlPanel / ImageCanvas /
+  SpritePreviewPanel / SavePreviewDialog(결과를 다시 EditorScreen으로 반환)
+  서비스·모델 계층은 순수 Dart + 화면 독립 (테스트 용이)
+
+■ 8. 관찰 포인트 / 개선 후보 (참고용)
+--------------------------------------------------------------------------------
+- 파일명/폴더명 정제 로직이 SpriteCropper.sanitizeName과
+  SavePreviewDialog._sanitizeFolderName에서 규칙이 조금 다르다(공백 처리).
+  폴더명은 공백 유지(패턴에 \s 미포함), 파일명은 공백 제거 — 의도된 차이이나
+  명시적으로 주석이 있으면 혼동 방지에 유리.
+- SavePreviewDialog는 Dialog 위젯 내부에서 ScaffoldMessenger로 SnackBar를
+  띄우는데, MaterialApp 하위라 동작하지만 테스트에서는 스낵바 타이머 정리가
+  필요(createFolder 헬퍼에 4초 pump 추가됨).
+- frameRects 오버라이드는 총 컷 수 변경 시 clearFrameRects로 초기화돼
+  인덱스 불일치를 방지하고 있음.
+- ImageCanvas.fitScale은 이미지를 "커짐 없이" 100% 피팅(scale ≤ 1)하므로
+  해상도가 작은 시트는 작게 보일 수 있음 (의도된 1:1 표시).
+- EditorScreen._saveZip에서 cropFrames로 얻은 프레임에 대해 다시
+  img.decodeImage로 크기 재계산(sizes)을 수행 — 프레임 수×디코딩 비용.
+- README.md와 pubspec.description은 기본 Flutter 템플릿 그대로(Boilerplate) —
+  프로젝트 소개 문서화가 남은 숙제.
+
+================================================================================
+ 분석 끝
+================================================================================
