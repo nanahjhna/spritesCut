@@ -82,6 +82,9 @@ void main() {
 
   Future<void> loadImage(WidgetTester tester) async {
     await tester.pumpWidget(const SpriteCutApp());
+    // 메인 화면에서 이미지 자르기 편집기로 이동한다.
+    await tester.tap(find.text('이미지 자르기'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('이미지 업로드'));
     await tester.pumpAndSettle();
   }

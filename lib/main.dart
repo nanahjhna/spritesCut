@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/editor_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const SpriteCutApp());
@@ -26,7 +26,7 @@ class SpriteCutApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: const EditorScreen(),
+      home: const HomeScreen(),
     );
   }
 }

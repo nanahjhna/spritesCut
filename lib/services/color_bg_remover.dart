@@ -99,6 +99,28 @@ abstract final class ColorBgRemover {
       throw const FormatException('이미지를 해석할 수 없습니다.');
     }
 
+    return Uint8List.fromList(
+      img.encodePng(
+        removeBackgroundFromImage(
+          image,
+          backgroundColor: backgroundColor,
+          tolerance: tolerance,
+          feather: feather,
+        ),
+      ),
+    );
+  }
+
+  /// 이미 디코딩된 [image]에서 배경을 제거한 새 RGBA 이미지를 반환한다.
+  ///
+  /// GIF처럼 여러 프레임을 한 번에 처리할 때, 매 프레임마다 인코딩/디코딩을
+  /// 반복하지 않도록 [removeBackground]와 분리해 둔 이미지 단위 API.
+  static img.Image removeBackgroundFromImage(
+    img.Image image, {
+    required RgbColor backgroundColor,
+    double tolerance = 0.1,
+    double feather = 0.05,
+  }) {
     final br = backgroundColor.r;
     final bg = backgroundColor.g;
     final bb = backgroundColor.b;
@@ -144,6 +166,6 @@ abstract final class ColorBgRemover {
       }
     }
 
-    return Uint8List.fromList(img.encodePng(output));
+    return output;
   }
 }
