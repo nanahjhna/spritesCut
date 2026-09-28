@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'batch_crop_screen.dart';
 import 'editor_screen.dart';
 import 'gif_splitter_screen.dart';
 
@@ -57,6 +58,15 @@ class HomeScreen extends StatelessWidget {
                     subtitle: 'GIF 애니메이션의 모든 프레임을 '
                         '개별 PNG 또는 스프라이트 시트로 변환합니다.',
                     onTap: () => _open(context, const GifSplitterScreen()),
+                  ),
+                  const SizedBox(height: 16),
+                  _ModeCard(
+                    icon: Icons.photo_size_select_actual_outlined,
+                    color: Colors.deepOrange,
+                    title: '다중 이미지 일괄 자르기',
+                    subtitle: '여러 사진을 고정한 크기로 가운데 정렬 '
+                        '자르고 PNG로 묶어 ZIP으로 저장합니다.',
+                    onTap: () => _open(context, const BatchCropScreen()),
                   ),
                 ],
               ),
