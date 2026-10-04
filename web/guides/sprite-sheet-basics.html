@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스프라이트 시트란 무엇인가? 기초 개념 정리 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="스프라이트 시트의 정의, 행 우선·열 우선 배치, 프레임 크기 계산 공식, 투명 배경과 단색 배경의 차이, 애니메이션 타임라인과의 관계를 정리하고 이 도구가 무엇을 하고 무엇을 하지 않는지 설명합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="스프라이트 시트란 무엇인가? 기초 개념 정리">
+<meta property="og:description" content="스프라이트 시트의 정의, 배치 방식, 프레임 크기 계산 공식, 배경 방식, 애니메이션 타임라인과의 관계를 정리한 기초 가이드.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "스프라이트 시트란 무엇인가? 기초 개념 정리",
+  "description": "스프라이트 시트의 정의, 행 우선·열 우선 배치, 프레임 크기 계산 공식, 투명 배경과 단색 배경의 차이, 애니메이션 타임라인과의 관계를 정리하고 이 도구가 무엇을 하고 무엇을 하지 않는지 설명합니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/sprite-sheet-basics.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "mainEntityOfPage": "https://spritescut.netlify.app/guides/sprite-sheet-basics.html"
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>스프라이트 시트란 무엇인가? 기초 개념 정리</h1>
+<p class="lede">게임 캐릭터가 달리거나 공격하는 모습이 한 장의 이미지에 나란히 붙어 있다면 그 그림이 바로 스프라이트 시트입니다. 분할하기 전에 먼저 알아두면 좋은 개념들을 모았습니다.</p>
+<p class="lang-switch"><a href="/guides/sprite-sheet-basics-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>한 장의 이미지 안에 넣은 여러 장면</h2>
+<p>애니메이션에서 움직임은 결국 "그림이 몇 장 빨리 바뀌는가"로 만들어집니다. 장면마다 파일을 따로 저장하면 관리도, 로딩도 불편합니다. 그래서 여러 장면을 정해진 규격으로 잘라 붙여 <strong>하나의 이미지 파일</strong>로 만드는 방식을 씁니다. 그 결과물이 스프라이트 시트, 즉 sprite sheet이며, 게임에서는 보통 텍스처 아틀라스라는 이름으로 불립니다.</p>
+<p>이렇게 묶어 두면 얻는 이득이 분명합니다. 게임 엔진 입장에서 텍스처를 여러 번 로드하지 않아도 되고, GPU가 같은 텍스처 하나에 여러 장면을 담아두면 프레임마다 GPU 상태를 바꾸는 횟수가 줄어듭니다. 편집자 입장에서도 캐릭터 한 묶음이 파일 하나에 들어 있으므로 버전 관리나 백업이 단순해집니다. 도구를 갈아끼울 때 배경을 갈아끼우거나 색조를 한 번에 바꾸는 것도 쉬워집니다.</p>
+<p>반대로 단점도 있습니다. 시트를 한 번 잘못 자르면 모든 프레임이 함께 어긋나고, 파일 하나가 손상되면 애니메이션 전체가 깨집니다. 프레임마다 투명 영역이 제각각이라 GPU 메모리만 낭비하기도 합니다. 그래서 여러 장면을 하나로 합치는 것과, 하나로 합친 것을 다시 정확하게 나누는 것은 같은 비중의 작업입니다.</p>
+
+<h2>가로 한 줄, 세로 한 줄, 격자 배치</h2>
+<p>장면을 붙이는 순서와 방식은 크게 두 가지로 나뉩니다. 첫째는 <strong>행 우선(row-major)</strong> 배치입니다. 왼쪽에서 오른쪽으로 먼저 꽉 채우고, 줄이 차면 그다음 줄로 내려갑니다. 토큰이나 문자 이미지를 다루는 작업에서 자주 보이는 방식입니다. 둘째는 <strong>열 우선(column-major)</strong> 배치입니다. 세로로 먼저 꽉 채우고, 열이 꽉 차면 옆 열로 넘어갑니다. 캐릭터 시트에서 관공 방향이나 진행 방향별로 한 묶음을 늘어놓을 때 이 방식을 씁니다.</p>
+<h3>어느 쪽이 더 흔한가</h3>
+<p>2D 게임 캐릭터 시트는 관공이 커질수록 열 우선이 편한 경우가 많습니다. 반면 UI 아이콘이나 이모티콘처럼 갯수가 많고 항목 크기가 작은 경우는 가로 한 줄이나 격자가 더 읽기 쉽습니다. 이 도구는 두 방식 모두 지원하지는 않으므로, 가로 한 줄로 나열된 시트를 세로로 다시 이어 붙이거나 그 반대로 바꾸는 작업은 이미지를 미리 재배치해야 합니다. 필요한 재배치가 불가능하다면 여러 장의 이미지를 한 번에 같은 크기로 자르는 쪽이 현실적입니다.</p>
+
+<h2>프레임 크기 계산</h2>
+<p>시트를 균일한 격자로 나눈다면 프레임 크기는 나눗셈으로 나옵니다. 이미지 폭을 가로 분할 개수로, 높이를 세로 분할 개수로 나누면 한 컷의 크기가 됩니다. 아래 표에 자주 쓰이는 조합을 정리했습니다.</p>
+<table>
+  <caption>이미지 크기와 분할 개수에 따른 한 컷 크기</caption>
+  <thead>
+    <tr><th scope="col">이미지 크기</th><th scope="col">분할 수 (가로 × 세로)</th><th scope="col">1컷 크기</th><th scope="col">총 컷 수</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>256 × 64</td><td>4 × 1</td><td>64 × 64</td><td>4</td></tr>
+    <tr><td>512 × 128</td><td>4 × 2</td><td>128 × 64</td><td>8</td></tr>
+    <tr><td>1024 × 1024</td><td>8 × 8</td><td>128 × 128</td><td>64</td></tr>
+    <tr><td>1920 × 1080</td><td>8 × 4</td><td>240 × 270</td><td>32</td></tr>
+    <tr><td>800 × 600</td><td>16 × 12</td><td>50 × 50</td><td>192</td></tr>
+  </tbody>
+</table>
+<p>계산한 값이 소수점으로 떨어지면 같은 프레임 크기를 유지하기 어렵습니다. 1000px짜리 폭을 3등분하면 한 컷이 333.33px가 되어 결국 어느 한쪽은 333px, 다른 쪽은 334px로 어긋납니다. 애니메이션에서는 이런 어긋남이 눈에 잘 띕니다. 2의 거듭제곱 크기(32, 64, 128, 256 등)로 설계를 하면 이 문제가 원천적으로 사라집니다. 이미지 폭을 512로 두고 8등분하면 한 컷은 정확히 64px가 됩니다.</p>
+<div class="note">
+  <p><strong>참고</strong> 이 도구의 캔버스는 이미지를 100% 크기로만 표시합니다. 작은 이미지를 화면에 맞게 늘려 보여주지 않습니다. 따라서 64 × 64짜리 시트를 확대해서 확인하고 싶다면 브라우저 확대 기능을 쓰거나, 분할한 뒤 나온 PNG를 별도의 이미지 뷰어로 열어보아야 합니다. 화면상의 확대는 픽셀 판정에 영향을 주지 않기 때문에, 좌표 값을 입력할 때는 항상 원본 픽셀 기준으로 생각하는 편이 안전합니다.</p>
+</div>
+
+<h2>투명 배경과 단색 배경</h2>
+<p>스프라이트 시트에서 배경은 두 가지 방식으로 관리됩니다. 첫째는 <strong>알파(투명) 배경</strong>입니다. 여백이 완전히 투명한 PNG로 저장하고 엔진이 합성할 때 원하는 배경을 깔아주는 방식입니다. 2D 게임에서 거의 표준이며, 어떤 배경 위에서도 캐릭터가 자연스럽게 보입니다. 둘째는 <strong>단색 배경</strong>입니다. 마젠타나 초록처럼 눈에 확 띄는 한 색을 깔고, 해당 색을 투명 처리하는 방식입니다. 영상 편집이나 합성 툴에서 오염된 영역을 빨리 지우기 위해 쓰입니다.</p>
+<h3>어느 쪽이 결과물이 예쁜가</h3>
+<p>단색 배경은 색이 스프라이트 안에 실제로 쓰였다면 문제가 됩니다. 캐릭터에 마젠타가 한 픽셀이라도 들어 있으면 그 부분까지 지워집니다. 반대로 알파 배경은 안쪽의 반투명 픽셀, 그림자, 테두리 반사광까지 그대로 보존합니다. 그래서 마지막 결과물의 품질을 생각하면 알파 배경이 확실히 안전합니다. 배경 제거 기능은 뒤 단계에서 다룹니다.</p>
+
+<h2>시트와 애니메이션 타임라인의 관계</h2>
+<p>분할된 프레임은 그 자체로 움직이지 않습니다. 각 프레임을 얼마나 오래 보여줄지가 정해져야 애니메이션이 됩니다. 예를 들어 8프레임짜리 대기 모션을 8프레임 모두 0.1초씩 보여주면 0.8초짜리 루프가 되고, 기본 보행 속도인 12.5fps에 딱 맞습니다. 반면 실제 60fps 게임에서 캐릭터가 초당 8프레임으로 뛰는 모습이라면 프레임마다 약 0.125초를 배정해야 합니다.</p>
+<p>즉 시트 구조는 애니메이션 타이밍을 설계할 때 쓰는 정보입니다. 총 컷 수로 전체 길이를 가늠하고, 각 컷의 가로·세로 크기로 화면 배율을 계산합니다. 이 도구는 정지 이미지로 잘라주기만 하고 애니메이션 파일을 만들지는 않습니다. 다만 저장되는 ZIP 안에는 미리보기용 <code>index.html</code>이 함께 들어 있어서, 압축을 풀면 브라우저에서 바로 재생되는 형태를 확인할 수 있습니다.</p>
+
+<h2>분할할 자신의 시트인지 확인하기</h2>
+<p>실제로 분할 도구를 열기 전에 다음 네 가지를 눈으로 확인해 두면 작업이 훨씬 수월합니다.</p>
+<ol>
+  <li><strong>프레임 크기가 같은가.</strong> 시트 안의 모든 컷이 같은 크기여야 균등 분할로 한 번에 처리됩니다. 크기가 섞여 있다면 수동 경계선 모드가 필요합니다.</li>
+  <li><strong>프레임 사이에 빈 여백이 있는가.</strong> 투명 여백이 끼어 있으면 그대로 잘려 나옵니다. 영역 여백으로 먼저 제외해야 합니다.</li>
+  <li><strong>줄바꿈 위치가 규칙적인가.</strong> 마지막 줄에 프레임이 덜 들어간 자리가 남아 있다면 균등 분할 결과가 고르게 떨어지지 않습니다.</li>
+  <li><strong>배경이 단색인가.</strong> 단색이면 배경 제거로 투명 PNG를 만들 수 있고, 그라데이션이나 질감이면 제거하지 않는 편이 낫습니다.</li>
+</ol>
+<p>이 네 조건 중 앞의 두 개만 만족하면 <a href="/guides/how-to-cut-sprite-sheet.html">균등 분할 기본 사용법</a>의 절차 그대로 1분 안에 끝납니다. 여백이 끼어 있거나 줄의 길이가 일정하지 않다면 <a href="/guides/manual-boundaries.html">여백과 수동 경계선으로 정확히 나누기</a>를 참고하세요.</p>
+
+<h2>이 도구가 하는 일과 하지 않는 일</h2>
+<p>이 도구는 브라우저 안에서 완전히 동작합니다. 이미지를 고르는 순간부터 PNG가 만들어지고 ZIP으로 묶여 내려올 때까지 모든 계산이 사용자의 기기에서 처리되므로, 이미지 파일이 어떤 서버로도 올라가지 않습니다. 가입이나 로그인이 필요 없고 비용도 없습니다.</p>
+<h3>수행하는 작업</h3>
+<ul>
+  <li>이미지 한 장을 격자로 잘라 PNG 여러 장으로 나누기</li>
+  <li>단색 배경을 제거해 RGBA PNG로 다시 저장하기</li>
+  <li>각 프레임의 좌표와 크기를 개별적으로 조정하고 되돌리기</li>
+  <li>결과를 ZIP으로 묶고 미리보기용 HTML과 배경 이미지 포함하기</li>
+</ul>
+<h3>수행하지 않는 작업</h3>
+<ul>
+  <li>이미지 확대·축소나 리샘플링. 입력 픽셀을 그대로 잘라냅니다.</li>
+  <li>애니메이션 GIF나 영상 변환</li>
+  <li>색상 보정, 윤곽선 정리 같은 화질 개선 작업</li>
+  <li>계정, 로그, 서버 저장 공간 등 사용자 관리 기능</li>
+</ul>
+<p>이제 개념이 정리되었다면 <a href="/">스프라이트 시트 도구</a>를 열어 직접 시트를 올려 보세요. 다음 글은 <a href="/guides/how-to-cut-sprite-sheet.html">스프라이트 시트 분할 기본 사용법</a>으로 이어집니다.</p>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/index.html"><span class="dir">이전 글</span><span class="ttl">기능 가이드</span></a>
+  <a class="next" href="/guides/how-to-cut-sprite-sheet.html"><span class="dir">다음 글</span><span class="ttl">스프라이트 시트 분할 기본 사용법</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

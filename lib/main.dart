@@ -12,7 +12,7 @@ class SpriteCutApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI 스프라이트 시트 분할 도구',
+      title: '스프라이트 시트 분할 도구',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),

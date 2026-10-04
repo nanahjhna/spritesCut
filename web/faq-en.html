@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frequently Asked Questions (FAQ) | Sprite Sheet Splitter</title>
+<meta name="description" content="The questions users ask most often about the Sprite Sheet Splitter. Answers about supported formats, how files are handled, why split results do not line up, how to adjust background removal, where files are saved and browser compatibility.">
+<link rel="canonical" href="https://spritescut.netlify.app/faq-en.html">
+<meta name="robots" content="index, follow">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/faq.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/faq-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/faq.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Frequently Asked Questions (FAQ) | Sprite Sheet Splitter</meta>
+<meta property="og:description" content="A collection of frequently asked questions about supported formats, how files are handled and how to adjust results.">
+<meta property="og:url" content="https://spritescut.netlify.app/faq-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/faq-en.html",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is this tool really free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. All features are free to use with no separate installation and no sign-up. There is no payment step and no paid plan." } },
+    { "@type": "Question", "name": "Do you upload images to a server?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. When you select a file, the data is delivered only to the memory of the device your browser is running on, and the splitting, cutting and compression are all performed there. The processed results are not sent anywhere either." } },
+    { "@type": "Question", "name": "Which file formats are supported?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Image Cutter recommends PNG and JPG, and can also open other formats the browser is able to decode. GIF Splitter is for GIF files only. In every case the results are saved as PNG." } },
+    { "@type": "Question", "name": "Are there limits on file size or number of frames?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The code has no frame count limit; the practical limit is the memory of your device. Only Batch Cropper is limited, to 20000 pixels on each of width and height, and when the total pixel count exceeds 40 million pixels a notice is displayed." } },
+    { "@type": "Question", "name": "Can I process several photos of the same size at once?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. With Batch Cropper you can select several files at once, crop them to the same size and bundle the PNGs into a ZIP." } },
+    { "@type": "Question", "name": "The split results keep coming out misaligned. What should I check?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It is often caused by transparent margins at the edges of the image or by irregular spacing. Specify the top, bottom, left and right padding, or change the split mode to manual adjustment and set the boundaries yourself." } },
+    { "@type": "Question", "name": "The background is not removed, or the character disappears too",
+      "acceptedAnswer": { "@type": "Answer", "text": "Detection fails when the background is not a solid colour. If noise or shadows are mixed in, try raising the tolerance. Conversely, if the character colour is close to the background colour, you need to lower the tolerance." } },
+    { "@type": "Question", "name": "Can I crop only certain cuts differently and save them?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Select the frame in the result preview and you can adjust its x, y, width and height values individually, and return it to the state it was in with a full reset." } },
+    { "@type": "Question", "name": "Where are the result files saved?",
+      "acceptedAnswer": { "@type": "Answer", "text": "They are saved to the location you choose through your browser's download function. When you receive a ZIP, double-clicking the index.html inside it lets you preview the animation." } },
+    { "@type": "Question", "name": "A blank screen appears when I open it in my browser",
+      "acceptedAnswer": { "@type": "Answer", "text": "This tool runs with JavaScript. Check in your browser settings that JavaScript is not disabled, then reload the page." } },
+    { "@type": "Question", "name": "Does it work on phones and tablets?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes, it works in both desktop and mobile browsers. Processing speed and stability depend on the performance and memory of your device. The batch cropper handles several files at once, so it is best used on a device with enough memory." } },
+    { "@type": "Question", "name": "Is there a browser that uses a lot of memory?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Memory usage is determined by the total pixel count of the image being processed and the number of frames being created. When working with large amounts of images, a Chrome-based browser is recommended. If the browser feels stuck while processing, close other tabs and try again." } },
+    { "@type": "Question", "name": "The split counts feel too high or too low",
+      "acceptedAnswer": { "@type": "Answer", "text": "The default split counts are 4 across and 1 down. The status bar at the bottom of the screen shows the total pixel size, the split area size, the size of one cut and the total cut count in real time. Values of 0 or less are corrected to 1, so leaving a field blank applies 1. How to calculate the frame size exactly is set out in the pixel art image specs guide." } },
+    { "@type": "Question", "name": "Can I undo a value I changed by mistake?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. On the image cutter screen, undo and redo remember up to 100 steps. The shortcuts are Ctrl+Z and Ctrl+Shift+Z respectively, and redo also works with Ctrl+Y. While you keep changing values, they are grouped into a single step, so dragging a handle does not keep adding steps. Loading a new image clears the history." } },
+    { "@type": "Question", "name": "What is inside the ZIP I saved?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The ZIP from the image cutter and the GIF splitter contains the cropped frame PNGs together with an HTML file for previewing the animation and a background image file. Double-clicking that HTML file lets you check the animation while adjusting the playback speed slider, and it works with no internet connection. The ZIP from the batch cropper contains only PNG files." } },
+    { "@type": "Question", "name": "Can I organise the frames into folders?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Turn on folder organisation in the preview screen shown before saving, then create folders and divide the frames between them. You can long-press a thumbnail for about half a second and drag it into a folder, or select several and use the move button. Deleting a folder returns its files to the default location, and the remaining files are renumbered consecutively." } },
+    { "@type": "Question", "name": "How do I convert a GIF into a sprite sheet?",
+      "acceptedAnswer": { "@type": "Answer", "text": "On the GIF splitter screen, pick a GIF and the frame count and length are shown with an animated preview. Choose one row, one column or a grid in the sheet layout, then save as a sprite sheet PNG, a ZIP of frame PNGs, or a re-saved GIF. With automatic transparent-area trimming turned on, the transparent margins common to all frames are cut away." } },
+    { "@type": "Question", "name": "The screen looks frozen while it is processing",
+      "acceptedAnswer": { "@type": "Answer", "text": "Large images or a large number of frames take a while. The batch cropper shows the progress and the current file name, and the GIF splitter keeps the adjustment slider usable while it recalculates. Switching to another browser tab does not stop the processing." } },
+    { "@type": "Question", "name": "I have a problem that is not resolved",
+      "acceptedAnswer": { "@type": "Answer", "text": "Please let us know through the contact page. This tool cannot view your images, so writing down the error message shown on screen together with your browser name and version and the name of the feature where the problem occurred makes it much easier to find the cause." } }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span>Frequently asked questions</span>
+</nav>
+<h1>Frequently asked questions</h1>
+<p class="lede">We have collected the questions users ask most often. If your question is not here, send it to us through <a href="/contact-en.html">Contact</a> and we will reply.</p>
+<p class="lang-switch"><a href="/faq.html">이 페이지를 한국어로 읽기</a></p>
+<div class="post-meta">Last updated 2026-10-04</div>
+
+<h2>Basics</h2>
+
+<details class="faq-item">
+  <summary>Is this tool really free?</summary>
+  <div class="answer">
+    <p>Yes. All features are free to use with no separate installation and no sign-up. There is no payment step and no paid plan, and because no account is created, there is never a password to enter either.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Do you upload images to a server?</summary>
+  <div class="answer">
+    <p>No. When you select a file, the data is delivered only to the memory of the device your browser is running on, and image splitting, cutting, background removal and ZIP compression are all performed there. The processed results are not sent anywhere either, and are written to your device through your browser's download function.</p>
+    <p>That is why you never run into an upload size limit, and why you never have to expose personal photos or the game assets you are working on to anyone else. For details, please refer to the <a href="/privacy-en.html">Privacy Policy</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Which file formats are supported?</summary>
+  <div class="answer">
+    <p>Image Cutter recommends PNG and JPG, and can also open other formats the browser is able to decode. GIF Splitter is for GIF files only. In all three tools the results are saved as PNG, and there is no option to save as JPG or WebP.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Does it work on phones and tablets?</summary>
+  <div class="answer">
+    <p>Yes, it works in both desktop and mobile browsers. Processing speed and stability do, however, depend on the performance and memory of your device. Batch Cropper handles several files at once, so it works better on a device with enough memory.</p>
+  </div>
+</details>
+
+<h2>Size and limits</h2>
+
+<details class="faq-item">
+  <summary>Are there limits on file size or number of frames?</summary>
+  <div class="answer">
+    <p>There is no rule in the code that limits the number of frames. The practical limit is the memory of your device. In particular, entering large horizontal and vertical division counts increases both the number of frames produced and the memory used.</p>
+    <p>Only Batch Cropper has numeric limits. Width and height each accept 8 pixels or more and 20000 pixels or less, and when width multiplied by height exceeds 40 million pixels a notice appears asking you to specify a smaller size.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>I have many photos that need to be the same size. Can they be done at once?</summary>
+  <div class="answer">
+    <p>Yes. With Batch Cropper you can select several photos at once, crop them to the same size and bundle the PNGs into a ZIP. Choose one reference photo, set the size and position, and the same rule is applied to the rest.</p>
+    <p>For the detailed method, see the guide <a href="/guides/batch-crop-images-en.html">Cropping several images to one size at once</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Are there browsers that use a lot of memory?</summary>
+  <div class="answer">
+    <p>Memory usage is determined by the total pixel count of the images being processed and by the number of frames produced. Chrome-based browsers are recommended when working with large numbers of images. If the browser feels like it is freezing during processing, close other tabs and try again.</p>
+  </div>
+</details>
+
+<h2>Adjusting results</h2>
+
+<details class="faq-item">
+  <summary>The split results keep coming out misaligned. What should I check?</summary>
+  <div class="answer">
+    <p>In most cases it is transparent margin at the edge of the image, or irregular spacing.</p>
+    <ol>
+      <li>Set the top, bottom, left and right padding values so that only the area that actually contains content is left.</li>
+      <li>Change the split mode from even split to manual adjustment and you can set each boundary directly by absolute coordinates.</li>
+      <li>If it is still misaligned, adjust only that frame individually in the preview at the bottom of the screen.</li>
+    </ol>
+    <p>You can see the detailed method in <a href="/guides/manual-boundaries-en.html">Cutting accurately with padding and manual boundaries</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>The number of divisions feels too high or too low</summary>
+  <div class="answer">
+    <p>The default division counts are 4 across and 1 down. In the status bar at the bottom of the screen you can check the total pixel size, the division area size, the size of one cut and the total number of cuts in real time. Values of 0 or less are corrected to 1, so leaving a field empty applies 1.</p>
+    <p>We have written up the method for calculating frame sizes exactly in the <a href="/guides/pixel-art-image-specs-en.html">Pixel art image specs guide</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>The background is not removed, or the character disappears too</summary>
+  <div class="answer">
+    <p>Both cases come down to the tolerance value.</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Symptom</th><th>Cause</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td>The background is not removed at all</td><td>The background colour is not solid (noise, gradients, shadows)</td><td>Raise the tolerance. The range is 0~30% for Image Cutter and 1~50% for GIF Splitter.</td></tr>
+        <tr><td>Part of the character disappears too</td><td>The character colour is close to the background colour, or the tolerance is too large</td><td>Lower the tolerance. If the background colour has already been detected, check the detected background colour value first.</td></tr>
+        <tr><td>A notice says the background colour could not be detected</td><td>The edge of the image is not a solid colour</td><td>It works only on images whose edge is a solid colour. Try excluding the edge margin.</td></tr>
+        <tr><td>The edges of the result look rough</td><td>The boundary looks like a staircase</td><td>Reduce the tolerance a little. Areas near the boundary are treated leniently so that some of them become transparent.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>For a detailed explanation, see <a href="/guides/remove-background-chromakey-en.html">Creating transparent PNGs with background removal</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Can I crop only certain cuts differently and save them?</summary>
+  <div class="answer">
+    <p>Yes. In the result preview at the bottom of the screen, click the thumbnail of a frame to enter frame editing mode, where the x, y, width and height values can be adjusted individually. To restore the original values, press the <code>기본값</code> (reset to default) button; to clear all edits at once, press <code>전체 초기화</code> (reset all). While you are editing, the <code>실행 취소</code> (undo) and <code>다시 실행</code> (redo) shortcuts work as before.</p>
+    <p>For the detailed method, see <a href="/guides/frame-editing-undo-en.html">Per-frame editing and undo/redo</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Can I undo a value I changed by mistake?</summary>
+  <div class="answer">
+    <p>Yes. In the Image Cutter screen, undo and redo remember up to 100 steps. The shortcuts are Ctrl+Z and Ctrl+Shift+Z respectively, and redo also works with Ctrl+Y. While you change values continuously they are grouped into a single step, so dragging the handle does not make the step count grow unnecessarily. Loading a new image resets the history.</p>
+  </div>
+</details>
+
+<h2>Saving and results</h2>
+
+<details class="faq-item">
+  <summary>Where are the result files saved?</summary>
+  <div class="answer">
+    <p>Because the tool uses your browser's download function, files are saved to the location you choose. To save somewhere other than the default folder, change the path in the save dialog. Image Cutter and GIF Splitter produce a single ZIP file containing several files, and Batch Cropper also bundles several PNGs into a ZIP.</p>
+    <p>The ZIP file name includes the original file name along with the number of divisions or the crop size.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>What is inside the ZIP file once I save it?</summary>
+  <div class="answer">
+    <p>The ZIP from Image Cutter and GIF Splitter contains the cut frame PNGs together with an HTML file for previewing the animation and a background image file. Double-clicking that HTML file lets you check the animation while adjusting the playback speed slider. It works with no separate internet connection.</p>
+    <p>The ZIP from Batch Cropper contains only PNG files. For details, see <a href="/guides/zip-preview-animation-en.html">Checking the animation with the ZIP and the index.html preview</a>.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>Can I organise frames into folders?</summary>
+  <div class="answer">
+    <p>Yes. In the preview screen shown before saving, turn on <code>폴더 정리</code> (organise into folders) to create folders and place frames into them. Press and hold a thumbnail for about half a second and drop it onto a folder, or select several and press the <code>이동</code> (move) button. If you delete a folder, the files inside it return to the default location, and the remaining file numbers are renumbered consecutively.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>I want to know how to turn a GIF into a sprite sheet</summary>
+  <div class="answer">
+    <p>When you select a GIF in the GIF Splitter screen, the frame count and duration are displayed and the preview plays. Choose one of <code>가로 한 줄</code> (single row), <code>세로 한 줄</code> (single column) or <code>격자</code> (grid) under <code>시트 레이아웃</code> (sheet layout), then save in the format you want: <code>스프라이트 시트 (PNG)</code> (sprite sheet PNG), <code>프레임 PNG 모음 (ZIP)</code> (frames in a ZIP) or <code>GIF 다시 저장</code> (re-save the GIF). If you leave <code>투명 영역 자동 제거</code> (automatic transparent area trimming) on, the transparent margin shared by all frames is trimmed away.</p>
+    <p>For the detailed method, see <a href="/guides/gif-to-sprite-sheet-en.html">Converting a GIF into a sprite sheet</a>.</p>
+  </div>
+</details>
+
+<h2>When something goes wrong</h2>
+
+<details class="faq-item">
+  <summary>A blank screen appears when I open it in my browser</summary>
+  <div class="answer">
+    <p>This tool runs with JavaScript. Check in your browser settings that JavaScript is not disabled, then reload the page. If it is still not resolved, try opening it in a different browser.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>The screen seems to freeze during processing</summary>
+  <div class="answer">
+    <p>Processing takes a while when the image is large or when many frames are being produced. Batch Cropper shows the progress together with the current file name, and GIF Splitter stays displayed with its sliders movable while the values are recalculated. Processing continues even if you switch to another browser tab.</p>
+  </div>
+</details>
+
+<details class="faq-item">
+  <summary>I have a problem that has not been resolved</summary>
+  <div class="answer">
+    <p>Please let us know through <a href="/contact-en.html">Contact</a>. Because this tool cannot view your images, writing down the error message shown on screen together with the browser name and version and the name of the feature where the problem occurred makes the cause far easier to identify.</p>
+  </div>
+</details>
+
+<div class="cta">
+  <h2>More detail in the guides</h2>
+  <p>If questions and answers alone are not enough, check the usage guides organised step by step.</p>
+  <a class="btn" href="/guides/index-en.html">Browse all feature guides</a>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Splitter</a></li>
+          <li><a href="/">Batch Cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq-en.html">Frequently asked questions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Service</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy Policy</a></li>
+          <li><a href="/terms-en.html">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing is performed only on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

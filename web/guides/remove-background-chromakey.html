@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>배경 제거로 투명 PNG 만들기 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="단색 배경을 자동 감지해 투명 PNG로 바꾸는 방법. 감지된 배경색 확인, 허용 오차 슬라이더 조정(도구별 0~30% / 1~50%), 실패하는 배경 유형과 해결 방법을 표로 정리했습니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<meta rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/remove-background-chromakey-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="배경 제거로 투명 PNG 만들기">
+<meta property="og:description" content="단색 배경 자동 감지와 허용 오차 조정, 실패하는 배경 유형과 해결 방법.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "배경 제거로 투명 PNG 만들기",
+  "description": "단색 배경을 자동 감지해 투명 PNG로 바꾸는 방법. 감지된 배경색 확인, 허용 오차 슬라이더 조정(도구별 0~30% / 1~50%), 실패하는 배경 유형과 해결 방법을 표로 정리했습니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 스프라이트 시트 분할 도구" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "단색 배경 이미지 불러오기", "text": "이미지 자르기 도구에서 배경을 제거할 시트를 선택합니다. 격자 영역 안쪽이 아니라 가장자리 색이 제거 대상입니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "배경 제거 스위치 켜기", "text": "'배경 처리' 항목에서 '배경 제거' 스위치를 켭니다. 단색 배경을 자동 감지해 투명하게 처리합니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "감지된 배경색과 오차 확인하기", "text": "'감지된 배경색 #xxxxxx' 표시로 어떤 색이 선택되었는지 확인하고, 오차 슬라이더로 유사색 제거 범위를 조절합니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "투명 처리 결과 검증하기", "text": "캔버스의 체스판 배경으로 지워진 영역이 투명해졌는지, 스프라이트 안쪽 색까지 사라지지 않았는지 확인합니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "분할 수를 정하고 프레임별 결과 확인하기", "text": "분할 수를 입력하고 결과물 미리보기에서 각 프레임의 투명 처리 상태를 확인합니다. 프레임별로 배경을 다르게 처리할 수는 없습니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "투명 PNG로 ZIP 저장하기", "text": "저장 및 다운로드 (ZIP)로 내보내면 RGBA PNG가 저장됩니다. 스위치를 끄면 원본 상태로 정확히 되돌아옵니다.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>배경 제거로 투명 PNG 만들기</h1>
+<p class="lede">초록색이나 마젠타 한 색으로 채워진 시트라면 그 색을 지워 투명 배경으로 만들 수 있습니다. 감지 원리부터 오차 값 조절, 잘 안 될 때의 대처법까지 정리했습니다.</p>
+<p class="lang-switch"><a href="/guides/remove-background-chromakey-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>배경색을 지우는 원리</h2>
+<p>배경 제거는 픽셀마다 색을 비교하는 결정적인 계산입니다. 먼저 제거할 기준 색을 하나 정한 뒤, 각 픽셀의 RGB 값과 그 기준 색의 차이를 계산합니다. 차이가 충분히 작으면 그 픽셀의 알파 값을 0으로 만들어 완전히 투명하게 바꿉니다. 학습된 모델이나 추정 같은 과정은 개입하지 않습니다. 같은 입력이면 언제 어디서 실행하든 같은 결과가 나오는, 단순한 수식뿐입니다.</p>
+<p>이 방식이 잘 먹히는 조건은 하나입니다. 제거 대상 색이 시트 안에서 실제로 쓰이지 않은 단색이어야 합니다. 그래서 작업용 배경으로는 마젠타나 형광 초록처럼 눈에 확 띄고 게임 자료에는 나올 가능성이 없는 색이 선택됩니다. 반대로 파란 하늘, 붉은 머리카락, 흰색 눈이 있는 캐릭터라면 그 색이 스프라이트의 일부인지 배경인지 구분할 수 없어 오탐이 생깁니다.</p>
+<div class="note">
+  <p><strong>알려 둘 점</strong> 이 도구는 이미지 자르기나 다중 이미지 일괄 자르기 결과의 배경을 제거하지 않습니다. 배경 제거는 이미지 자르기의 <strong>배경 처리</strong> 항목과 GIF 스프라이트 분할의 <strong>단색 배경 제거</strong> 스위치에서만 동작합니다. 이미 투명한 PNG를 자르는 경우에는 켤 필요가 없습니다.</p>
+</div>
+
+<h2 id="step-1">1단계. 단색 배경 이미지 선택하기</h2>
+<p><a href="/">스프라이트 시트 도구</a>의 이미지 자르기에서 시트를 불러옵니다. 제거 기준이 되는 색은 이미지 가장자리에서 샘플링합니다. 이미지 자르기 도구는 가장자리의 얇은 띠를 읽어 대표 색을 정하고, GIF 스프라이트 분할은 첫 프레임의 테두리 영역 8%를 샘플링해 색을 정한 뒤 모든 프레임에 그대로 적용합니다.</p>
+<p>여기서 "가장자리"가 중요합니다. 시트 안쪽 가운데에 스프라이트가 있고 그 바깥 전부가 같은 색이면 가장자리가 전부 그 색이므로 기준이 잘 잡힙니다. 반면 가장자리에 스프라이트 일부가 걸쳐 있으면 잡힌 색이 엉뚱해질 수 있습니다. 애초에 가장자리가 이미 투명한 이미지라면 제거할 색 자체가 없습니다.</p>
+
+<h2 id="step-2">2단계. 배경 제거 스위치 켜기</h2>
+<p><strong>배경 처리</strong> 항목에서 <em>"배경 제거"</em> 스위치를 켭니다. 설명 문구는 <em>"단색 배경을 자동 감지해 투명하게 처리합니다."</em> 입니다. 켜는 즉시 감지가 시작되고 결과가 캔버스에 반영됩니다.</p>
+<p>도구가 이해하지 못하면 <em>"배경색을 감지하지 못했습니다. 배경이 단색인지 확인해 주세요."</em> 라는 안내가 대신 표시됩니다. 이 경우 슬라이더를 움직여도 아무 변화가 없으니, 이미지에 그라데이션이나 질감이 들어 있는지 먼저 확인하세요.</p>
+
+<h2 id="step-3">3단계. 감지된 색과 오차 값 확인하기</h2>
+<p>감지에 성공하면 <em>"감지된 배경색&nbsp;&nbsp;#xxxxxx"</em> 형태로 실제 색 값이 표시됩니다. 이 값을 눈으로 대조해 보세요. 화면에 보이는 배경과 다른 색이 잡혔다면 기준 자체가 잘못된 것이므로 스위치를 껐다 켜 다시 시도하거나 원본을 점검해야 합니다.</p>
+<p>그다음 <em>"오차 (유사색 제거 범위)"</em> 슬라이더를 조정합니다. 기준 색과 아주 비슷한 색까지 함께 지우는 폭이라고 이해하면 됩니다. 노이즈나 압축 아티팩 때문에 단색으로 저장된 영역에도 미세한 편차가 생기는데, 오차가 넓을수록 이런 편차까지 함께 제거됩니다. 기본값은 10%이며 0%에서 30%까지 30칸으로 움직입니다. 입력값을 바꾸면 200ms 정도의 짧은 지연 후 다시 계산됩니다. 잠깐 멈췄다가 결과가 갱신되는 것이 정상입니다.</p>
+<h3>오차를 키우면 생기는 일</h3>
+<p>오차가 커지면 스프라이트 안쪽의 색도 지워지기 시작합니다. 특히 스프라이트의 그림자나 테두리처럼 배경색과 가까운 색으로 그려진 부분이 먼저 사라집니다. 반대로 오차가 너무 작으면 배경 안에 남은 미세한 색 얼룩이 그대로 남아 가장자리에 점무가 생깁니다. 넓은 배경이 가장자리까지 이어지는 시트라면 2~5%만으로도 충분한 경우가 많습니다.</p>
+
+<h2 id="step-4">4단계. 결과 검증하기</h2>
+<p>캔버스는 이미지를 100% 크기로 보여주고, 투명 영역 뒤에는 체스판 패턴이 깔립니다. 이 패턴이 보이면 해당 픽셀이 투명해졌다는 뜻이므로, 어디까지 지워졌는지 눈으로 확인할 수 있습니다.</p>
+<p>확인 순서는 이렇습니다. 첫째, 제거 대상이어야 할 바깥 영역이 체스판으로 바뀌었는지 봅니다. 둘째, 스프라이트의 실루엣에 구멍이 뚫렸는지 봅니다. 셋째, 반투명 상태로 남은 경계 픽셀이 의도한 부드러움인지 봅니다. 허용 오차 안에 들어온 픽셀은 완전히 지워지지 않고 알파 값이 낮아진 상태로 남을 수 있기 때문에, 배경색이 미묘하게 섞인 스프라이트는 가장자리가 계단처럼 보일 수 있습니다. 도구가 가장자리를 다듬어 주지는 않으므로 이런 경우는 원본의 배경을 더 깨끗하게 준비하는 편이 결과가 좋습니다.</p>
+
+<h2 id="step-5">5단계. 분할 결과와 함께 확인하기</h2>
+<p>분할 수를 정해 자르고 나면 <strong>결과물 미리보기</strong>에서 각 프레임의 상태를 봅니다. 미리보기의 썸네일도 같은 체스판 배경 위에 놓이므로 투명 처리가 확인됩니다.</p>
+<p>배경 제거는 이미지 전체에 한 번 적용됩니다. 즉 1번 프레임과 7번 프레임에 서로 다른 기준 색을 줄 수는 없습니다. 한 장의 시트 안에서 일부만 다른 색을 배경으로 쓰고 있다면, 두 개의 이미지로 나눠 각각 처리한 뒤 다시 합치는 workflow가 필요합니다.</p>
+
+<h2 id="step-6">6단계. 투명 PNG로 저장하기</h2>
+<p><strong>저장 및 다운로드 (ZIP)</strong>을 누르고, 저장 대화상자에서 <em>"다운로드 (ZIP)"</em>을 선택합니다. 결과물은 항상 RGBA PNG입니다. 알파 채널이 살아 있는 JPG나 WebP는 선택지가 없습니다. 파일 이름은 원본 이름에 분할 수를 붙인 패턴(<code>{파일명}_{가로}_{세로}_1.png</code>)으로 생성됩니다.</p>
+<p>확신이 서지 않을 때는 스위치를 끄면 됩니다. 끈 상태의 캔버스는 처리 이전 이미지, 즉 원본 상태로 정확히 되돌아옵니다. 원본 픽셀이 손상되지 않는다는 뜻이니 여러 값을 안전하게 시도해 볼 수 있습니다.</p>
+
+<h2>도구별 설정 비교</h2>
+<table>
+  <caption>두 도구의 배경 제거 설정</caption>
+  <thead>
+    <tr><th scope="col">항목</th><th scope="col">이미지 자르기</th><th scope="col">GIF 스프라이트 분할</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>기능 이름</td><td>배경 제거 (배경 처리)</td><td>단색 배경 제거</td></tr>
+    <tr><td>기본 상태</td><td>꺼짐</td><td>꺼짐</td></tr>
+    <tr><td>색 판정 방식</td><td>이미지 가장자리의 얇은 띠에서 샘플링</td><td>첫 프레임 테두리 8%에서 감지 후 전 프레임에 재사용</td></tr>
+    <tr><td>표시</td><td>감지된 배경색 #xxxxxx / RGB(r, g, b)</td><td>배경색 RGB(r, g, b)</td></tr>
+    <tr><td>허용 오차 범위</td><td>0~30% (30칸)</td><td>1~50%</td></tr>
+    <tr><td>허용 오차 기본값</td><td>10%</td><td>10%</td></tr>
+    <tr><td>재계산 지연</td><td>200ms</td><td>150ms (진행 표시줄 표시)</td></tr>
+    <tr><td>출력 형식</td><td>RGBA PNG</td><td>RGBA PNG</td></tr>
+  </tbody>
+</table>
+<p>GIF 스프라이트 분할의 허용 오차는 1% 미만으로 내려갈 수 없습니다. 실사용에서 0% 아래로는 의미가 없다는 판단이며, 슬라이더를 움직이는 동안에는 얇은 진행 표시줄이 나타나 처리 중이어도 슬라이더를 놓지 않고 계속 끌 수 있습니다. GIF 쪽 배경 제거를 다룬 절차는 <a href="/guides/gif-to-sprite-sheet.html">GIF를 스프라이트 시트로 변환하기</a>에서 이어서 다룹니다.</p>
+
+<h2>처리 순서 요약</h2>
+<p>배경 제거는 다른 작업과 함께 진행되는 경우가 많으므로 순서를 정해 두면 결과가 흔들리지 않습니다.</p>
+<ol>
+  <li>단색 배경 이미지인지 먼저 확인합니다. 가장자리 색이 하나로 유지되는 이미지여야 합니다.</li>
+  <li><a href="/guides/manual-boundaries.html">영역 여백</a>으로 바깥 투명 여백을 먼저 걷어 냅니다. 배경 제거보다 여백 정리가 먼저라 기준 색이 정확해집니다.</li>
+  <li>배경 제거 스위치를 켜고 감지된 배경색이 실제 배경과 같은지 대조합니다.</li>
+  <li>오차 슬라이더를 2~5%부터 시작해 필요할 때만 올립니다.</li>
+  <li>분할 수를 입력한 뒤 결과물 미리보기에서 각 프레임의 투명 처리 상태를 확인합니다.</li>
+  <li>저장 및 다운로드 (ZIP)로 RGBA PNG를 내보냅니다.</li>
+</ol>
+<p>2단계를 생략하고 배경 제거부터 해도기술적으로 문제가 없지만, 여백 안에 스프라이트가 정확히 들어맞아 있어야 색 비교가 정확해집니다. 여백을 먼저 정리하면 결과가 한 번에 잘 나올 확률이 높아집니다.</p>
+
+<h2>문제 증상과 해결 방법</h2>
+<table>
+  <caption>배경 제거가 잘 안 될 때</caption>
+  <thead>
+    <tr><th scope="col">증상</th><th scope="col">원인</th><th scope="col">대처</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>배경색을 감지하지 못했다는 안내</td><td>그라데이션이나 노이즈, 질감이 있는 배경</td><td>원본을 단색으로 다시 저장하거나, 제거 없이 그대로 사용</td></tr>
+    <tr><td>배경에 점무가 남음</td><td>오차가 너무 작음, 압축 노이즈</td><td>오차를 3~10% 위로 올리기</td></tr>
+    <tr><td>스프라이트에 구멍이 뚫힘</td><td>오차가 너무 큼, 스프라이트가 배경색과 유사</td><td>오차를 1~3%로 낮추거나 제거하지 않기</td></tr>
+    <tr><td>가장자리가 계단처럼 보임</td><td>경계 픽셀이 반투명 상태로 남음</td><td>배경색을 더 단일하게 정리한 원본 사용</td></tr>
+    <tr><td>제거 후 색이 어두워짐</td><td>스프라이트 바깥 윤곽이 배경색과 가까워 제거됨</td><td>오차 축소, 또는 해당 프레임은 제거 제외</td></tr>
+    <tr><td>일부 프레임만 남는 배경</td><td>프레임마다 배경색이 서로 다름</td><td>이미지를 두 장으로 나눠 각각 처리 후 재합성</td></tr>
+    <tr><td>슬라이더를 바꿔도 반응이 느림</td><td>재계산 대기 지연</td><td>0.2초 정도 기다린 뒤 확인</td></tr>
+    <tr><td>GIF에서 첫 프레임만 기준이 됨</td><td>첫 프레임에서 색을 감지해 재사용하는 설계</td><td>첫 프레임의 가장자리를 대표 색에 맞게 정리</td></tr>
+  </tbody>
+</table>
+
+<h2>배경을 아예 지우지 않아도 되는 경우</h2>
+<p>원본이 이미 알파 PNG라면 어떤 작업도 필요 없습니다. 분할만 해도 투명 배경이 그대로 보존됩니다. 반대로 배경 제거를 반드시 하지 않아도 되는 경우가 하나 더 있습니다.게임 엔진에서 배경색을 곱셈 블렌드로 처리하거나, 배경색을 키잉하는 셰이더를 직접 가진 경우입니다. 이때는 원본 JPG를 그대로 자르는 편이 화질 손실도 적습니다.</p>
+<p>투명 배경이 확실히 필요하다면, 배경 제거를 켠 상태에서 <a href="/guides/how-to-cut-sprite-sheet.html">기본 분할 사용법</a>의 저장 절차로 이어가면 됩니다. 그리고 잘라낸 프레임의 위치나 크기를 손보고 싶다면 <a href="/guides/frame-editing-undo.html">프레임 개별 편집과 실행 취소 가이드</a>에서 다룹니다.</p>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/manual-boundaries.html"><span class="dir">이전 글</span><span class="ttl">여백과 수동 경계선으로 정확히 나누기</span></a>
+  <a class="next" href="/guides/frame-editing-undo.html"><span class="dir">다음 글</span><span class="ttl">프레임 개별 편집과 실행 취소/다시 실행</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

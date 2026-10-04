@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About | Sprite Sheet Splitter</title>
+<meta name="description" content="What the Sprite Sheet Splitter does. This page introduces the background, the feature set, the technical approach and the operating information of a free image processing tool that runs only in your browser.">
+<link rel="canonical" href="https://spritescut.netlify.app/about-en.html">
+<meta name="robots" content="index, follow">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/about.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/about-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/about.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="About | Sprite Sheet Splitter">
+<meta property="og:description" content="A free sprite sheet and image processing tool that runs only in your browser.">
+<meta property="og:url" content="https://spritescut.netlify.app/about-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "About",
+  "description": "The background, feature set and operating information of the Sprite Sheet Splitter.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/about-en.html",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "isPartOf": { "@type": "WebSite", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://spritescut.netlify.app/" },
+      { "@type": "ListItem", "position": 2, "name": "About", "item": "https://spritescut.netlify.app/about-en.html" }
+    ]
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span>About</span>
+</nav>
+<h1>About</h1>
+<p class="lede">The Sprite Sheet Splitter is a free tool that lets you tidy up the image assets you use in games and on the web, right inside your browser. This page explains what it makes and why it was made.</p>
+<p class="lang-switch"><a href="/about.html">이 페이지를 한국어로 읽기</a></p>
+<div class="post-meta">Last updated 2026-10-04</div>
+
+<h2>What this tool does</h2>
+<p>In game development and web work, it is common to collect the many scenes (frames) in which a character moves into one large image, that is, a <strong>sprite sheet</strong>. Conversely, there are moments when one large sheet image has to be cut back into individual frames. This tool does exactly that job.</p>
+<p>Put simply, this tool does three things for you.</p>
+<ul>
+  <li>It cuts one sprite sheet into multiple frame images.</li>
+  <li>It converts a GIF animation into per-frame images or into a single sprite sheet.</li>
+  <li>It crops several photos to the same size and bundles them into one ZIP file.</li>
+</ul>
+<p>These jobs originally required Photoshop or a separate program to be installed. What was actually needed, though, was only one thing: "cut it and save it as a file". Launching a heavy editor for that single task was an unreasonable burden, so we made this tool.</p>
+
+<h2>Why it runs only in the browser</h2>
+<p>The most important design goal of this tool is <strong>that images are not sent to a server</strong>. Since all image decoding, cutting, background removal and ZIP compression run inside your browser, the following all hold true.</p>
+<ul>
+  <li>There is nothing to upload, and no time spent uploading.</li>
+  <li>You never run into an upload size limit.</li>
+  <li>You never have to expose personal photos or the game assets you are working on to anyone else.</li>
+  <li>It runs immediately in any computer's browser, with nothing to install.</li>
+</ul>
+<div class="note">
+  <p>The processed results are not sent anywhere either. Result files are written directly to your own device through the browser's download function. For details, please refer to the <a href="/privacy-en.html">Privacy Policy</a>.</p>
+</div>
+
+<h2>Feature set</h2>
+
+<h3>Image Cutter</h3>
+<p>This is the feature you will use most often. After loading a sprite sheet image, you specify the number of horizontal and vertical divisions, and each frame is separated as a PNG. It offers both an even grid division and a method that marks irregular gaps or unwanted margins at the edges of the image as manual boundaries.</p>
+<p>If the image has a solid colour background, it can detect the background automatically and make it transparent. If you are not happy with the split result, you can adjust the size or position of a particular frame again, or undo your changes. Saving is done in one ZIP file, and inside it you will find the frame PNGs together with an HTML file for previewing the animation and the background image.</p>
+<p><a href="/guides/how-to-cut-sprite-sheet-en.html">See the basic usage</a> · <a href="/guides/remove-background-chromakey-en.html">See how to remove backgrounds</a></p>
+
+<h3>GIF Splitter</h3>
+<p>A GIF stores many frames compressed into a single file. This tool splits a GIF into individual PNGs, one per frame, or builds a single sprite sheet with the frames laid out in a single row, a single column, or a grid. It automatically trims the transparent margins around the GIF and, if the background is a solid colour, removes it before saving.</p>
+<p><a href="/guides/gif-to-sprite-sheet-en.html">See the GIF conversion guide</a></p>
+
+<h3>Batch Cropper</h3>
+<p>Use this when you need to make many photos the same size at once. Choose one photo as the reference, set the size and position you want, and the same rule is applied to all the others. The results are all converted to PNGs of the same pixel size and placed into a single ZIP.</p>
+<p><a href="/guides/batch-crop-images-en.html">See the batch cropping guide</a></p>
+
+<h2>An honest description of the technical approach</h2>
+<p>All image processing in this tool is done with deterministic, pixel-by-pixel operations. For example, the background removal feature samples the colours along the edge of the image to find a representative colour, then calculates the distance between each pixel and that colour and makes the pixel transparent (alpha 0) when the distance is within a set range. The same input always produces the same output.</p>
+<p>For the same reason, this tool cannot be applied to any kind of creative work in the general sense. It does not learn from and redraw pictures in a particular style, and it does not offer such a feature.</p>
+
+<h2>Cost and how to use it</h2>
+<p>This tool can be used with no separate installation and no sign-up, and every feature is free to use. There is no payment step and no paid plan. Because no account is created, there is never a password to enter either.</p>
+
+<h2>Operating information</h2>
+<div class="table-wrap">
+<table>
+  <tbody>
+    <tr><th>Service provider</th><td>[서비스 제공자 이름]</td></tr>
+    <tr><th>Address</th><td>[서비스 제공자 주소]</td></tr>
+    <tr><th>Telephone number</th><td>[연락 가능 전화번호]</td></tr>
+    <tr><th>Email</th><td><a href="mailto:contact@example.com">contact@example.com</a></td></tr>
+    <tr><th>Homepage</th><td><a href="https://spritescut.netlify.app/">https://spritescut.netlify.app/</a></td></tr>
+    <tr><th>Service launch date</th><td>October 4, 2026</td></tr>
+  </tbody>
+</table>
+</div>
+<p>If you find an error while using the tool or anything that could be improved, please let us know through <a href="/contact-en.html">Contact</a> at any time and we will look into it. The accuracy and convenience of this tool keep improving thanks to the reports we receive from users.</p>
+
+<div class="cta">
+  <h2>Try it yourself</h2>
+  <p>It runs in your browser straight away, with no sign-up. Because there is no image upload and processing happens only on your own device, you can start using it right away.</p>
+  <a class="btn" href="/">Open the Sprite Sheet Splitter</a>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Splitter</a></li>
+          <li><a href="/">Batch Cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq-en.html">Frequently asked questions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Service</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy Policy</a></li>
+          <li><a href="/terms-en.html">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing is performed only on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creating Transparent PNGs with Background Removal | Sprite Sheet Splitter</title>
+<meta name="description" content="How solid-colour background removal works, how to read the detected background colour, how to tune the tolerance slider in each tool, and a troubleshooting table for the results that go wrong.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/remove-background-chromakey-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/remove-background-chromakey-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/remove-background-chromakey.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Creating Transparent PNGs with Background Removal">
+<meta property="og:description" content="Detected colour readout, tolerance ranges per tool, and fixes for gradients, noise, and eaten sprite edges.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/remove-background-chromakey-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Creating Transparent PNGs with Background Removal",
+  "description": "How solid-colour background removal works, how to read the detected background colour, how to tune the tolerance slider in each tool, and a troubleshooting table for the results that go wrong.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "Sprite sheet splitter that runs in the browser" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Load an image with a solid background", "text": "Pick the sheet in the image cutter. The colour to key is sampled from the image border, not from the grid area.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "Turn on background removal", "text": "Flip the background removal switch in the background section. It detects a solid background automatically and makes it transparent.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "Check the detected colour and tolerance", "text": "Confirm the detected background colour swatch, then widen or narrow the tolerance slider that controls how similar colours are removed.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "Verify the keyed result", "text": "Use the checkerboard behind the canvas to confirm the surrounding area became transparent and that colours inside the sprite survived.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "Check every frame after splitting", "text": "Set the grid and inspect the result preview. Removal applies to the whole image, so each frame inherits the same treatment.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "Export RGBA PNGs", "text": "Use save and download (ZIP). Output is always RGBA PNG, and switching the toggle off restores the original image exactly.", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index-en.html">Guides</a></span>
+</nav>
+<h1>Creating Transparent PNGs with Background Removal</h1>
+<p class="lede">If your sheet is filled with one flat green or magenta, that colour can be keyed out and you get real transparency. Here is how the detection works, how to tune the tolerance, and what to do when the result disappoints you.</p>
+<p class="lang-switch"><a href="/guides/remove-background-chromakey.html">이 글 한국어로 읽기</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>What background removal actually does</h2>
+<p>Background removal here is deterministic pixel maths. The tool picks one reference colour, measures the RGB distance from every pixel to that colour, and drives the alpha value to zero where the distance is small enough. No model is involved and nothing is estimated: the same input always yields the same output on any device.</p>
+<p>That approach works when one condition holds: the target colour must be a solid colour that never appears inside the artwork. Magenta and fluorescent green are the usual choices because nothing in game art uses them. If the sprite has blue sky, red hair, or white eyes, those colours cannot be told apart from the background, and you get holes where you did not want them.</p>
+<div class="note">
+  <p><strong>Worth knowing</strong> Background removal is available in the image cutter's <strong>background section</strong> and in the GIF splitter's <strong>solid background removal</strong> switch. It is not applied to batch cropping results, and it is not something you need when your source is already an alpha PNG.</p>
+</div>
+
+<h2 id="step-1">Step 1. Load an image with a solid background</h2>
+<p>Load the sheet in the image cutter from the <a href="/">sprite sheet tool</a>. The reference colour comes from sampling the image border. The image cutter reads a thin strip along the edges; the GIF splitter samples 8% of the border area of the first frame and then reuses that single colour for every frame.</p>
+<p>That word "border" carries the weight. If the sprite sits in the middle and the entire surrounding area is one colour, the border is pure background and the reference is reliable. If artwork crosses the edge, the sampled colour can be wrong. And if the border is already transparent, there is nothing to key at all.</p>
+
+<h2 id="step-2">Step 2. Turn on background removal</h2>
+<p>Flip the <em>"background removal"</em> switch in the <strong>background section</strong>, described as detecting a solid background automatically and making it transparent. Detection starts immediately and the canvas updates.</p>
+<p>If the image cannot be understood, you get <em>"배경색을 감지하지 못했습니다. 배경이 단색인지 확인해 주세요."</em> instead. Nothing will change while you move the slider in that state, so check the source image for a gradient or texture first.</p>
+
+<h2 id="step-3">Step 3. Read the detected colour and tune tolerance</h2>
+<p>On success, a swatch appears as <em>"detected background #xxxxxx"</em>. Compare it against what you see. A mismatch means the reference itself is wrong, so toggle off and on again, or fix the source.</p>
+<p>Next, adjust the <em>"tolerance (similar colour removal range)"</em> slider. Think of it as how far from the reference colour a pixel may be and still be deleted. Compression artefacts mean a supposedly flat area is never perfectly flat, and a wider tolerance sweeps up that variation. The range is 0% to 30% in 30 steps, with 10% as the default, and results refresh after a short 200ms debounce, so a brief pause before the canvas updates is normal.</p>
+<h3>What a wider tolerance costs you</h3>
+<p>Push tolerance too far and the sprite itself starts disappearing, beginning with shadows and outlines painted in colours close to the background. Keep it too tight and leftover specks stay behind, producing a dirty fringe. For a sheet whose background runs unbroken to the edge, 2% to 5% is often enough.</p>
+
+<h2 id="step-4">Step 4. Verify the result</h2>
+<p>The canvas shows the image at 100% with a checkerboard behind transparency, so wherever the pattern appears, pixels became transparent. Check three things: the surrounding area turned into checkerboard, the sprite silhouette has no holes punched through it, and any semi-transparent edge pixels look like the softness you intended.</p>
+<p>That last point deserves care. Pixels within tolerance may not be deleted outright; their alpha can drop instead, leaving a background tint and a stepped-looking edge. The tool does not refine edges for you, so a cleaner source background is the real fix when this happens.</p>
+
+<h2 id="step-5">Step 5. Check the frames after splitting</h2>
+<p>Set the grid counts, cut, and open the <strong>result preview</strong>. Thumbnails sit on the same checkerboard, so the transparency is easy to judge frame by frame.</p>
+<p>Removal applies once to the whole image. Frame 1 and frame 7 cannot receive different reference colours. If one sheet mixes several background colours, split it into two images, treat them separately, then recombine the results.</p>
+
+<h2 id="step-6">Step 6. Export transparent PNGs</h2>
+<p>Press <strong>save and download (ZIP)</strong>, then <em>"download (ZIP)"</em> in the dialog. Output is always RGBA PNG; there is no JPG or WebP option, because those formats do not keep a usable alpha channel. Files are named after the source plus the grid, such as <code>{filename}_{H}_{V}_1.png</code>.</p>
+<p>When you are unsure, flip the switch off. The canvas returns to the pre-processing image exactly, with the original pixels intact, so you can try values without risk.</p>
+
+<h2>Settings compared across the two tools</h2>
+<table>
+  <caption>Background removal in the image cutter and the GIF splitter</caption>
+  <thead>
+    <tr><th scope="col">Setting</th><th scope="col">Image Cutter</th><th scope="col">GIF Splitter</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Feature name</td><td>Background removal</td><td>Solid background removal</td></tr>
+    <tr><td>Default state</td><td>Off</td><td>Off</td></tr>
+    <tr><td>Colour detection</td><td>Thin strip sampled from the image border</td><td>8% border sample of the first frame, reused for all frames</td></tr>
+    <tr><td>Readout</td><td>Detected background #xxxxxx</td><td>Background colour RGB(r, g, b)</td></tr>
+    <tr><td>Tolerance range</td><td>0–30% in 30 steps</td><td>1–50%</td></tr>
+    <tr><td>Tolerance default</td><td>10%</td><td>10%</td></tr>
+    <tr><td>Recalculation delay</td><td>200ms</td><td>150ms, with a progress bar</td></tr>
+    <tr><td>Output</td><td>RGBA PNG</td><td>RGBA PNG</td></tr>
+  </tbody>
+</table>
+<p>The GIF tolerance cannot go below 1%, since anything lower has no practical meaning. A slim progress bar appears while frames are reprocessed, so you can keep dragging the slider instead of releasing it and waiting. For the GIF workflow around this switch, see <a href="/guides/gif-to-sprite-sheet-en.html">converting a GIF into a sprite sheet</a>.</p>
+
+<h2>Recommended order of operations</h2>
+<p>Background removal usually happens alongside other work, so a fixed order keeps the result stable.</p>
+<ol>
+  <li>Confirm the image really has a solid background whose edge colour stays consistent all the way around.</li>
+  <li>Strip the outer transparent gutter with <a href="/guides/manual-boundaries-en.html">padding</a> first. Cleaning the padding before keying gives a more accurate reference colour.</li>
+  <li>Turn on removal and compare the detected background colour against what you see.</li>
+  <li>Start the tolerance at 2% to 5% and raise it only when needed.</li>
+  <li>Set the grid counts and inspect transparency frame by frame in the result preview.</li>
+  <li>Export RGBA PNGs with save and download (ZIP).</li>
+</ol>
+<p>Skipping step 2 is technically fine, but the sprite must sit exactly inside the region for the colour comparison to be clean. Tidying the padding first makes a good result far more likely in one pass.</p>
+
+<h2>Troubleshooting table</h2>
+<table>
+  <caption>Symptoms and fixes for background removal</caption>
+  <thead>
+    <tr><th scope="col">Symptom</th><th scope="col">Cause</th><th scope="col">Fix</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>No background colour detected</td><td>Gradient, noise, or textured background</td><td>Re-export the source as a flat colour, or skip removal</td></tr>
+    <tr><td>Speckles left in the background</td><td>Tolerance too small for compression noise</td><td>Raise tolerance to 3–10%</td></tr>
+    <tr><td>Holes in the sprite</td><td>Tolerance too wide, or sprite uses similar colours</td><td>Drop to 1–3%, or leave the background alone</td></tr>
+    <tr><td>Stepped or jagged edges</td><td>Edge pixels left semi-transparent</td><td>Use a source with a cleaner, flatter background</td></tr>
+    <tr><td>Sprite looks darker after removal</td><td>An outline close to the background colour was keyed too</td><td>Reduce tolerance, or exclude that image from removal</td></tr>
+    <tr><td>Only some frames keyed correctly</td><td>Different background colours per frame</td><td>Split into two images, process separately, recombine</td></tr>
+    <tr><td>Slider seems unresponsive</td><td>Recalculation debounce</td><td>Wait about 0.2 seconds and look again</td></tr>
+    <tr><td>GIF keyed from frame 1 only</td><td>By design, the colour is detected once and reused</td><td>Make the first frame's border match the dominant background</td></tr>
+  </tbody>
+</table>
+
+<h2>When you do not need removal at all</h2>
+<p>If your source is already an alpha PNG, do nothing: cutting preserves the transparency. There is also no need when your engine handles the colour itself, for instance with multiply blending or a custom keying shader. In that case cutting the original JPG keeps more quality than re-exporting through a keyed pass.</p>
+<p>If transparency really is required, turn removal on and continue with the save steps in <a href="/guides/how-to-cut-sprite-sheet-en.html">the basic cutting guide</a>. To adjust individual frame positions afterwards, read <a href="/guides/frame-editing-undo-en.html">per-frame editing and undo</a>.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>It runs in your browser with no sign-up. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet splitter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/manual-boundaries-en.html"><span class="dir">Previous</span><span class="ttl">Precise Splitting with Padding and Manual Boundaries</span></a>
+  <a class="next" href="/guides/frame-editing-undo-en.html"><span class="dir">Next</span><span class="ttl">Per-Frame Editing and Undo/Redo</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Sprite Splitter</a></li>
+          <li><a href="/">Batch Image Cutter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">All guides</a></li>
+          <li><a href="/faq-en.html">FAQ</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy</a></li>
+          <li><a href="/terms-en.html">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

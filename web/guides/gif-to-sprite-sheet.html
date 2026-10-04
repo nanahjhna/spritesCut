@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GIF를 스프라이트 시트로 변환하기 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="GIF 스프라이트 분할 도구로 GIF를 한 줄 또는 격자 스프라이트 시트 PNG로 변환하고, 프레임 PNG 모음을 ZIP으로 뽑는 방법을 단계별로 정리했습니다. 투명 영역 제거와 단색 배경 제거 설정도 설명합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="GIF를 스프라이트 시트로 변환하기">
+<meta property="og:description" content="GIF 스프라이트 분할 도구로 GIF를 한 줄 또는 격자 스프라이트 시트 PNG로 변환하고, 프레임 PNG 모음을 ZIP으로 뽑는 방법을 단계별로 정리했습니다. 투명 영역 제거와 단색 배경 제거 설정도 설명합니다.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "GIF를 스프라이트 시트로 변환하기",
+  "description": "GIF 스프라이트 분할 도구로 GIF를 한 줄 또는 격자 스프라이트 시트 PNG로 변환하고, 프레임 PNG 모음을 ZIP으로 뽑는 방법을 단계별로 정리했습니다. 투명 영역 제거와 단색 배경 제거 설정도 설명합니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 GIF 스프라이트 분할 도구" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "GIF 파일 선택하기", "text": "GIF 스프라이트 분할 화면에서 GIF 선택 버튼으로 파일을 불러옵니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "프레임 정보와 미리보기 확인하기", "text": "프레임 수, 크기, 길이, 1컷 크기 정보를 읽고 상단 미리보기를 재생해 봅니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "시트 레이아웃 고르기", "text": "가로 한 줄, 세로 한 줄, 격자 중 시트를 담을 방식을 선택합니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "투명 영역과 단색 배경 정리하기", "text": "투명 영역 자동 제거와 단색 배경 제거를 켜고 허용 오차를 조정합니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "원하는 결과물로 저장하기", "text": "스프라이트 시트 PNG, 프레임 PNG 모음 ZIP, GIF 다시 저장 중 하나를 고릅니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "이름 규칙과 미리보기 파일 확인하기", "text": "저장된 파일 이름 규칙을 확인하고 ZIP 안의 index.html로 결과를 검증합니다.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>GIF를 스프라이트 시트로 변환하기</h1>
+<p class="lede">움직이는 GIF를 이미 묶음으로 바꾸면 게임 엔진에 넣기 훨씬 수월해집니다. 브라우저에서 GIF를 고르면 곧바로 프레임이 나뉘고, 한 줄로 늘린 시트나 격자 시트, 개별 프레임 묶음 중 원하는 형태로 내려받을 수 있습니다.</p>
+<p class="lang-switch"><a href="/guides/gif-to-sprite-sheet-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>GIF를 스프라이트 시트로 바꾸면 무엇이 달라지나</h2>
+<p>GIF는 그 자체로 재생되는 이미지라 애니메이션을 담고 있지만, 게임 엔진은 보통 한 장의 시트 이미지를 읽고 프레임 인덱스로 잘라 씁니다. 그래서 "GIF를 한 번 재생해 주는 그림"으로 바꿔야 합니다. 이 도구는 그 변환만 전적으로 다룹니다. GIF를 고르면 모든 프레임이 해석되어 하나씩 분리되고, 이어 붙이는 방식만 선택하면 곧바로 시트 PNG가 만들어집니다.</p>
+<p>또 한 가지 다른 점이 있습니다. GIF의 프레임마다 표시 시간이 다를 수 있는데, PNG 한 장에는 시간 정보가 들어갈 자리가 없습니다. 그래서 이 도구의 PNG 결과물에는 <strong>프레임마다 얼마씩 보여야 하는지 정보가 저장되지 않습니다.</strong> 속도는 엔진 쪽에서 설정해야 하며, 기본 리듬을 원한다면 대략 12 FPS 안팎으로 시작하면 원본과 비슷한 느낌을 얻습니다.</p>
+
+<h2>변환 순서</h2>
+<ol>
+<li>GIF 파일을 고르고 프레임 수와 크기를 확인합니다.</li>
+<li>붙일 방식을 가로 한 줄, 세로 한 줄, 격자 중에서 고릅니다.</li>
+<li>투명 영역 자동 제거와 단색 배경 제거로 각 프레임을 정리합니다.</li>
+<li>필요한 형태로 저장 버튼 하나를 누릅니다.</li>
+</ol>
+
+<h3 id="step-1">GIF 파일 선택하기</h3>
+<p>홈 화면에서 GIF 스프라이트 분할 도구로 들어갑니다. 화면 제목은 <strong>GIF 스프라이트 분할</strong>이고, 처음에는 <strong>GIF 파일을 선택해 주세요</strong>라는 안내와 <strong>GIF 선택</strong> 버튼만 보입니다. 버튼을 눌러 파일을 고릅니다. 다른 파일로 바꿀 때는 버튼이 <strong>변경</strong>으로 바뀝니다.</p>
+
+<h3 id="step-2">프레임 정보와 미리보기 확인하기</h3>
+<p>파일을 읽으면 정보 줄이 채워집니다. <code>{n} 프레임  •  {w}×{h} px  •  길이 {x.xx}초</code> 형식이라 프레임 수, 한 프레임 크기, 전체 재생 시간을 한눈에 알 수 있습니다. 그 아래 <strong>1컷: {w} × {h} px</strong> 로 프레임 하나의 크기가 따로 표시되므로, 이 값이 최종 스프라이트 한 장의 크기가 됩니다.</p>
+<p>화면 위쪽에는 애니메이션 미리보기가 있습니다. 이 미리보기 재생 속도는 약 80ms 고정 주기, 즉 초당 12.5컷으로 고정되어 있어 사용자가 바꿀 수 없습니다. 폭은 400px이고 확대할 때 가장 가까운 픽셀을 그대로 쓰는 방식으로 보여주기 때문에 픽셀 아트가 뭉개지지 않습니다. 배경은 체커보드라서 투명 부분이 어디까지인지 분명하게 보입니다.</p>
+
+<h3 id="step-3">시트 레이아웃 고르기</h3>
+<p><strong>시트 레이아웃</strong> 절에서 세 가지 중 하나를 고릅니다. 기본값은 <strong>가로 한 줄</strong>입니다.</p>
+
+<table>
+<caption>레이아웃별 결과 크기 (프레임 {w}×{h}, 총 {n}컷)</caption>
+<thead>
+<tr><th scope="col">레이아웃</th><th scope="col">시트 가로</th><th scope="col">시트 세로</th><th scope="col">장점</th></tr>
+</thead>
+<tbody>
+<tr><td>가로 한 줄</td><td>w × n</td><td>h</td><td>분할 수 곱셈이 필요 없어 가장 단순합니다. 스트립 시트를 그대로 쓰면 되는 경우에 적합합니다.</td></tr>
+<tr><td>세로 한 줄</td><td>w</td><td>h × n</td><td>폭이 제한된 곳, 또는 세로 스크롤 축에 맞춰 붙일 때 유리합니다.</td></tr>
+<tr><td>격자</td><td>w × c</td><td>h × r</td><td>c = ⌈√n⌉ 로 열 수가 정해지고 r = ⌈n ÷ c⌉ 입니다. 잘라 쓰기 편한 정사각형에 가깝게 들어갑니다.</td></tr>
+</tbody>
+</table>
+
+<p>격자 레이아웃의 열 수는 프레임 수의 제곱근을 올림한 값으로 정해집니다. 예를 들어 10컷이면 열은 4개(⌈√10⌉ = 4), 행은 3개가 되어 4×3 = 12칸 중 10칸만 채워집니다. 시트 결과는 캡션에 <code>시트 결과: {W} × {H} px  ({C}×{R} = {n}컷)</code> 형태로 표시됩니다. 화면 폭이 900px 이상이면 시트 미리보기가 원본 애니메이션과 좌우로 나란히 놓이고, 그보다 좁으면 위아래로 쌓입니다. 두 그림을 나란히 봐야 프레임이 실제 GIF와 어긋나지 않는지 판단하기 좋습니다.</p>
+
+<h3 id="step-4">투명 영역과 단색 배경 정리하기</h3>
+<p><strong>투명 영역 자동 제거</strong> 스위치는 "모든 프레임의 불투명 영역만 남깁니다"라는 설명과 함께 기본으로 켜져 있습니다. 켜져 있으면 모든 프레임에서 불투명 픽셀이 차지하는 영역을 한 번에 계산해, 그 공통 영역 밖의 여백을 잘라냅니다. GIF에는 프레임마다 투명이 없는 영역이 조금씩 다른 경우가 많습니다. 이 스위치를 켜두면 프레임 위치가 흔들리지 않고 가장자리의 불필요한 빈 공간도 함께 없어집니다. 반대로 프레임마다 캐릭터가 제자리에 있는 것 자체를 표현하고 싶다면 끄는 편이 낫습니다.</p>
+<p><strong>단색 배경 제거</strong> 스위치는 기본으로 꺼져 있고, 설명은 "가장자리 색을 자동 감지합니다"입니다. 켜면 감지된 색이 <code>배경색 RGB(r, g, b)</code> 형태로 표시되고, 그 색과 비슷한 픽셀을 지워 줍니다. 감지 방식은 첫 번째 프레임의 테두리 쪽 약 8% 영역을 샘플링해 가장 많이 쓰인 색을 고르는 것입니다. 감지된 색은 한 번만 구한 뒤 모든 프레임에 똑같이 적용됩니다. 덕분에 프레임마다 다른 배경색이 조금씩 변하는 GIF에서도 결과가 흔들리지 않습니다. 단색이 아니라면 <strong>배경색을 감지하지 못했습니다. 단색 배경인지 확인해 주세요.</strong>라는 메시지가 뜹니다.</p>
+<p>그 아래 <strong>허용 오차: {n}%</strong> 슬라이더가 1%에서 50%까지 움직이며 기본값은 10%입니다. 값이 클수록 비슷한 색을 더 많이 지웁니다. 슬라이더를 끌 때마다 150ms의 짧은 지연 후 다시 계산되며, 그동안 슬라이더 아래에 얇은 진행 표시줄이 나타나 조작이 막히지 않습니다.단색 배경이라면 1~5%로 충분하고, 노이즈가 섞인 배경이면 20% 이상을 써야 합니다. 상세한 감지 원리는 <a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a>에서 다룹니다.</p>
+
+<h3 id="step-5">원하는 결과물로 저장하기</h3>
+<p>화면 아래에는 저장 버튼이 세 개 있습니다. 무엇을 만들었는지에 따라 고를 것이 달라집니다.</p>
+
+<table>
+<caption>저장 버튼과 생성되는 파일</caption>
+<thead>
+<tr><th scope="col">버튼</th><th scope="col">파일 이름</th><th scope="col">내용</th></tr>
+</thead>
+<tbody>
+<tr><td>스프라이트 시트 (PNG)</td><td><code>{파일명}_sheet.png</code></td><td>선택한 레이아웃대로 모든 프레임을 붙인 이미지 한 장. 엔진에 시트 텍스처로 쓸 때 이 파일만 있으면 됩니다.</td></tr>
+<tr><td>프레임 PNG 모음 (ZIP)</td><td><code>{파일명}_frames.zip</code></td><td>프레임별로 잘라낸 PNG와 <code>index.html</code>, <code>stage.jpg</code>. 프레임 이름을 직접 다루고 싶을 때 씁니다.</td></tr>
+<tr><td>GIF 다시 저장</td><td><code>{파일명}.gif</code></td><td>다시 인코딩한 GIF. 무한 반복으로 재생되도록 저장됩니다.</td></tr>
+</tbody>
+</table>
+
+<h3 id="step-6">이름 규칙과 미리보기 파일 확인하기</h3>
+<p>프레임 PNG 모음 ZIP 안의 파일 이름은 <code>{파일명}0001.png</code>처럼 시작합니다. 4자리로 0을 채우기 때문에 <code>0001</code>, <code>0002</code> … 순서가 됩니다. 프레임이 9999개를 넘어가면 다섯 자리로 늘어나 10000부터 이어집니다. 나열된 순서가 곧 재생 순서이므로 번호를 다시 붙일 필요가 없습니다.</p>
+<p>ZIP 안에는 <a href="/guides/zip-preview-animation.html">이미지 자르기 도구와 같은 방식</a>으로 만들어진 <code>index.html</code>과 <code>stage.jpg</code>가 함께 들어 있습니다. 압축을 풀고 <code>index.html</code>을 열어 변환 결과를 그대로 확인할 수 있습니다.</p>
+
+<div class="note">
+<p>GIF는 색상 수가 제한된 팔레트 방식이라, 각 프레임은 먼저 RGBA로 변환된 뒤 합쳐집니다. 덕분에 반투명 픽셀이나 투명 영역이 시트에서도 유지됩니다.</p>
+</div>
+
+<h2>어떤 출력을 골라야 하나</h2>
+<table>
+<caption>용도별 권장 출력</caption>
+<thead>
+<tr><th scope="col">상황</th><th scope="col">추천 출력</th></tr>
+</thead>
+<tbody>
+<tr><td>게임 엔진의 아틀라스 텍스처가 필요할 때</td><td>스프라이트 시트 (PNG)</td></tr>
+<tr><td>프레임마다 크기를 다르게 쓰거나 개별 파일로 관리하고 싶을 때</td><td>프레임 PNG 모음 (ZIP)</td></tr>
+<tr><td>원본 애니메이션을 공유하거나 웹에 올리고 싶을 때</td><td>GIF 다시 저장</td></tr>
+<tr><td>실행 전 결과를 눈으로 확인하고 싶을 때</td><td>프레임 PNG 모음 (ZIP)의 index.html</td></tr>
+</tbody>
+</table>
+
+<h2>문제가 생겼을 때</h2>
+<table>
+<caption>문제와 해결</caption>
+<thead>
+<tr><th scope="col">증상</th><th scope="col">확인할 것</th></tr>
+</thead>
+<tbody>
+<tr><td>GIF를 고르면 아예 열리지 않습니다.</td><td>해석할 수 없는 파일일 수 있습니다. <strong>GIF 파일을 해석할 수 없습니다.</strong> 메시지가 나오면 다른 파일로 바꿔 보세요.</td></tr>
+<tr><td>프레임 수가 0으로 표시됩니다.</td><td>프레임 정보가 없는 파일입니다. <strong>GIF에 프레임이 없습니다.</strong> 메시지가 함께 나옵니다.</td></tr>
+<tr><td>시트에서 프레임 위치가 어긋나 보입니다.</td><td><strong>투명 영역 자동 제거</strong>를 켠 상태에서 그런 현상이 생기기 쉽습니다. 꺼보고 비교해 보세요.</td></tr>
+<tr><td>배경 제거 메시지가 계속 뜹니다.</td><td>테두리가 단색이 아닙니다. 단색 배경 GIF에는 이 스위치를 쓰면 안 됩니다.</td></tr>
+<tr><td>캐릭터 일부가 함께 지워졌습니다.</td><td><strong>허용 오차</strong>가 너무 큽니다. 슬라이더를 낮추면 살아납니다.</td></tr>
+<tr><td>시트가 지나치게 가로로 길어졌습니다.</td><td>레이아웃을 <strong>격자</strong>로 바꾸면 크기가 거의 정사각형에 가깝게 줄어듭니다.</td></tr>
+<tr><td>슬라이더를 움직일 때 멈춘 것처럼 느껴집니다.</td><td>150ms 지연 뒤 다시 계산되며, 아래 진행 표시줄이 그 시간을 보여 줍니다. 손을 떼면 곧바로 끝납니다.</td></tr>
+</tbody>
+</table>
+
+<p>이 도구에는 실행 취소와 키보드 단축키가 없습니다. 실수로 설정을 바꿨다면 <strong>변경</strong>으로 같은 GIF를 다시 선택하면 처음 설정으로 돌아옵니다. GIF를 스프라이트 시트가 아니라 개별 PNG 파일로 나눠야 한다면 <a href="/guides/how-to-cut-sprite-sheet.html">스프라이트 시트 분할 기본 사용법</a>이 더 맞을 수 있습니다.</p>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/zip-preview-animation.html"><span class="dir">이전 글</span><span class="ttl">ZIP과 index.html 미리보기로 애니메이션 확인</span></a>
+  <a class="next" href="/guides/batch-crop-images.html"><span class="dir">다음 글</span><span class="ttl">여러 이미지 한 번에 같은 크기로 자르기</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

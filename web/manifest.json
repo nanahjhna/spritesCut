@@ -1,12 +1,16 @@
 {
-    "name": "spritescut",
-    "short_name": "spritescut",
+    "name": "스프라이트 시트 분할 도구",
+    "short_name": "스프라이트 분할",
     "start_url": ".",
+    "scope": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#3f51b5",
+    "theme_color": "#3f51b5",
+    "description": "스프라이트 시트 이미지를 프레임 PNG로 분할하고, GIF 애니메이션을 스프라이트 시트로 변환하고, 여러 사진을 같은 크기로 일괄 자르는 브라우저 도구입니다.",
+    "lang": "ko",
+    "dir": "ltr",
+    "categories": ["utilities", "graphics", "photo", "developer"],
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

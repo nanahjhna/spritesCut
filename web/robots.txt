@@ -1,0 +1,10 @@
+# https://spritescut.netlify.app/
+# 모든 리소스 crawling 허용. 관리자용 차단 경로 없음.
+
+User-agent: *
+Allow: /
+
+# 질의 조합(인쇄용) 페이지
+Disallow: /print/
+
+Sitemap: https://spritescut.netlify.app/sitemap.xml

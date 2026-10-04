@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Converting a GIF into a Sprite Sheet | Sprite Sheet Splitter</title>
+<meta name="description" content="Turn a GIF into a single-row or grid sprite sheet PNG with the GIF sprite splitter, or download every frame as a ZIP. This guide covers the layout options, automatic transparency trimming, solid-colour background removal and the three output buttons.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Converting a GIF into a Sprite Sheet">
+<meta property="og:description" content="Turn a GIF into a single-row or grid sprite sheet PNG with the GIF sprite splitter, or download every frame as a ZIP. This guide covers the layout options, automatic transparency trimming, solid-colour background removal and the three output buttons.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Converting a GIF into a Sprite Sheet",
+  "description": "Turn a GIF into a single-row or grid sprite sheet PNG with the GIF sprite splitter, or download every frame as a ZIP. This guide covers the layout options, automatic transparency trimming, solid-colour background removal and the three output buttons.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "GIF sprite splitter that runs in your browser" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Pick a GIF file", "text": "Open the GIF sprite splitter and load a file with the Select GIF button.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "Read the frame info and preview", "text": "Check the frame count, size, duration and single-frame dimensions, then watch the in-app preview.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "Choose a sheet layout", "text": "Pick between a single row, a single column or a grid arrangement for the frames.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "Clean up transparency and background", "text": "Turn on automatic transparency trimming and solid-colour background removal, then tune the tolerance.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "Save the output you need", "text": "Choose between the sprite sheet PNG, the frames ZIP, or saving the GIF again.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "Check naming and the preview files", "text": "Verify the generated file names and open index.html from the ZIP to check the result.", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index.html">Guides</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index.html">Guides</a></span>
+</nav>
+<h1>Converting a GIF into a Sprite Sheet</h1>
+<p class="lede">Turning an animated GIF into a still image bundle makes it far easier to hand to a game engine. Pick a GIF in the browser and the frames are separated straight away, then download them as a strip, a grid, or a set of loose files.</p>
+<p class="lang-switch"><a href="/guides/gif-to-sprite-sheet.html">Read this guide in Korean</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>Why convert at all</h2>
+<p>A GIF plays by itself, but game engines usually load a single sheet image and cut it up using frame indices. What they need is therefore "a picture of the animation played once". That is the only job this tool does. Once the GIF is selected every frame is decoded, split apart, and arranged according to a layout you pick — and that is already a usable sprite sheet.</p>
+<p>There is one important difference worth knowing about. A GIF can give each frame its own display duration, but a PNG has nowhere to store timing information. The PNG output produced here <strong>carries no per-frame duration</strong>, so playback speed has to be configured on the engine side. Around 12 FPS is a reasonable starting point if you want the original rhythm.</p>
+
+<h2>The conversion workflow</h2>
+<ol>
+<li>Load a GIF and check its frame count and dimensions.</li>
+<li>Choose how to arrange the frames: a single row, a single column, or a grid.</li>
+<li>Tidy each frame with automatic transparency trimming and solid-colour background removal.</li>
+<li>Press one save button for the output shape you need.</li>
+</ol>
+
+<h3 id="step-1">Pick a GIF file</h3>
+<p>Open the GIF sprite splitter from the home screen. The screen is titled <strong>GIF sprite splitter</strong> and starts with only the prompt <strong>Select a GIF file</strong> and a <strong>Select GIF</strong> button. Press it and choose your file. Once a file is loaded the button reads <strong>Change</strong> so you can swap it for another one.</p>
+
+<h3 id="step-2">Read the frame info and watch the preview</h3>
+<p>Once the file is decoded an info line appears in the form <code>{n} frames • {w}×{h} px • {x.xx}s</code>, giving you the frame count, the per-frame size and the total duration at a glance. Directly below it, <strong>1 cut: {w} × {h} px</strong> states the size of one frame, and that is exactly the size of one cell in the finished sheet.</p>
+<p>A live animation preview sits near the top of the screen. Its playback is fixed at roughly 80 milliseconds per frame — about 12.5 FPS — and is not user adjustable. It is rendered 400 pixels wide using nearest-neighbour scaling so pixel art stays crisp, on a checkerboard background that makes the transparent region obvious.</p>
+
+<h3 id="step-3">Choose the sheet layout</h3>
+<p>Under <strong>Sheet layout</strong> you pick one of three options. The default is <strong>Single row</strong>.</p>
+
+<table>
+<caption>Resulting sheet size per layout (frame {w}×{h}, {n} frames)</caption>
+<thead>
+<tr><th scope="col">Layout</th><th scope="col">Sheet width</th><th scope="col">Sheet height</th><th scope="col">Good for</th></tr>
+</thead>
+<tbody>
+<tr><td>Single row</td><td>w × n</td><td>h</td><td>Simplest maths — no division needed. Right choice when a strip sheet is already what you want.</td></tr>
+<tr><td>Single column</td><td>w</td><td>h × n</td><td>Constrained widths, or aligning frames to a vertical scroll axis.</td></tr>
+<tr><td>Grid</td><td>w × c</td><td>h × r</td><td>Columns are set to c = ⌈√n⌉ and rows to r = ⌈n ÷ c⌉. Keeps the result close to square, which is easier to sample.</td></tr>
+</tbody>
+</table>
+
+<p>For the grid layout the column count is the square root of the frame count, rounded up. With 10 frames you get 4 columns (⌈√10⌉ = 4) and 3 rows, so 4×3 = 12 cells with only 10 filled. The result is captioned <code>Sheet result: {W} × {H} px ({C}×{R} = {n} cuts)</code>. At 900 pixels of viewport width and above the sheet preview sits beside the animated preview, and below that width the two stack vertically. Seeing them side by side is the quickest way to confirm that the frames match the source GIF.</p>
+
+<h3 id="step-4">Trim transparency and solid backgrounds</h3>
+<p><strong>Remove transparent areas automatically</strong> carries the explanation "keeps only the opaque area of every frame" and is on by default. With it enabled, the bounding box of all opaque pixels is computed across the whole animation and everything outside that common region is trimmed. GIFs frequently contain frames whose transparent margins shift slightly; trimming keeps the artwork from wobbling and removes dead space around the edges. Turn it off when the differing empty margins are themselves meaningful to you.</p>
+<p><strong>Remove solid background</strong> is off by default and described as "detects the edge colour automatically". When enabled, the detected colour is shown as <code>Background colour RGB(r, g, b)</code> and matching pixels are removed. Detection samples an 8% band along the border of the <em>first</em> frame and takes the dominant colour there, then reuses that single colour for every frame. That is what keeps the result stable even when the background shifts slightly between frames. On an image that is not a solid colour you will get the message "could not detect a background colour — please check whether the background is a single colour".</p>
+<p>The <strong>Tolerance: {n}%</strong> slider below spans 1% to 50% and defaults to 10%. Higher values remove more near-matching pixels. Results are recomputed after a 150ms debounce while you drag, and a slim progress bar appears underneath so the slider stays usable during that time. A truly flat background needs only 1–5%; a noisy one may need 20% or more. The detection logic itself is covered in the <a href="/guides/remove-background-chromakey-en.html">background removal guide</a>.</p>
+
+<h3 id="step-5">Save the output you need</h3>
+<p>Three save buttons sit at the bottom of the screen.</p>
+
+<table>
+<caption>Save buttons and the files they produce</caption>
+<thead>
+<tr><th scope="col">Button</th><th scope="col">File name</th><th scope="col">What you get</th></tr>
+</thead>
+<tbody>
+<tr><td>Sprite sheet (PNG)</td><td><code>{filename}_sheet.png</code></td><td>A single image with all frames combined in the chosen layout. All you need when the engine expects a sheet texture.</td></tr>
+<tr><td>Frames PNG set (ZIP)</td><td><code>{filename}_frames.zip</code></td><td>One cropped PNG per frame plus <code>index.html</code> and <code>stage.jpg</code>. Best when you want to manage frame files individually.</td></tr>
+<tr><td>Save GIF again</td><td><code>{filename}.gif</code></td><td>A re-encoded GIF, saved so that it loops forever.</td></tr>
+</tbody>
+</table>
+
+<h3 id="step-6">Check naming and the preview files</h3>
+<p>Inside the frames ZIP, files are named <code>{filename}0001.png</code> and onward, zero-padded to four digits, so the order is 0001, 0002, and so on. Past 9999 frames the padding grows to five digits and continues from 10000. Because the numeric order matches playback order you never need to renumber anything.</p>
+<p>The ZIP also carries <code>index.html</code> and <code>stage.jpg</code>, generated exactly as described in the <a href="/guides/zip-preview-animation-en.html">grid cutter preview guide</a>. Unzip it, open <code>index.html</code>, and the converted animation plays straight away.</p>
+
+<div class="note">
+<p>GIF frames are stored in a limited palette, so each one is converted to RGBA before compositing. Semi-transparent pixels and transparent areas therefore survive into the sheet instead of being flattened away.</p>
+</div>
+
+<h2>Choosing between the three outputs</h2>
+<table>
+<caption>Recommended output by situation</caption>
+<thead>
+<tr><th scope="col">Situation</th><th scope="col">Recommended output</th></tr>
+</thead>
+<tbody>
+<tr><td>The engine needs an atlas texture</td><td>Sprite sheet (PNG)</td></tr>
+<tr><td>You want per-frame files or mixed sizes</td><td>Frames PNG set (ZIP)</td></tr>
+<tr><td>You just want to share the animation on the web</td><td>Save GIF again</td></tr>
+<tr><td>You want to eyeball the result before shipping</td><td>The index.html inside the frames ZIP</td></tr>
+</tbody>
+</table>
+
+<h2>Troubleshooting</h2>
+<table>
+<caption>Symptoms and what to check</caption>
+<thead>
+<tr><th scope="col">Symptom</th><th scope="col">What to check</th></tr>
+</thead>
+<tbody>
+<tr><td>The GIF will not open at all.</td><td>It may be an unsupported file. If you see "the GIF file could not be decoded", try a different file.</td></tr>
+<tr><td>The frame count shows zero.</td><td>The file has no frames, and "the GIF has no frames" is shown alongside it.</td></tr>
+<tr><td>Frames look misaligned in the sheet.</td><td>Usually caused by automatic transparency trimming. Switch it off and compare.</td></tr>
+<tr><td>Background detection keeps failing.</td><td>The edges are not a solid colour. Do not use this switch on non-flat GIF backgrounds.</td></tr>
+<tr><td>Parts of the character get deleted.</td><td>The tolerance is too high. Lower the slider.</td></tr>
+<tr><td>The sheet is extremely wide.</td><td>Switch the layout to Grid and the dimensions shrink to nearly square.</td></tr>
+<tr><td>The slider feels frozen while dragging.</td><td>Reprocessing starts after a 150ms delay and the progress bar underneath shows it. Releasing the handle finishes immediately.</td></tr>
+</tbody>
+</table>
+
+<p>This tool has no undo history and no keyboard shortcuts. If you change a setting by mistake, pressing <strong>Change</strong> and re-selecting the same GIF returns everything to the defaults. If what you actually need is a sheet cut into separate PNG files rather than a GIF conversion, the <a href="/guides/how-to-cut-sprite-sheet-en.html">basic sprite sheet cutting guide</a> is the better fit.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>No account needed — it runs straight in your browser. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet cutter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/zip-preview-animation-en.html"><span class="dir">Previous</span><span class="ttl">Previewing animation with the ZIP and index.html</span></a>
+  <a class="next" href="/guides/batch-crop-images-en.html"><span class="dir">Next</span><span class="ttl">Cropping many images to one uniform size</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image cutter</a></li>
+          <li><a href="/">GIF sprite splitter</a></li>
+          <li><a href="/">Batch image cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq.html">Frequently asked questions</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal basics</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Information</h4>
+        <ul>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/privacy.html">Privacy policy</a></li>
+          <li><a href="/terms.html">Terms of service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

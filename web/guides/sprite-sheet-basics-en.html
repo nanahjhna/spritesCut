@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Is a Sprite Sheet? Basic Concepts | Sprite Sheet Splitter</title>
+<meta name="description" content="A plain-language guide to sprite sheets: why frames are packed into one image, row-major vs column-major layout, the frame size formula, transparent vs solid backgrounds, and how a sheet maps to an animation timeline.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/sprite-sheet-basics.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="What Is a Sprite Sheet? Basic Concepts">
+<meta property="og:description" content="Layout styles, the frame size formula, background choices, and how a sheet relates to an animation timeline.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "What Is a Sprite Sheet? Basic Concepts",
+  "description": "A plain-language guide to sprite sheets: why frames are packed into one image, row-major vs column-major layout, the frame size formula, transparent vs solid backgrounds, and how a sheet maps to an animation timeline.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "mainEntityOfPage": "https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html"
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index-en.html">Guides</a></span>
+</nav>
+<h1>What Is a Sprite Sheet? Basic Concepts</h1>
+<p class="lede">If you have ever seen a character running or attacking in a row of poses inside a single picture, that picture is a sprite sheet. Here are the ideas worth knowing before you cut one open.</p>
+<p class="lang-switch"><a href="/guides/sprite-sheet-basics.html">이 글 한국어로 읽기</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>Many scenes inside one file</h2>
+<p>Animation is, in the end, "how fast does the picture change." Keeping every scene in its own file makes both authoring and loading awkward. So the scenes are cut to a fixed spec and pasted side by side into <strong>one image file</strong>. The result is a sprite sheet, also called a texture atlas in engine terms.</p>
+<p>The payoff is immediate. The engine loads a single texture instead of dozens, and a GPU holding many scenes in one texture needs fewer state changes per frame. For an artist, a whole character set lives in a single file, which makes versioning and backups trivial. Swapping the background or shifting the colour palette becomes a one-image job instead of a hundred-file job.</p>
+<p>There are downsides too. One bad cut shifts every frame at once, and one corrupted file breaks the entire animation. When each frame has a different transparent margin, GPU memory is wasted as well. Packing scenes into one image and cutting that image back apart correctly are therefore equally important halves of the same job.</p>
+
+<h2>Row layout, column layout, or a grid</h2>
+<p>Scenes are usually packed in one of two ways. The first is <strong>row-major</strong>: fill left to right, then drop to the next line when the row is full. You see it constantly with icons and character sets. The second is <strong>column-major</strong>: fill top to bottom, then move to the next column. This is handy for character sheets where a run cycle or an attack set belongs together.</p>
+<h3>Which one you will meet</h3>
+<p>The more poses a character has, the more column-major tends to win. For UI icons or emoticons, where items are small and numerous, a single row or a grid reads better. This tool does not repack images for you, so converting a row sheet into a column sheet means rearranging the artwork yourself first. When that is not practical, cropping a batch of separate images to one size is the better route.</p>
+
+<h2>Frame size math</h2>
+<p>With a uniform grid, the frame size comes straight from division. Divide the image width by the column count and the height by the row count, and you have one cut. The table below collects common combinations.</p>
+<table>
+  <caption>Frame size per grid combination</caption>
+  <thead>
+    <tr><th scope="col">Image size</th><th scope="col">Grid (columns × rows)</th><th scope="col">Frame size</th><th scope="col">Total frames</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>256 × 64</td><td>4 × 1</td><td>64 × 64</td><td>4</td></tr>
+    <tr><td>512 × 128</td><td>4 × 2</td><td>128 × 64</td><td>8</td></tr>
+    <tr><td>1024 × 1024</td><td>8 × 8</td><td>128 × 128</td><td>64</td></tr>
+    <tr><td>1920 × 1080</td><td>8 × 4</td><td>240 × 270</td><td>32</td></tr>
+    <tr><td>800 × 600</td><td>16 × 12</td><td>50 × 50</td><td>192</td></tr>
+  </tbody>
+</table>
+<p>If the division lands on a fraction, consistent frames become impossible. Splitting 1000px into thirds gives 333.33px per frame, which in practice means one column of 333px next to a column of 334px. That drift is visible in motion. Designing in powers of two — 32, 64, 128, 256 — removes the problem entirely: a 512px width split 8 ways is exactly 64px per frame.</p>
+<div class="note">
+  <p><strong>Note</strong> The canvas always displays your image at 100%, never enlarged to fill the window. To inspect a 64 × 64 sheet closely, use your browser's zoom or open the exported PNGs in an image viewer. On-screen magnification does not change any pixel decision, so treat every coordinate as an original-pixel value.</p>
+</div>
+
+<h2>Transparent and solid backgrounds</h2>
+<p>A sheet manages its background in one of two ways. The first is an <strong>alpha (transparent)</strong> background: the margins are fully transparent PNG pixels and the engine composites the sprite over whatever it likes. This is the 2D standard and it looks right on every background. The second is a <strong>solid</strong> background: a glaring colour such as magenta or green fills the sheet and that colour is keyed out afterwards. It is fast to clean up in a video tool, but it has a sharp edge.</p>
+<h3>Which produces a better file</h3>
+<p>Solid backgrounds fail when that colour is actually used in the sprite. A single magenta pixel inside the character will be deleted too. Alpha backgrounds keep inner semi-transparent pixels, soft shadows, and rim highlights intact. If you care about the final quality of the exported art, alpha is the safe answer. The background removal feature is covered in a later step.</p>
+
+<h2>How a sheet maps to a timeline</h2>
+<p>Cut frames do not move on their own. Someone has to decide how long each one is shown. An 8-frame idle loop with 0.1s per frame runs for 0.8s, which happens to match the common 12.5fps walk cycle. In a 60fps game where the character animates at 8 poses per second, each frame needs roughly 0.125s.</p>
+<p>The sheet is therefore a planning artefact. The total frame count tells you the length of the loop, and each frame's width and height tell you the on-screen scale. This tool cuts still images and does not export animation files. What it does produce is a ZIP containing a preview <code>index.html</code>: unzip it, open that file in a browser, and the sequence plays.</p>
+
+<h2>Check your own sheet first</h2>
+<p>Before you open the cutter, look at four things. They decide which guide you actually need.</p>
+<ol>
+  <li><strong>Are the frames all the same size?</strong> A uniform grid handles the whole sheet in one pass. Mixed sizes need manual boundaries.</li>
+  <li><strong>Is there a gutter between frames?</strong> Transparent margins survive the cut, so you must exclude them with padding first.</li>
+  <li><strong>Are the rows regular?</strong> If the last row is only partly filled, an equal grid will not produce even frames.</li>
+  <li><strong>Is the background a solid colour?</strong> Solid means you can key it to transparent; a gradient or texture means you should leave it alone.</li>
+</ol>
+<p>If the first two conditions hold, the <a href="/guides/how-to-cut-sprite-sheet-en.html">basic equal-grid cutting walkthrough</a> finishes in about a minute. For gutters or ragged rows, see <a href="/guides/manual-boundaries-en.html">padding and manual boundaries</a>.</p>
+
+<h2>What this tool does and does not do</h2>
+<p>The tool runs entirely in your browser. From picking the image to receiving the ZIP, every calculation happens on your own device, so no image is ever uploaded. No account, no sign-up, no cost.</p>
+<h3>What it does</h3>
+<ul>
+  <li>Cut one image into a grid of PNG frames</li>
+  <li>Remove a solid background and write RGBA PNG output</li>
+  <li>Adjust each frame's position and size individually, and undo mistakes</li>
+  <li>Bundle the results into a ZIP with a preview HTML page and a background image</li>
+</ul>
+<h3>What it does not do</h3>
+<ul>
+  <li>Resize or resample. Output pixels are taken straight from the input.</li>
+  <li>Convert to animated GIF or video</li>
+  <li>Colour correction, edge cleanup, or any other image improvement</li>
+  <li>Accounts, logins, or server-side storage</li>
+</ul>
+<p>With the concepts in place, open the <a href="/">sprite sheet tool</a> and load your sheet. The next guide in this series is <a href="/guides/how-to-cut-sprite-sheet-en.html">the basic cutting walkthrough</a>.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>It runs in your browser with no sign-up. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet splitter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/index-en.html"><span class="dir">Previous</span><span class="ttl">All guides</span></a>
+  <a class="next" href="/guides/how-to-cut-sprite-sheet-en.html"><span class="dir">Next</span><span class="ttl">Basic sprite sheet cutting</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Sprite Splitter</a></li>
+          <li><a href="/">Batch Image Cutter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">All guides</a></li>
+          <li><a href="/faq-en.html">FAQ</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy</a></li>
+          <li><a href="/terms-en.html">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

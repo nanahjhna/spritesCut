@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/site_footer.dart';
 import 'batch_crop_screen.dart';
 import 'editor_screen.dart';
 import 'gif_splitter_screen.dart';
@@ -15,15 +16,19 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        child: Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                   Icon(Icons.grid_view_rounded, size: 72, color: scheme.primary),
                   const SizedBox(height: 16),
                   Text(
@@ -68,10 +73,14 @@ class HomeScreen extends StatelessWidget {
                         '자르고 PNG로 묶어 ZIP으로 저장합니다.',
                     onTap: () => _open(context, const BatchCropScreen()),
                   ),
-                ],
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+            const SiteFooter(),
+          ],
         ),
       ),
     );

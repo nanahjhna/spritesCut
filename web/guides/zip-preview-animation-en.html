@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Previewing Animation with the ZIP and index.html | Sprite Sheet Splitter</title>
+<meta name="description" content="The ZIP saved by the sprite sheet cutter contains more than PNGs: it also ships a generated index.html that plays your frames back and a bundled stage.jpg background. This guide covers the preview page and the folder-organisation workflow.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/zip-preview-animation-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/zip-preview-animation-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Previewing Animation with the ZIP and index.html">
+<meta property="og:description" content="The ZIP saved by the sprite sheet cutter contains more than PNGs: it also ships a generated index.html that plays your frames back and a bundled stage.jpg background. This guide covers the preview page and the folder-organisation workflow.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/zip-preview-animation-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Previewing Animation with the ZIP and index.html",
+  "description": "The ZIP saved by the sprite sheet cutter contains more than PNGs: it also ships a generated index.html that plays your frames back and a bundled stage.jpg background. This guide covers the preview page and the folder-organisation workflow.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "Sprite sheet cutter that runs in your browser" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Load the sheet and set the split counts", "text": "Open the grid cutter, upload your sprite sheet, and set the horizontal and vertical split counts.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "Press the save button", "text": "Press the save button at the bottom to start bundling the cropped frames into a ZIP archive.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "Organise frames into folders", "text": "In the save preview dialog, turn on folder organisation and create folders to group frames by animation.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "Unzip and open index.html", "text": "Unzip the downloaded archive, then double-click index.html to open it in your browser.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "Tune playback with the FPS slider", "text": "Use the pause and play button, and the playback speed slider to adjust between 1 and 30 FPS.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "Ship only the PNGs to your engine", "text": "Numbering restarts inside each folder, so the grouped PNGs are ready to be dropped straight into an engine.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index.html">Guides</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index.html">Guides</a></span>
+</nav>
+<h1>Previewing Animation with the ZIP and index.html</h1>
+<p class="lede">Pressing save once does not just hand you PNGs. The archive also contains an index.html that plays those frames back in order, plus a stage.jpg used as the preview background. Open the folder and the animation is on screen immediately.</p>
+<p class="lang-switch"><a href="/guides/zip-preview-animation.html">Read this guide in Korean</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>What is actually inside the ZIP</h2>
+<p>The grid cutter never gives you a single image file. Saving produces a ZIP archive, and that archive holds three kinds of item: the cropped frame PNGs, a generated HTML preview page, and one bundled background image. Unzipping it gives you both the usable assets and the verification file, already sorted together.</p>
+
+<table>
+<caption>Anatomy of the saved ZIP</caption>
+<thead>
+<tr><th scope="col">Item</th><th scope="col">Naming</th><th scope="col">Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td>Frame PNGs</td><td><code>{filename}_{columns}_{rows}_1.png</code> … <code>_N.png</code></td><td>The actual output. The numeric suffix is the frame order.</td></tr>
+<tr><td>Preview page</td><td><code>index.html</code></td><td>Plays the frames back in order for verification. Makes no network requests.</td></tr>
+<tr><td>Background image</td><td><code>stage.jpg</code></td><td>The image used as the preview backdrop.</td></tr>
+</tbody>
+</table>
+
+<p>Names follow a fixed pattern. The archive itself is called <code>{filename}_{H}_{V}.zip</code>, with the horizontal and vertical split counts appended, and the frames inside use <code>{filename}_{H}_{V}_1.png</code> and so on. Characters that are unsafe in a filename become underscores, and an empty name falls back to <code>sprite</code>.</p>
+
+<div class="note">
+<p>Only this ZIP carries <code>index.html</code> and <code>stage.jpg</code>. The ZIP from the <a href="/guides/batch-crop-images.html">batch image cutter</a> contains one PNG per photo and nothing else, because a grid of unrelated photographs is not an animation.</p>
+</div>
+
+<h2>Walking through a save</h2>
+
+<h3 id="step-1">Load the sheet and set the split counts</h3>
+<p>Open the grid cutter from the home screen and load your sheet with the <strong>Upload image</strong> button. Once an image is loaded the panels for <strong>Background</strong>, <strong>Split counts (columns × rows)</strong> and <strong>Split mode</strong> appear in order. If your frames sit in a single horizontal strip you mostly need to get the column count right. The status bar at the bottom shows the full size, the crop region, the single-frame size and the total frame count, so checking the per-frame size there is the fastest sanity test.</p>
+
+<h3 id="step-2">Press save and download</h3>
+<p>When the numbers look right, press <strong>Save and download (ZIP)</strong>. The button turns into <strong>Processing…</strong> while the frames are bundled, and a <strong>preview the sprites to save</strong> dialog opens afterwards. Its header shows the total frame count along with <strong>({k} deleted)</strong>. Anything you would rather not keep can be dropped here before the archive is written.</p>
+
+<h3 id="step-3">Group frames with folder organisation</h3>
+<p>That dialog has a <strong>Folder organisation</strong> switch: "creates folders to tidy up the images". It is on by default, and while it is on the ZIP gains folders that the images are placed inside.</p>
+<p>The sidebar lets you move between <strong>Show all</strong> and <strong>Default (no folder)</strong>, and <strong>Add folder</strong> creates folders named <code>New folder 1</code>, <code>New folder 2</code> and so on. Any folder can be renamed or removed. Deleting a folder never deletes images: they move back to the default location, and you first get a confirmation explaining that <em>the {n} images in folder "{name}" will be moved to Default (no folder)</em>.</p>
+<p>There are two ways to move images into a folder.</p>
+<ol>
+<li><strong>Long-press for half a second, then drag.</strong> Hold an image for roughly half a second to pick it up, then drag it onto a folder in the sidebar and let go.</li>
+<li><strong>Select, then press Move.</strong> Select one or more images, press <strong>Move</strong>, and pick the destination in the <strong>choose folder to move to</strong> dialog.</li>
+</ol>
+<p>Multi-selection works with Ctrl-click and Shift-click, and a <strong>Select mode</strong> toggle keeps the selection active for further taps. The tooltip reads "Select mode (select multiple)".</p>
+<p><strong>Delete selected</strong> increases the deleted count in the header. Once you finish, the remaining frames are renumbered sequentially from 1 — and that numbering <strong>restarts inside every folder</strong>. Six frames in the first folder and four in the second will be saved as 1–6 and 1–4 respectively. One folder is effectively one animation, which is the natural way to separate a walk cycle from a run cycle found on the same sheet.</p>
+
+<h3 id="step-4">Unzip and open index.html</h3>
+<p>Press <strong>Download (ZIP)</strong>, then the sequence is simple.</p>
+<ol>
+<li>Double-click the downloaded archive to unzip it.</li>
+<li>Double-click <code>index.html</code> inside the folder.</li>
+<li>The animation starts playing in your browser.</li>
+</ol>
+<p>That HTML file reads nothing from the network. Every frame PNG is loaded up front when the page opens and afterwards the page only draws them, so it works on a tablet in airplane mode or from a USB stick on a different machine.</p>
+
+<h3 id="step-5">The play button and the FPS slider</h3>
+<p>The page is headed <strong>Sprite animation preview</strong>, followed by an info line in the form <code>{n} frames ({w} × {h}px)</code>. A single button toggles between <strong>Pause</strong> and <strong>Play</strong>. The <strong>Playback speed (FPS): </strong> slider ranges from 1 to 30 FPS and defaults to 10. Playback starts automatically when the page loads, so you can just watch the first loop before touching anything.</p>
+
+<h3 id="step-6">Take only the PNGs to your engine</h3>
+<p>Once you are satisfied, deleting <code>index.html</code> and <code>stage.jpg</code> costs you nothing — the output is unaffected. What an engine needs is the PNGs. If you used folders, each folder is a ready-made unit you can import as a whole, which makes pulling several animations out of one sheet much less work.</p>
+
+<h2>What stage.jpg does</h2>
+<p><code>stage.jpg</code> becomes the backdrop of the preview, applied with <code>background-size: cover</code> so it fills the box. In practice it is a floor or wall painting that lets you judge how transparent regions will look once the sprite stands on a real backdrop.</p>
+<p>If the file is missing, renamed or damaged, the preview simply opens without it and a CSS checkerboard pattern takes over, making the transparent pixels easy to see. The background is decoration; the animation plays either way.</p>
+
+<div class="note">
+<p>The preview box is capped at 400px wide with the aspect ratio preserved. Frames are drawn with <code>image-rendering: pixelated</code>, so the pixel grid stays crisp even when the sprite is displayed far smaller than its native size.</p>
+</div>
+
+<h2>Practical tips</h2>
+<ul>
+<li><strong>Check the FPS first.</strong> Game animation usually runs at 10 to 12 FPS, which is close enough to the 10 FPS default that you rarely need to move the slider.</li>
+<li><strong>Read frame count and frame size together.</strong> The per-frame size appears in the info line as <code>{w} × {h}px</code>. If the column and row counts are not in a ratio your sprite actually uses, you will get unwanted empty margins around each frame.</li>
+<li><strong>Trim the leftover padding.</strong> The margins in equal mode remove repeated empty space, and less transparent padding also means a smaller PNG. The <a href="/guides/manual-boundaries.html">margins and manual boundaries guide</a> covers this in detail.</li>
+<li><strong>Fix odd per-frame sizes before exporting.</strong> Each frame can be given its own size from the results preview, and those values are what the ZIP uses. See the <a href="/guides/frame-editing-undo.html">per-frame editing guide</a>.</li>
+</ul>
+
+<h2>Summary</h2>
+<p>The grid cutter's ZIP holds three things: frame PNGs, an <code>index.html</code> playback page, and a <code>stage.jpg</code> backdrop. The HTML runs fully offline and plays between 1 and 30 FPS, while a missing <code>stage.jpg</code> falls back to a checkerboard. Using folder organisation in the save dialog means a single pass can organise several animations at once.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>No account needed — it runs straight in your browser. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet cutter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/frame-editing-undo-en.html"><span class="dir">Previous</span><span class="ttl">Per-frame editing and undo/redo</span></a>
+  <a class="next" href="/guides/gif-to-sprite-sheet-en.html"><span class="dir">Next</span><span class="ttl">Converting a GIF into a sprite sheet</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image cutter</a></li>
+          <li><a href="/">GIF sprite splitter</a></li>
+          <li><a href="/">Batch image cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq.html">Frequently asked questions</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal basics</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Information</h4>
+        <ul>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/privacy.html">Privacy policy</a></li>
+          <li><a href="/terms.html">Terms of service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

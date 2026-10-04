@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스프라이트 시트 분할 기본 사용법 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="이미지 자르기 도구로 스프라이트 시트를 균등 분할하는 전체 절차. 분할 수 입력법, 상태 표시줄 읽는 법, 결과물 미리보기 확인, 불필요한 프레임 삭제, ZIP 저장과 파일 이름 규칙을 단계별로 정리합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="스프라이트 시트 분할 기본 사용법">
+<meta property="og:description" content="균등 분할로 스프라이트 시트를 PNG 여러 장으로 나누는 전체 절차와 파일 이름 규칙.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "스프라이트 시트 분할 기본 사용법",
+  "description": "이미지 자르기 도구로 스프라이트 시트를 균등 분할하는 전체 절차. 분할 수 입력법, 상태 표시줄 읽는 법, 결과물 미리보기 확인, 불필요한 프레임 삭제, ZIP 저장과 파일 이름 규칙을 단계별로 정리합니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 스프라이트 시트 분할 도구" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "스프라이트 시트 이미지 선택하기", "text": "홈의 이미지 자르기 도구에서 파일 선택을 열어 PNG나 JPG 등 해석 가능한 이미지 한 장을 고릅니다. 빈 화면에는 '스프라이트 시트를 업로드해 주세요'라는 안내가 나타납니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "가로·세로 분할 수 입력하기", "text": "'분할 수 (가로 × 세로)' 항목에서 가로 분할과 세로 분할 값을 넣습니다. 기본값은 4 × 1이며 0 이하의 값은 1로 처리됩니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "상태 표시줄에서 결과 수치 확인하기", "text": "화면 하단의 상태 표시줄에서 전체 크기, 영역 크기, 1컷 크기, 총 컷 수를 확인해 계산이 맞는지 검증합니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "결과물 미리보기로 컷 확인하기", "text": "'결과물 미리보기' 패널을 열어 격자에 놓인 썸네일을 확인합니다. 각 썸네일에는 순번과 실제 픽셀 크기가 표시됩니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "필요 없는 프레임 삭제하기", "text": "저장 대화상자에서 쓰지 않을 프레임을 선택해 삭제합니다. 남은 프레임은 순서대로 다시 번호가 매겨집니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "ZIP으로 저장하고 결과 확인하기", "text": "'다운로드 (ZIP)'을 누르면 프레임 PNG와 미리보기 index.html, 배경 stage.jpg가 묶여 내려옵니다.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>스프라이트 시트 분할 기본 사용법</h1>
+<p class="lede">격자가 규칙적인 스프라이트 시트는 균등 분할 하나로 처리됩니다. 이미지 한 장을 고르고 숫자 두 개를 입력하면 PNG 여러 장이 나오는 전체 과정을 그대로 적었습니다.</p>
+<p class="lang-switch"><a href="/guides/how-to-cut-sprite-sheet-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>이 방법이 통하는 조건</h2>
+<p>균등 분할은 시트 안의 모든 프레임이 같은 크기이고, 프레임 사이에 여백이 없으며, 줄마다 컷 수가 같을 때 결과가 정확합니다. 512 × 128짜리 시트를 4 × 2로 나누면 128 × 64짜리 8컷이 나오듯이, 단순한 격자라면 이 한 번의 분할로 끝납니다.</p>
+<p>반대로 투명 여백이 프레임 사이에 끼어 있거나 마지막 줄이 덜 차 있다면 균등 분할만으로는 원하는 모양이 나오지 않습니다. 그럴 때는 <a href="/guides/manual-boundaries.html">여백과 수동 경계선 가이드</a>로 넘어가면 됩니다. 여기서는 우선 가장 흔한 격자 시트를 끝까지 분해해 봅니다.</p>
+
+<h2 id="step-1">1단계. 이미지 선택하기</h2>
+<p><a href="/">스프라이트 시트 도구</a>를 열고 홈 화면의 이미지 자르기 도구로 들어옵니다. 아직 아무것도 선택하지 않은 화면에는 <em>"스프라이트 시트를 업로드해 주세요"</em>라는 안내만 보입니다. 이 안내를 누르거나 페이지 안의 파일 선택 버튼으로 이미지 파일을 고릅니다.</p>
+<p>PNG와 JPG를 기본으로 하며, 브라우저가 해석할 수 있는 다른 형식도 열 수 있습니다. 파일을 선택하는 즉시 이미지가 브라우저 안에서 읽히고 캔버스에 100% 크기로 표시됩니다. 이 도구는 서버가 없기 때문에 파일이 어디로도 전송되지 않습니다. 기기 안에서 처리가 끝나기 때문에 네트워크가 느려도 작업이 지연될 일은 없습니다.</p>
+<p>이미지를 불러오면 실행 취소 기록은 초기화됩니다. 이전에 작업했던 다른 이미지의 기록이 섞이는 일이 없습니다.</p>
+
+<h2 id="step-2">2단계. 가로·세로 분할 수 입력하기</h2>
+<p><strong>분할 수 (가로 × 세로)</strong> 항목에서 두 개의 칸에 숫자를 넣습니다. <strong>가로 분할</strong>은 한 줄에 놓이는 컷 수, <strong>세로 분할</strong>은 줄 수이므로 입력 칸 뒤에는 <em>"개"</em>가 붙습니다. 처음에는 4 × 1로 시작합니다. 위 표는 자주 쓰는 분할 수와 그 결과입니다.</p>
+<table>
+  <caption>분할 수에 따른 총 컷 수와 1컷 크기 예시 (이미지 1024 × 1024 기준)</caption>
+  <thead>
+    <tr><th scope="col">가로 분할</th><th scope="col">세로 분할</th><th scope="col">총 컷 수</th><th scope="col">1컷 크기</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>4</td><td>1</td><td>4</td><td>256 × 1024</td></tr>
+    <tr><td>4</td><td>2</td><td>8</td><td>256 × 512</td></tr>
+    <tr><td>8</td><td>4</td><td>32</td><td>128 × 256</td></tr>
+    <tr><td>8</td><td>8</td><td>64</td><td>128 × 128</td></tr>
+    <tr><td>16</td><td>16</td><td>256</td><td>64 × 64</td></tr>
+  </tbody>
+</table>
+<p>숫자를 지우면 그 칸은 비어 있는 상태로 남아 계산되지 않으므로, 지우는 즉시 다른 값을 입력하는 편이 안전합니다. 0이나 음수를 입력한 경우 그 값은 1로 대체되어 분할이 진행됩니다. 다만 실수로 빈칸을 두면 의도하지 않은 컷이 나올 수 있으니 입력 후 상태 표시줄을 한 번 확인하세요.</p>
+<p>분할 모드가 <strong>균등 분할</strong>로 설정되어 있는 동안에는 영역 여백 칸이 보입니다. 여기에 여백이 필요하다면 좌우 상하로 몇 픽셀씩 제외할지 입력하고, 값을 바꾸면 캔버스의 드래그 핸들도 함께 움직입니다. 여백을 다듬는 자세한 방법은 <a href="/guides/manual-boundaries.html">여백과 수동 경계선 가이드</a>를 참고하세요.</p>
+
+<h2 id="step-3">3단계. 상태 표시줄에서 계산 결과 확인하기</h2>
+<p>캔버스 아래쪽 상태 표시줄에는 한 줄에 모든 핵심 수치가 요약됩니다. 확인해야 할 항목은 다음과 같습니다.</p>
+<ul>
+  <li><strong>전체 W×H px</strong> — 원본 이미지의 크기입니다.</li>
+  <li><strong>영역 W×H px (상/하/좌/우)</strong> — 여백을 제외한 뒤 실제로 자를 영역의 크기입니다.</li>
+  <li><strong>1컷 W×H px</strong> — 한 장으로 잘라지는 결과의 크기입니다.</li>
+  <li><strong>총 N개 (C×R)</strong> — 만들어지는 컷 수와 가로·세로 배수입니다.</li>
+</ul>
+<p>이 줄이 캔버스 아래에 항상 보이므로 분할 수를 바꿀 때마다 결과를 즉시 확인할 수 있습니다. 1024 × 1024 이미지에서 8 × 8을 입력했다면 1컷이 128 × 128, 총 64개로 표시되어야 합니다. 여기서 1컷이 0이거나 8px보다 작게 나온다면 분할 수가 너무 많다는 뜻이므로 값을 줄이세요. 1컷의 최소 크기는 8px입니다.</p>
+<p>분할 모드를 <strong>수동 조절</strong>로 바꾸면 표시줄에 <em>"수동 조절"</em> 표시가 추가되고, 1컷 크기가 여러 값으로 달라질 수 있기 때문에 최솟값~최댓값 범위가 함께 나타납니다.</p>
+
+<h2 id="step-4">4단계. 결과물 미리보기로 실제 컷 확인하기</h2>
+<p>화면 하단의 <strong>결과물 미리보기</strong> 패널은 접거나 펼칠 수 있는 영역입니다. 펼치면 투명 영역이 체스판 모양으로 배경화되어 나타나고, 잘라질 프레임들이 썸네일 격자로 나열됩니다. 각 썸네일에는 <em>"순번 · 가로×세로"</em> 형태의 라벨이 붙습니다. 예를 들어 <em>12 · 64×64</em>라고 적혀 있으면 결과물의 12번 컷이 64 × 64이라는 뜻입니다.</p>
+<p>이 썸네일은 최종 출력과 같은 방식으로 계산됩니다. 캔버스에서 잘라 보이는 것과 미리보기에 나오는 것이 다르다면 분할 수나 여백 값이 어긋난 것이므로 이 시점에서 수정을 시작하면 됩니다. 썸네일을 누르면 그 프레임 하나만 따로 편집하는 모드로 넘어가며, 좌표와 크기를 개별적으로 바꿀 수 있습니다. 자세한 동작은 <a href="/guides/frame-editing-undo.html">프레임 개별 편집과 실행 취소 가이드</a>에서 다룹니다.</p>
+<div class="note">
+  <p><strong>주의</strong> 결과물은 항상 PNG로만 저장됩니다. JPG나 WebP를 선택하는 옵션은 없습니다. 투명 영역을 유지해야 하므로 출력 형식을 RGBA PNG로 고정해 두는 편이 안전합니다.</p>
+</div>
+
+<h2 id="step-5">5단계. 필요 없는 프레임 골라내기</h2>
+<p>분할 결과에 사용하지 않을 컷이 섞여 있을 수 있습니다. 시트의 마지막 줄이 비어 있거나 참고용 포즈가 들어 있는 경우가 그렇습니다. 이런 프레임은 미리보기 단계에서 개별 크기를 조정하거나, 저장 직전 대화상자에서 삭제할 수 있습니다.</p>
+<p>삭제는 저장 대화상자에서 이루어집니다. 상단의 <em>"저장할 스프라이트 미리보기"</em> 화면에서 각 타일의 <em>"삭제"</em> 배지를 눌러 제거합니다. 남은 프레임은 1번부터 순서대로 다시 번호가 매겨지므로, 5번과 7번을 지웠다면 뒤에 있던 컷이 5번이 되어 번호가 끊기지 않습니다.</p>
+<p>여러 장면을 서로 다른 항목으로 정리해야 한다면 사이드바의 폴더 기능을 쓸 수 있습니다. <strong>폴더 정리</strong> 스위치를 켠 채 <em>"폴더 추가"</em>로 폴더를 만들고, 이미지를 0.5초 길게 눌러 드래그하거나 여러 개를 선택한 뒤 <em>"이동"</em> 버튼으로 넣습니다. Ctrl이나 Shift를 누른 채 클릭해도 여러 장을 한 번에 선택할 수 있고, <em>"선택 모드"</em> 버튼을 눌러 계속 여러 개 선택할 수 있습니다. 폴더별로 번호가 다시 시작되므로 동작과 대기 상태를 따로 묶어두기 좋습니다.</p>
+
+<h2 id="step-6">6단계. ZIP으로 저장하기</h2>
+<p>준비가 끝나면 <strong>저장 및 다운로드 (ZIP)</strong> 버튼을 누릅니다. 처리 중에는 버튼 라벨이 <em>"처리 중…"</em>으로 바뀌고, 곧바로 <em>"저장할 스프라이트 미리보기"</em> 대화상자가 열립니다. 이 화면에서 최종 대상을 확인한 뒤 <em>"다운로드 (ZIP)"</em>을 누르면 파일이 내려옵니다. 즉 저장 동작은 잘라내기 → 미리보기 확인의 두 단계로 나뉘어집니다.</p>
+<p>다이얼로그 하단에는 저장될 이름 규칙이 그대로 적혀 있습니다. 원본 파일명이 <code>hero.png</code>이고 가로·세로 분할이 4 × 2라면 <code>hero_1.png</code>부터 <code>hero_8.png</code>까지 ZIP으로 묶입니다. 안전하지 않은 문자는 밑줄로 바뀌고, 이름이 비어 있으면 <code>sprite</code>가 기본값으로 쓰입니다.</p>
+<p>여기서 한 가지 더 알아둘 점이 있습니다. ZIP 안에는 PNG 프레임뿐만 아니라 미리보기용 <code>index.html</code>과 배경 이미지 <code>stage.jpg</code>가 함께 들어 있습니다. 압축을 풀고 <code>index.html</code>을 브라우저로 열면 프레임이 순서대로 재생되는 형태를 바로 확인할 수 있습니다. 이 구조를 활용하는 방법은 <a href="/guides/zip-preview-animation.html">ZIP과 index.html 미리보기 가이드</a>에서 자세히 다룹니다.</p>
+
+<h2>분할 수를 정하는 체크 순서</h2>
+<p>이미지를 열었는데 분할 수를 무엇으로 해야 할지 막막하면 아래 순서대로 판단하면 됩니다.</p>
+<ol>
+  <li>상태 표시줄의 <em>전체 W×H px</em>로 원본 크기를 확인합니다.</li>
+  <li>한 컷에 들어갈 스프라이트의 크기를 정합니다. 픽셀 아트라면 32, 64, 128 같은 2의 거듭제곱 크기가 안전합니다.</li>
+  <li>전체 폭을 한 컷 폭으로 나눈 값에 가로 분할 수를, 전체 높이를 한 컷 높이로 나눈 값에 세로 분할 수를 입력합니다.</li>
+  <li>총 컷 수와 1컷 크기가 기대한 값과 같은지 상태 표시줄에서 확인합니다.</li>
+  <li>다르다면 여백을 먼저 적용하거나, 분할 수를 한 단계씩 조정해 봅니다.</li>
+</ol>
+<p>예를 들어 1024 × 512 시트에 64 × 64 스프라이트가 들어 있다면 가로 분할은 16, 세로 분할은 8입니다. 총 컷 수는 128이 되고 1컷 크기는 64 × 64로 떨어집니다. 계산이 딱 맞아떨어지지 않는다면 1컷 크기에 소수점이 생기는 상황이라는 뜻이므로, 원본 크기나 목표 컷 크기를 2의 거듭제곱으로 맞춰보는 것이 가장 빠른 해결책입니다.</p>
+
+<h2>빈도와 제한 정리</h2>
+<p>분할 작업에서 자주 확인하게 되는 값들을 정리했습니다.</p>
+<table>
+  <caption>이미지 자르기 도구의 기본값과 범위</caption>
+  <thead>
+    <tr><th scope="col">항목</th><th scope="col">기본값</th><th scope="col">범위 또는 규칙</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>가로 분할 / 세로 분할</td><td>4 / 1</td><td>정수, 0 이하 입력 시 1로 처리</td></tr>
+    <tr><td>1컷 최소 크기</td><td>—</td><td>8px 미만으로는 나뉘지 않음</td></tr>
+    <tr><td>배경 제거 허용 오차</td><td>10%</td><td>0~30%, 30칸</td></tr>
+    <tr><td>프레임 편집 최소 크기</td><td>—</td><td>8 × 8 px</td></tr>
+    <tr><td>실행 취소 기록</td><td>—</td><td>100단계, 0.35초 이내 변경은 합쳐짐</td></tr>
+    <tr><td>출력 형식</td><td>—</td><td>항상 RGBA PNG, JPG·WebP 없음</td></tr>
+    <tr><td>분할 모드</td><td>균등 분할</td><td>균등 분할 / 수동 조절</td></tr>
+  </tbody>
+</table>
+<p>프레임 개수에는 코드상 상한이 없습니다. 다만 컷 수를 늘리면 이미지 데이터가 그만큼 복제되므로 실제로는 기기 메모리가 한계가 됩니다. 1024 × 1024 이미지를 64 × 64로 자르면 256컷, 각 파일이 PNG 압축에 따라 수십 KB에서 수백 KB까지 나올 수 있으니, 큰 시트는 여러 묶음으로 나누어 처리하는 편이 안전합니다.</p>
+<p>여기까지 따라왔다면 프레임 PNG가 준비된 것입니다. 개별 프레임 크기를 손보고 싶다면 <a href="/guides/frame-editing-undo.html">프레임 개별 편집과 실행 취소 가이드</a>, 여백이나 불규칙한 배치를 다뤄야 한다면 <a href="/guides/manual-boundaries.html">여백과 수동 경계선 가이드</a>를 이어서 읽어 보세요.</p>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/sprite-sheet-basics.html"><span class="dir">이전 글</span><span class="ttl">스프라이트 시트란 무엇인가? 기초 개념 정리</span></a>
+  <a class="next" href="/guides/manual-boundaries.html"><span class="dir">다음 글</span><span class="ttl">여백과 수동 경계선으로 정확히 나누기</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

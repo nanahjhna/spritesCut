@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Art Image Specifications | Sprite Sheet Splitter</title>
+<meta name="description" content="A reference guide to sprite sheet maths: how to derive frame size, why sprites must be scaled with nearest-neighbour, why transparent padding bloats PNGs, and what the background removal tolerance really controls.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Pixel Art Image Specifications">
+<meta property="og:description" content="A reference guide to sprite sheet maths: how to derive frame size, why sprites must be scaled with nearest-neighbour, why transparent padding bloats PNGs, and what the background removal tolerance really controls.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "Pixel Art Image Specifications",
+  "description": "A reference guide to sprite sheet maths: how to derive frame size, why sprites must be scaled with nearest-neighbour, why transparent padding bloats PNGs, and what the background removal tolerance really controls.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "Sprite sheet cutter that runs in your browser" }]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index.html">Guides</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index.html">Guides</a></span>
+</nav>
+<h1>Pixel Art Image Specifications</h1>
+<p class="lede">This is a reference document rather than a walkthrough. It covers how frame dimensions are calculated, why enlarging must copy the nearest pixel, why transparent padding makes files heavy, and what the background removal tolerance actually controls.</p>
+<p class="lang-switch"><a href="/guides/pixel-art-image-specs.html">Read this guide in Korean</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>Why a sprite sheet must never be resampled</h2>
+<p>In pixel art every individual colour carries meaning. A single black pixel defines an outline, and one step of mid-grey decides where the shading falls. For that reason, every tool and engine that enlarges sprite art uses <strong>nearest-neighbour scaling</strong>: one pixel becomes a block of identical pixels, and the original grid survives untouched.</p>
+<p>Interpolated scaling does the opposite, blending neighbouring colours into new ones. The result looks pleasingly smooth, which is precisely the problem in pixel art — outlines soften, faint bands of grey appear that were never in the source, and scaling back down afterwards yields something different from the original. That is why this tool's canvas shows your image at 100% and deliberately does not enlarge it. If you need a closer look, zoom in the browser or in the preview instead.</p>
+
+<table>
+<caption>What each scaling method does to a sprite</caption>
+<thead>
+<tr><th scope="col">Method</th><th scope="col">Pixel handling</th><th scope="col">Fit for pixel art</th></tr>
+</thead>
+<tbody>
+<tr><td>Nearest-neighbour</td><td>Duplicates blocks by an integer factor</td><td>Grid preserved. This is what the tool uses.</td></tr>
+<tr><td>Bilinear interpolation</td><td>Mixes colours across edge pixels</td><td>Not suitable. Outlines blur.</td></tr>
+<tr><td>Bicubic interpolation</td><td>Mixes colours over a wider area</td><td>Not suitable. Introduces noise and smearing.</td></tr>
+<tr><td>Spatial interpolation (e.g. Lanczos)</td><td>Adds ringing at the edges</td><td>Even tuned carefully, the original grid is lost.</td></tr>
+</tbody>
+</table>
+
+<p>It is worth pointing out where this rule is actually enforced. The <code>index.html</code> inside your ZIP renders frames with <code>image-rendering: pixelated</code>, and the preview box is capped at 400px wide with the aspect ratio preserved. Even when the display shrinks, the grid stays crisp; and if the source is larger than 400px it may appear clipped, which is a limitation of the display box and not of the data — the PNGs are stored at full size.</p>
+
+<h2>Working out frame size</h2>
+<p>Once the split counts are known, one frame's dimensions come from two divisions.</p>
+<p><code>frame width = sheet width ÷ columns</code><br>
+<code>frame height = sheet height ÷ rows</code></p>
+<p>If the sheet does not divide evenly, leftover pixels on the final frame can make that one slightly smaller. In equal mode the margins deal with the leftover area, while <a href="/guides/manual-boundaries-en.html">manual mode</a> lets you type boundary coordinates directly and get identical frames regardless of the frame count.</p>
+
+<table>
+<caption>Frame size worked out for various split counts</caption>
+<thead>
+<tr><th scope="col">Sheet size</th><th scope="col">Columns × rows</th><th scope="col">Frame size</th><th scope="col">Total frames</th></tr>
+</thead>
+<tbody>
+<tr><td>512 × 128</td><td>4 × 1</td><td>128 × 128</td><td>4</td></tr>
+<tr><td>512 × 128</td><td>8 × 1</td><td>64 × 128</td><td>8</td></tr>
+<tr><td>1024 × 1024</td><td>8 × 8</td><td>128 × 128</td><td>64</td></tr>
+<tr><td>2048 × 512</td><td>16 × 2</td><td>128 × 256</td><td>32</td></tr>
+<tr><td>3840 × 2160</td><td>30 × 15</td><td>128 × 144</td><td>450</td></tr>
+</tbody>
+</table>
+
+<p>The status bar summarises this as <code>Total: W × H px • Region: W × H px (top: n, bottom: n, left: n, right: n) • 1 cut: W × H px • N total (C×R)</code>. Adjusting a margin can appear to change the frame size, but what really happens is the region narrowing. All frames remain the same size as each other. In manual mode the bar gains a <strong>manual adjustment</strong> label and shows the 1-cut size as a min-to-max range; a non-zero spread is a signal that the boundaries are uneven.</p>
+
+<h2>Packed sheet or loose frames</h2>
+<p>The tools here produce both shapes of output: frame PNGs bundled in a ZIP, and — in the GIF tool — a single sheet PNG with every frame composited together. Which one suits you depends entirely on what your engine reads.</p>
+
+<table>
+<caption>Packed sheet versus individual frames</caption>
+<thead>
+<tr><th scope="col">Criterion</th><th scope="col">One sheet PNG</th><th scope="col">Many frame PNGs</th></tr>
+</thead>
+<tbody>
+<tr><td>Texture loading</td><td>A single read; fastest.</td><td>A file per frame must be opened.</td></tr>
+<tr><td>Engine setup</td><td>You must declare sheet size and grid counts.</td><td>Filenames alone convey the order.</td></tr>
+<tr><td>Replacing one frame</td><td>The whole sheet must be rebuilt.</td><td>Swap that single file.</td></tr>
+<tr><td>File count</td><td>One.</td><td>Grows with the frame count.</td></tr>
+<tr><td>Build scripts</td><td>Reproduce the packing rule exactly.</td><td>Works as-is.</td></tr>
+<tr><td>GPU memory</td><td>The full sheet occupies memory at once.</td><td>Only the frames you draw are resident.</td></tr>
+</tbody>
+</table>
+
+<p>In short, ship a packed sheet when the asset goes out with the game and is loaded once; keep loose frames when you need to tweak individual poses across a growing set. The GIF tool offers a third option by re-saving the animation as a GIF, which is useful when the animation must survive outside an engine. That workflow is covered in the <a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion guide</a>.</p>
+
+<h2>File size and memory</h2>
+<p>The output format is always PNG. It is lossless, so pixel values survive untouched, and it supports transparency. There is no JPG or WebP option. WebP would be smaller, but uneven support across browsers and engines still makes it a risky choice for sprite data, and JPG has no alpha channel at all, ruling it out whenever a transparent background is needed.</p>
+<p>PNG is lossless, which means even a slight colour change is stored as a different value. A sheet with large semi-transparent areas — artwork sitting on a very light outline, for instance — therefore ends up larger than expected. The bigger problem is completely invisible empty space. There is no marker inside the PNG that lets it skip runs of fully transparent pixels, so every one of them is stored. Large gaps between frames change nothing visible while steadily inflating the file. That is why trimming the margins in equal mode is more than cosmetic housekeeping.</p>
+<p>There is no frame-count limit coded into the tools. The remaining constraint is device memory, so two figures are worth checking before you start.</p>
+
+<table>
+<caption>What to verify before a large batch</caption>
+<thead>
+<tr><th scope="col">Check</th><th scope="col">Question to ask</th></tr>
+</thead>
+<tbody>
+<tr><td>Total sheet pixels</td><td>Does width × height fit in device memory and under the engine's maximum texture size?</td></tr>
+<tr><td>Per-frame size</td><td>Is it a whole number, and logically sensible next to the size you will draw it at?</td></tr>
+<tr><td>Padding</td><td>Is there dead transparent space left between frames?</td></tr>
+<tr><td>Alpha</td><td>Do you actually need transparency, or could background removal be enabled?</td></tr>
+<tr><td>Colours</td><td>Have you looked to confirm that unwanted grey tones were removed with the background?</td></tr>
+</tbody>
+</table>
+
+<h2>How colour and tolerance interact</h2>
+<p>Background removal picks a colour and deletes pixels close to it. The <strong>tolerance</strong> slider decides how close counts as close, and the two tools give it different ranges.</p>
+
+<table>
+<caption>Tolerance ranges by tool</caption>
+<thead>
+<tr><th scope="col">Tool</th><th scope="col">Range</th><th scope="col">Default</th><th scope="col">Re-applied after</th></tr>
+</thead>
+<tbody>
+<tr><td>Grid cutter</td><td>0% ~ 30%</td><td>10%</td><td>200ms debounce</td></tr>
+<tr><td>GIF sprite splitter</td><td>1% ~ 50%</td><td>10%</td><td>150ms debounce</td></tr>
+</tbody>
+</table>
+
+<p>Low values remove conservatively and keep the sprite body intact; high values remove more broadly and clear backgrounds cleanly. The upside is leftover background that fails to disappear; the downside is similar colours inside the character disappearing with it. Start from the 10% default, inspect the result with your own eyes, and adjust from there.</p>
+<p>In the grid cutter, switching the toggle off restores the original image exactly, so a mistaken removal costs you nothing and several values can be compared quickly. In the GIF tool a more generous tolerance is often natural, because many frames share the same thin background colour. The detection method and the tolerance behaviour are explained in more detail in the <a href="/guides/remove-background-chromakey-en.html">background removal guide</a>.</p>
+
+<div class="note">
+<p>Tolerance is calculated as a distance across RGB values. The same input produces the same result on any device and at any time, so you can compare values by eye as you adjust the slider and settle on a good setting quickly.</p>
+</div>
+
+<h2>Pre-export checklist</h2>
+<ol>
+<li>Is the 1-cut size a whole number with no variation between frames?</li>
+<li>Is unnecessary transparent padding gone from between frames?</li>
+<li>Is the frame size within the engine's maximum texture dimension?</li>
+<li>If the animation skips frames, does the total count match the intended order?</li>
+<li>If background removal was used, are small features like outlines and pupils still intact?</li>
+<li>Is the output really PNG?</li>
+<li>When enlarged, are the seams between frames visible?</li>
+<li>If it is an animation, have you checked the real playback speed with <code>index.html</code>?</li>
+</ol>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>No account needed — it runs straight in your browser. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet cutter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/batch-crop-images-en.html"><span class="dir">Previous</span><span class="ttl">Cropping many images to one uniform size</span></a>
+  <a class="next" href="/guides/index-en.html"><span class="dir">Next</span><span class="ttl">Browse all guides</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image cutter</a></li>
+          <li><a href="/">GIF sprite splitter</a></li>
+          <li><a href="/">Batch image cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq.html">Frequently asked questions</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal basics</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Information</h4>
+        <ul>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+          <li><a href="/privacy.html">Privacy policy</a></li>
+          <li><a href="/terms.html">Terms of service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

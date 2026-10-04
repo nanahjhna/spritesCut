@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Per-Frame Editing and Undo/Redo | Sprite Sheet Splitter</title>
+<meta name="description" content="Fix a single misaligned frame from the result preview panel, restore defaults for one or all frames, and use the 100-step undo history with Ctrl+Z, Ctrl+Shift+Z, and Ctrl+Y.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/frame-editing-undo-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/frame-editing-undo.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/frame-editing-undo-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/frame-editing-undo.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Per-Frame Editing and Undo/Redo">
+<meta property="og:description" content="Per-frame position and size overrides, restore buttons, and the shortcut set for undo and redo.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/frame-editing-undo-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Per-Frame Editing and Undo/Redo",
+  "description": "Fix a single misaligned frame from the result preview panel, restore defaults for one or all frames, and use the 100-step undo history with Ctrl+Z, Ctrl+Shift+Z, and Ctrl+Y.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "Sprite sheet splitter that runs in the browser" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Open the result preview panel", "text": "Expand the result preview at the bottom of the screen to see the thumbnail grid on a transparency checkerboard.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "Read the thumbnail labels", "text": "Each thumbnail is labelled with its index and pixel size, such as 12 · 64×64, so you can tell at a glance which frame is off.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "Enter single-frame edit mode", "text": "Tapping a thumbnail opens the frame N editor. The canvas switches to handles for that frame only and the dimming outside the guide box is turned off.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "Adjust x, y, w, and h", "text": "Edit the position and size fields. The minimum frame size is 8px, and results are recomputed after a short 150ms debounce.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "Restore one frame or all of them", "text": "The default button reverts the current frame to the grid value, while the global reset clears every per-frame override at once.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "Undo and redo your changes", "text": "Press Ctrl+Z to go back and Ctrl+Shift+Z or Ctrl+Y to go forward. Loading a new image clears the history.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index-en.html">Guides</a></span>
+</nav>
+<h1>Per-Frame Editing and Undo/Redo</h1>
+<p class="lede">Most cuts are right and only a few sit half a pixel out. You do not have to rebuild the whole grid for that: pick one frame from the result preview, correct it, and if you make it worse, put it back with a single keystroke.</p>
+<p class="lang-switch"><a href="/guides/frame-editing-undo.html">이 글 한국어로 읽기</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>Why you would edit one frame</h2>
+<p>Checking the results after cutting tends to reveal two kinds of problem. One is <strong>a few bad frames</strong>: padding off by a little, or a partly filled last row leaving a cut mostly transparent. The other is <strong>one frame that is almost right</strong>: an outline missing a pixel, or a sliver of background dragged in beside a front-facing character.</p>
+<p>Fixing either of those by reworking the split counts cascades into the padding values and ends up messier than before. Per-frame editing exists for this case. The grid stays exactly as it is, and a single frame gets its position and size overwritten.</p>
+<div class="note">
+  <p><strong>Important</strong> Per-frame overrides belong to the current grid. Changing the column or row count changes how many frames exist and where they sit, so the overrides reset. If you plan to try several grid combinations, you cannot carry each set of edits between them; finish one layout and adjust it.</p>
+</div>
+
+<h2 id="step-1">Step 1. Open the result preview</h2>
+<p>Open the image cutter from the <a href="/">sprite sheet tool</a>, load your image, and expand the <strong>result preview</strong> panel at the bottom. The panel collapses and expands, which is handy: keep it closed while testing grid counts, and open it once a result looks plausible.</p>
+<p>Expanding it shows a thumbnail grid on a checkerboard that represents transparency. The header reports the total as <em>"{n} cuts"</em>, and a <strong>reset all</strong> button appears whenever at least one override exists. That button's presence is a useful signal: it means this sheet has been hand-tweaked.</p>
+
+<h2 id="step-2">Step 2. Read the thumbnail labels</h2>
+<p>Every thumbnail carries a label of the form <em>"index · width×height"</em>. A tile reading <em>7 · 128×128</em> tells you frame 7 of the output is 128 × 128. Thumbnails are scaled down to fit the panel, but the label always shows the true pixel values, so scanning the grid reveals an odd frame immediately.</p>
+<p>Look at the checkerboard too. A tile with a lot of remaining background next to a clean transparent one tells you which section needs attention for the keying problem described in <a href="/guides/remove-background-chromakey-en.html">background removal</a>.</p>
+
+<h2 id="step-3">Step 3. Enter single-frame edit mode</h2>
+<p>Tap the thumbnail you want to fix and the tool switches to <em>"frame N edit"</em> mode. The canvas changes with it:</p>
+<ul>
+  <li>Instead of the full grid, <strong>only the selected frame</strong> gets handles.</li>
+  <li>The <strong>dimming outside the guide box is switched off</strong>, so the whole source image is evenly lit and neighbouring frames can be used as reference.</li>
+  <li>Dragging the handles changes that frame's position and size.</li>
+</ul>
+<p>When you need to check several frames, press <strong>end edit</strong> to leave, then tap the next thumbnail. Repeating enter-and-exit keeps each adjustment isolated.</p>
+
+<h2 id="step-4">Step 4. Adjust x, y, w, and h</h2>
+<p>The editor shows four fields: <strong>x</strong>, <strong>y</strong>, <strong>w</strong>, and <strong>h</strong>. x and y are coordinates in the source image; w and h are the width and height of the region being cut. Dragging and typing produce identical results.</p>
+<p>Two rules apply. The minimum frame size is <strong>8 × 8 px</strong>, and smaller values are rejected, so if your source resolution simply is not there, you must export a larger sheet. And results are recomputed after roughly 150ms, so if you type into several fields in quick succession only the final value may seem to take effect; wait a moment before judging it.</p>
+<p>Coordinates are integer pixels of the source image, no matter how far you have zoomed the browser.</p>
+
+<h2 id="step-5">Step 5. Restore defaults, or everything</h2>
+<p>There are two ways to undo an edit, at two different scopes.</p>
+<p><strong>Default</strong> reverts only the frame you are editing to its grid value. Adjustments on other frames stay put, which is exactly what you want after working through a long list and spotting one mistake.</p>
+<p><strong>Reset all</strong> clears every per-frame override in one action. Use it when you have spent twenty attempts on boundaries or padding and want a clean baseline — this replaces the manual procedures described in <a href="/guides/manual-boundaries-en.html">padding and manual boundaries</a>. The button only appears when overrides exist.</p>
+<p>When you are finished with a frame, press <strong>end edit</strong>. Your overrides are kept and carried into the export.</p>
+
+<h2 id="step-6">Step 6. Undo and redo</h2>
+<p>Every value-changing action is recorded: dragging a boundary, typing a padding number, editing a frame. History holds up to <strong>100 steps</strong>, and <strong>consecutive changes to the same target within 0.35 seconds merge into a single step</strong>.</p>
+<p>The reason that merge matters is practical. A single handle drag can produce sixty value changes. Without merging, one Ctrl+Z would not return you to where the drag started, and you would have to press it sixty times. With merging, a drag is one step, and one keystroke returns you exactly to the state before it.</p>
+<p>The shortcuts are:</p>
+<table>
+  <caption>Image cutter shortcuts</caption>
+  <thead>
+    <tr><th scope="col">Shortcut</th><th scope="col">Action</th><th scope="col">Notes</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Ctrl + Z</td><td>Undo</td><td>Returns to the previous state</td></tr>
+    <tr><td>Ctrl + Shift + Z</td><td>Redo</td><td>Reapplies an undone change</td></tr>
+    <tr><td>Ctrl + Y</td><td>Redo</td><td>Same action as Ctrl + Shift + Z</td></tr>
+    <tr><td>Ctrl + S</td><td>Save</td><td>Saves the ZIP in the batch image cutter</td></tr>
+  </tbody>
+</table>
+<p>Loading a new image clears the history completely. Once the source changes there is no reason to step back to the previous file's state. By contrast, history keeps accumulating while you keep <a href="/guides/manual-boundaries-en.html">adjusting boundaries on the same image</a>, so re-select the file if you want a guaranteed clean slate after a long experiment.</p>
+
+<h2>A practical routine</h2>
+<p>When a task involves a lot of trial and error, this order keeps you out of trouble.</p>
+<ol>
+  <li>Set the grid counts and confirm the total and per-frame size in the status bar.</li>
+  <li>Open the result preview and scan the labels to see whether every frame matches.</li>
+  <li>Open only the outliers and adjust their position and size.</li>
+  <li>Press Ctrl+Z if one change went wrong, or reset all if you want the untouched baseline back.</li>
+  <li>End edit, then use save and download (ZIP) and confirm in the preview dialog.</li>
+</ol>
+<p>Once the frames look right, <a href="/guides/zip-preview-animation-en.html">the ZIP and index.html guide</a> shows you how to watch them actually move. If your source frames come from an animated GIF, the next natural step is <a href="/guides/gif-to-sprite-sheet-en.html">converting a GIF into a sprite sheet</a>.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>It runs in your browser with no sign-up. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet splitter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/remove-background-chromakey-en.html"><span class="dir">Previous</span><span class="ttl">Creating Transparent PNGs with Background Removal</span></a>
+  <a class="next" href="/guides/zip-preview-animation-en.html"><span class="dir">Next</span><span class="ttl">Checking Animation with the ZIP and index.html Preview</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Sprite Splitter</a></li>
+          <li><a href="/">Batch Image Cutter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">All guides</a></li>
+          <li><a href="/faq-en.html">FAQ</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy</a></li>
+          <li><a href="/terms-en.html">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

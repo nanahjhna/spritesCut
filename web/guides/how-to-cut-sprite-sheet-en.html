@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Basic Sprite Sheet Cutting | Sprite Sheet Splitter</title>
+<meta name="description" content="The complete equal-grid workflow for the image cutter: entering grid counts, reading the status bar, checking the result thumbnails, removing frames you do not need, and saving the ZIP with predictable file names.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Basic Sprite Sheet Cutting">
+<meta property="og:description" content="Cut a sprite sheet into PNG frames with an equal grid, from file picking to ZIP download.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Basic Sprite Sheet Cutting",
+  "description": "The complete equal-grid workflow for the image cutter: entering grid counts, reading the status bar, checking the result thumbnails, removing frames you do not need, and saving the ZIP with predictable file names.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "Sprite sheet splitter that runs in the browser" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Pick your sprite sheet image", "text": "Open the image cutter from the home screen and choose one decodable image file such as a PNG or JPG. Until you do, the screen only shows the prompt asking you to upload a sprite sheet.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "Enter the column and row counts", "text": "In the grid section, type the horizontal and vertical split counts. The default is 4 × 1, and any value of zero or less is treated as 1.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "Verify the numbers in the status bar", "text": "The status bar below the canvas reports the full image size, the region size, the single-frame size, and the total frame count so you can confirm the maths before saving.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "Inspect the result thumbnails", "text": "Open the result preview panel. Frames appear on a checkerboard, each labelled with its index and pixel size.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "Drop the frames you do not need", "text": "In the save dialog, delete unwanted tiles. The remaining frames are renumbered sequentially with no gaps.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "Save the ZIP and open the preview", "text": "Press download ZIP. You receive the PNG frames together with a preview index.html and a bundled stage.jpg background image.", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span><a href="/guides/index-en.html">Guides</a></span>
+</nav>
+<h1>Basic Sprite Sheet Cutting</h1>
+<p class="lede">A regular grid sheet needs nothing more than an equal split. Pick one image, type two numbers, and you get a folder full of PNG frames. Here is the whole path, start to finish.</p>
+<p class="lang-switch"><a href="/guides/how-to-cut-sprite-sheet.html">이 글 한국어로 읽기</a></p>
+<div class="post-meta">Published 2026-10-04 · Last updated 2026-10-04 · About 8 min read</div>
+
+<h2>When this method works</h2>
+<p>Equal splitting is exact when every frame in the sheet is the same size, there is no gutter between frames, and each row holds the same number of cuts. Divide a 512 × 128 sheet 4 × 2 and you get eight 128 × 64 frames — nothing else to do.</p>
+<p>It breaks down when transparent margins sit between frames, or when the last row is only partly filled. In that case move on to <a href="/guides/manual-boundaries-en.html">padding and manual boundaries</a>. For now, let's take a plain grid all the way apart.</p>
+
+<h2 id="step-1">Step 1. Choose the image</h2>
+<p>Open the <a href="/">sprite sheet tool</a> and switch to the image cutter on the home screen. With nothing loaded, the page shows only the prompt <em>"스프라이트 시트를 업로드해 주세요"</em> (please upload a sprite sheet). Click it, or use the file picker button, and select your image.</p>
+<p>PNG and JPG work, as do other formats your browser can decode. The moment you pick the file it is read locally and drawn on the canvas at 100%. There is no server involved, so nothing is transmitted and a slow connection will not slow down the work.</p>
+<p>Loading an image also clears the undo history, so records from a previous file can never bleed into the new one.</p>
+
+<h2 id="step-2">Step 2. Enter the grid counts</h2>
+<p>In <strong>grid (columns × rows)</strong>, type into two fields labelled with the horizontal and vertical split; each carries the suffix "ea". They start at 4 × 1. The table shows what common settings produce.</p>
+<table>
+  <caption>Grid counts and their results on a 1024 × 1024 image</caption>
+  <thead>
+    <tr><th scope="col">Columns</th><th scope="col">Rows</th><th scope="col">Total frames</th><th scope="col">Frame size</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>4</td><td>1</td><td>4</td><td>256 × 1024</td></tr>
+    <tr><td>4</td><td>2</td><td>8</td><td>256 × 512</td></tr>
+    <tr><td>8</td><td>4</td><td>32</td><td>128 × 256</td></tr>
+    <tr><td>8</td><td>8</td><td>64</td><td>128 × 128</td></tr>
+    <tr><td>16</td><td>16</td><td>256</td><td>64 × 64</td></tr>
+  </tbody>
+</table>
+<p>If you clear a field and leave it empty, that side is not calculated at all, so type a replacement straight away. Entering zero or a negative number falls back to 1 for that side. Either way, glance at the status bar after typing to make sure the result matches your intent.</p>
+<p>While the mode is set to <strong>equal split</strong>, four padding fields are available. Enter how many pixels to exclude from the top, bottom, left, and right, and the drag handles on the canvas move with them. Fine-tuning gutters is covered in <a href="/guides/manual-boundaries-en.html">padding and manual boundaries</a>.</p>
+
+<h2 id="step-3">Step 3. Read the status bar</h2>
+<p>The bar under the canvas summarises everything that matters:</p>
+<ul>
+  <li><strong>Full W×H px</strong> — the size of the original image.</li>
+  <li><strong>Region W×H px (T/B/L/R)</strong> — the area left after padding is excluded.</li>
+  <li><strong>1 cut W×H px</strong> — the size of one exported frame.</li>
+  <li><strong>Total N (C×R)</strong> — how many frames you get, and the arrangement.</li>
+</ul>
+<p>Because the bar updates as you type, you can confirm each change without guessing. With a 1024 × 1024 image and 8 × 8, it must read 128 × 128 per cut and 64 total. If the frame size comes out as zero or under 8px, the grid is too fine — reduce it. The smallest frame the cutter will produce is 8px.</p>
+<p>Switch the mode to <strong>manual</strong> and the bar adds a <em>"manual"</em> badge. Since cut sizes can then vary, it also shows the smallest to largest frame size as a range.</p>
+
+<h2 id="step-4">Step 4. Check the result preview</h2>
+<p>The <strong>result preview</strong> panel at the bottom collapses and expands. Open it and the frames appear as thumbnails on a checkerboard, so transparency is easy to see. Each tile is labelled with its index and dimensions, such as <em>12 · 64×64</em>, meaning frame 12 of the output is 64 × 64.</p>
+<p>These thumbnails are produced by the same calculation as the final export. If what you see here disagrees with the guide lines on the canvas, your grid counts or padding values are off — better to fix it now than after export. Tapping a thumbnail opens a single-frame editor for that frame, described in <a href="/guides/frame-editing-undo-en.html">per-frame editing and undo</a>.</p>
+<div class="note">
+  <p><strong>Note</strong> Output is always PNG. There is no JPG or WebP option, because alpha transparency has to survive the export.</p>
+</div>
+
+<h2 id="step-5">Step 5. Remove frames you will not use</h2>
+<p>Sheets often contain cuts you never wanted: an empty slot at the end of the last row, a reference pose, a duplicate. You can trim individual frame sizes in the preview, or delete frames outright from the save dialog that appears just before download.</p>
+<p>In that dialog, press the <em>"delete"</em> badge on any tile to remove it. The remaining frames are renumbered from 1 with no gaps, so deleting frames 5 and 7 renumbers everything after them.</p>
+<p>If your scenes belong to different animations, use the folder feature in the sidebar. Turn on <strong>folder mode</strong>, create folders with <em>"add folder"</em>, then long-press an image for half a second and drag it into a folder — or select several and use the <em>"move"</em> button. Ctrl-click and Shift-click also multi-select, and the <em>"select mode"</em> toggle keeps selection active for repeated picks. Numbering restarts inside each folder, which keeps an idle loop and a run cycle in tidy separate ranges.</p>
+
+<h2 id="step-6">Step 6. Save the ZIP</h2>
+<p>When you are satisfied, press <strong>save and download (ZIP)</strong>. The label switches to <em>"processing…"</em> while the frames are cut, and then the <em>"save preview"</em> dialog opens. Confirm your selection there and press <em>"download (ZIP)"</em>. Saving is deliberately two steps: cut first, then verify what will actually be written.</p>
+<p>The dialog footer spells out the naming rule. For a source file called <code>hero.png</code> with a 4 × 2 grid, the archive holds <code>hero_1.png</code> through <code>hero_8.png</code>. Unsafe filename characters become underscores, and an empty name falls back to <code>sprite</code>.</p>
+<p>One more detail: the ZIP also contains <code>index.html</code> and a background image <code>stage.jpg</code> alongside the PNG frames. Unzip and open <code>index.html</code> in a browser to watch the frames play back in order. <a href="/guides/zip-preview-animation-en.html">The ZIP and index.html guide</a> covers that in detail.</p>
+
+<h2>Choosing grid counts</h2>
+<p>If the image is open and you are unsure what to type, work through this list.</p>
+<ol>
+  <li>Confirm the source size from the full W×H px readout.</li>
+  <li>Decide the intended size of one cut. For pixel art, powers of two such as 32, 64, or 128 are safest.</li>
+  <li>Divide the full width by the cut width for the column count, and the full height by the cut height for the row count.</li>
+  <li>Check that the total and per-frame size in the status bar match what you expected.</li>
+  <li>If they differ, apply padding first, or adjust the counts one step at a time.</li>
+</ol>
+<p>Take a 1024 × 512 sheet holding 64 × 64 sprites: columns is 16 and rows is 8, giving 128 cuts of exactly 64 × 64. When the arithmetic refuses to land cleanly, the per-frame size is turning fractional — the fastest fix is to bring the source size or the target cut size onto a power of two.</p>
+
+<h2>Defaults and limits at a glance</h2>
+<table>
+  <caption>Image cutter defaults, ranges, and rules</caption>
+  <thead>
+    <tr><th scope="col">Setting</th><th scope="col">Default</th><th scope="col">Range or rule</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Columns / rows</td><td>4 / 1</td><td>Integers; zero or less falls back to 1</td></tr>
+    <tr><td>Minimum frame size</td><td>—</td><td>Never smaller than 8px</td></tr>
+    <tr><td>Background removal tolerance</td><td>10%</td><td>0–30% in 30 steps</td></tr>
+    <tr><td>Minimum edited frame size</td><td>—</td><td>8 × 8 px</td></tr>
+    <tr><td>Undo history</td><td>—</td><td>100 steps; edits within 0.35s merge</td></tr>
+    <tr><td>Output format</td><td>—</td><td>Always RGBA PNG; no JPG or WebP</td></tr>
+    <tr><td>Split mode</td><td>Equal</td><td>Equal split / manual</td></tr>
+  </tbody>
+</table>
+<p>There is no frame-count ceiling in code, but every frame duplicates image data, so device memory is the real limit. Cutting a 1024 × 1024 sheet into 256 tiles of 64 × 64 means 256 separate files, each anywhere from tens to hundreds of kilobytes depending on the content. Very large sheets are safer processed in batches.</p>
+<p>Your frames are ready. If individual sizes need tweaking, read <a href="/guides/frame-editing-undo-en.html">per-frame editing and undo</a>; if the layout is irregular, read <a href="/guides/manual-boundaries-en.html">padding and manual boundaries</a>.</p>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>It runs in your browser with no sign-up. Images are processed only on your device and are never uploaded.</p>
+  <a class="btn" href="/">Open the sprite sheet splitter</a>
+</div>
+
+<nav class="pager" aria-label="Guide navigation">
+  <a class="prev" href="/guides/sprite-sheet-basics-en.html"><span class="dir">Previous</span><span class="ttl">What Is a Sprite Sheet? Basic Concepts</span></a>
+  <a class="next" href="/guides/manual-boundaries-en.html"><span class="dir">Next</span><span class="ttl">Precise Splitting with Padding and Manual Boundaries</span></a>
+</nav>
+<p class="to-top"><a href="#main">Back to top</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Sprite Splitter</a></li>
+          <li><a href="/">Batch Image Cutter</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">All guides</a></li>
+          <li><a href="/faq-en.html">FAQ</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy</a></li>
+          <li><a href="/terms-en.html">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

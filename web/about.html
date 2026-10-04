@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서비스 소개 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="스프라이트 시트 분할 도구는 무엇을 하는 도구인가요. 브라우저에서만 동작하는 무료 이미지 처리 도구의 제공 배경, 기능 구성, 기술 방식, 운영 정보를 소개합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/about.html">
+<meta name="robots" content="index, follow">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/about.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/about-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/about.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="서비스 소개 | 스프라이트 시트 분할 도구">
+<meta property="og:description" content="브라우저에서만 동작하는 무료 스프라이트 시트·이미지 처리 도구입니다.">
+<meta property="og:url" content="https://spritescut.netlify.app/about.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "서비스 소개",
+  "description": "스프라이트 시트 분할 도구의 제공 배경과 기능 구성, 운영 정보.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/about.html",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "isPartOf": { "@type": "WebSite", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://spritescut.netlify.app/" },
+      { "@type": "ListItem", "position": 2, "name": "서비스 소개", "item": "https://spritescut.netlify.app/about.html" }
+    ]
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span>서비스 소개</span>
+</nav>
+<h1>서비스 소개</h1>
+<p class="lede">스프라이트 시트 분할 도구는 게임과 웹에서 쓰는 이미지 자산을 브라우저 안에서 바로 정리해 주는 무료 도구입니다. 이 페이지에서는 무엇을 만들고 왜 만들었는지 설명합니다.</p>
+<p class="lang-switch"><a href="/about-en.html">Read this page in English</a></p>
+<div class="post-meta">최종 업데이트 2026-10-04</div>
+
+<h2>무엇을 하는 도구인가요</h2>
+<p>게임 개발이나 웹 작업에서는 캐릭터가 움직이는 여러 장면(프레임)을 한 장의 큰 이미지, 즉 <strong>스프라이트 시트</strong>로 모아서 관리하는 경우가 많습니다. 반대로, 한 장의 큰 시트 이미지를 다시 프레임별로 잘라야 하는 순간이 생깁니다. 이 도구는 바로 그 작업을 담당합니다.</p>
+<p>쉽게 말하면 이 도구는 다음 세 가지 일을 해 줍니다.</p>
+<ul>
+  <li>한 장의 스프라이트 시트를 잘라 여러 개의 프레임 이미지로 나눕니다.</li>
+  <li>GIF 애니메이션을 프레임별 이미지나 하나의 스프라이트 시트로 변환합니다.</li>
+  <li>여러 장의 사진을 같은 크기로 잘라 하나의 ZIP 파일로 묶습니다.</li>
+</ul>
+<p>이 작업들은 원래 포토샵이나 별도의 프로그램을 설치해서 해야 했습니다. 그러나 실제 필요한 것은 "잘라서 파일로 저장하기" 하나인데, 그하나를 위해 무거운 편집기를 실행하는 것은 지나친 부담이었습니다. 그래서 이 도구를 만들었습니다.</p>
+
+<h2>왜 브라우저에서만 동작하나요</h2>
+<p>이 도구의 가장 중요한 설계 목표는 <strong>이미지가 서버로 전송되지 않는 것</strong>입니다. 모든 이미지 디코딩, 자르기, 배경 제거, ZIP 압축이 이용자의 브라우저 안에서 실행되므로 다음이 성립합니다.</p>
+<ul>
+  <li>업로드할 필요도, 업로드할 시간도 없습니다.</li>
+  <li>업로드 가능한 용량 제한에 걸리지 않습니다.</li>
+  <li>개인 사진이나 작업 중인 게임 자산을 외부에 노출할 필요가 없습니다.</li>
+  <li>설치 없이, 어떤 컴퓨터의 브라우저에서도 바로 실행할 수 있습니다.</li>
+</ul>
+<div class="note">
+  <p>처리된 결과도 외부로 전송되지 않습니다. 결과 파일은 브라우저의 다운로드 기능으로 이용자의 기기에 직접 기록됩니다. 자세한 내용은 <a href="/privacy.html">개인정보처리방침</a>을 참고해 주세요.</p>
+</div>
+
+<h2>기능 구성</h2>
+
+<h3>이미지 자르기</h3>
+<p>가장 자주 쓰이는 기능입니다. 스프라이트 시트 이미지를 불러온 뒤 가로와 세로의 분할 수를 지정하면 각 프레임이 PNG로 나뉩니다. 균등 격자로 나누는 방법과, 이미지 가장자리의 불필요한 여백이나 규칙적이지 않은 간격을 수동 경계선으로 지정하는 방법을 모두 제공합니다.</p>
+<p>단색 배경이 있는 이미지라면 배경을 자동으로 감지해 투명하게 바꿀 수 있습니다. 분할 결과가 마음에 들지 않을 때는 특정 프레임만 크기나 위치를 다시 조정하거나, 변경 내용을 되돌릴 수 있습니다. 저장은 ZIP 파일 한 번으로 끝나며, 그 안에는 프레임 PNG들과 애니메이션 미리보기용 HTML 파일, 배경 이미지가 함께 들어갑니다.</p>
+<p><a href="/guides/how-to-cut-sprite-sheet.html">기본 사용법 보기</a> · <a href="/guides/remove-background-chromakey.html">배경 제거 사용법 보기</a></p>
+
+<h3>GIF 스프라이트 분할</h3>
+<p>GIF는 여러 프레임이 한 파일에 압축되어 들어 있습니다. 이 도구는 GIF를 프레임마다 개별 PNG로 나눠 주거나, 프레임을 가로 한 줄·세로 한 줄·격자 형태로 배치한 하나의 스프라이트 시트로 만들어 줍니다. GIF 주변에 붙어 있는 투명 여백을 자동으로 잘라내고, 단색 배경이라면 제거한 뒤 저장할 수 있습니다.</p>
+<p><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드 보기</a></p>
+
+<h3>다중 이미지 일괄 자르기</h3>
+<p>사진 여러 장을 한꺼번에 같은 크기로 만들어야 할 때 사용합니다. 기준이 될 사진 한 장을 고르고 원하는 크기와 위치를 정하면, 나머지 사진에도 같은 규칙이 적용됩니다. 결과는 모두 같은 픽셀 크기의 PNG로 변환되어 하나의 ZIP에 담깁니다.</p>
+<p><a href="/guides/batch-crop-images.html">일괄 자르기 가이드 보기</a></p>
+
+<h2>기술 방식에 대한 솔직한 설명</h2>
+<p>이 도구는 기계학습이나 신경망을 사용하지 않습니다. 이미지 처리는 모두 결정적인 픽셀 단위 연산으로 이루어집니다. 예를 들어 배경 제거 기능은 이미지 가장자리의 색을 표본으로 조사해 대표 색을 찾고, 각 픽셀과 그 색 사이의 거리를 계산해 일정 거리 이내이면 투명(alpha 0)으로 바꿉니다. 같은 입력에는 언제나 같은 결과가 나옵니다.</p>
+<p>이와 같은 이유로 이 도구는 어떤 종류의 창작물에도 적용할 수 없습니다. 특정 스타일의 그림을 학습해 다시 그리는 일은 하지 않으며, 그런 기능은 제공하지 않습니다.</p>
+
+<h2>비용과 이용 방법</h2>
+<p>이 도구는 별도의 설치나 회원가입 없이 사용할 수 있으며, 모든 기능을 무료로 이용할 수 있습니다. 결제 단계나 유료 플랜이 없습니다. 어떤 계정도 만들지 않기 때문에 비밀번호를 입력할 일도 없습니다.</p>
+
+<h2>운영 정보</h2>
+<div class="table-wrap">
+<table>
+  <tbody>
+    <tr><th>서비스 제공자</th><td>[서비스 제공자 이름]</td></tr>
+    <tr><th>주소</th><td>[서비스 제공자 주소]</td></tr>
+    <tr><th>전화번호</th><td>[연락 가능 전화번호]</td></tr>
+    <tr><th>이메일</th><td><a href="mailto:contact@example.com">contact@example.com</a></td></tr>
+    <tr><th>홈페이지</th><td><a href="https://spritescut.netlify.app/">https://spritescut.netlify.app/</a></td></tr>
+    <tr><th>서비스 개시일</th><td>2026년 10월 4일</td></tr>
+  </tbody>
+</table>
+</div>
+<p>이용 중 오류가 있거나 개선할 점이 있으면 언제든지 <a href="/contact.html">문의하기</a>로 알려 주시면 검토하겠습니다. 이용자들의 제보를 통해 이 도구의 정확도와 편의성이 계속 개선되고 있습니다.</p>
+
+<div class="cta">
+  <h2>직접 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지 업로드 없이 기기 안에서만 처리되므로 바로 사용할 수 있습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

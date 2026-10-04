@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature Guides — Sprite Sheet Cutter, GIF Converter, Batch Cropper | Sprite Sheet Splitter</title>
+<meta name="description" content="Step-by-step guides for every feature of the Sprite Sheet Splitter: sprite sheet basics, equal grid cutting, manual boundaries, background removal, per-frame editing, the ZIP preview animation, GIF conversion, batch cropping and pixel art image specs.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/index-en.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/index.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/index-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/index.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:site_name" content="Sprite Sheet Splitter">
+<meta property="og:title" content="Feature Guides — Sprite Sheet Splitter">
+<meta property="og:description" content="All nine step-by-step guides for the Sprite Sheet Splitter in one place.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/index-en.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Feature Guides",
+  "description": "Every feature of the Sprite Sheet Splitter, explained step by step.",
+  "inLanguage": "en",
+  "url": "https://spritescut.netlify.app/guides/index-en.html",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "isPartOf": { "@type": "WebSite", "name": "Sprite Sheet Splitter", "url": "https://spritescut.netlify.app/" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://spritescut.netlify.app/" },
+      { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://spritescut.netlify.app/guides/index-en.html" }
+    ]
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "What Is a Sprite Sheet? A Beginner's Guide", "url": "https://spritescut.netlify.app/guides/sprite-sheet-basics-en.html" },
+      { "@type": "ListItem", "position": 2, "name": "How to Cut a Sprite Sheet into Frames", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet-en.html" },
+      { "@type": "ListItem", "position": 3, "name": "Manual Boundaries and Padding for Irregular Sheets", "url": "https://spritescut.netlify.app/guides/manual-boundaries-en.html" },
+      { "@type": "ListItem", "position": 4, "name": "Removing Solid Backgrounds for Transparent PNGs", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey-en.html" },
+      { "@type": "ListItem", "position": 5, "name": "Per-Frame Editing and Undo/Redo", "url": "https://spritescut.netlify.app/guides/frame-editing-undo-en.html" },
+      { "@type": "ListItem", "position": 6, "name": "Previewing Animations with the ZIP Preview", "url": "https://spritescut.netlify.app/guides/zip-preview-animation-en.html" },
+      { "@type": "ListItem", "position": 7, "name": "3 Ways to Convert a GIF into a Sprite Sheet", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet-en.html" },
+      { "@type": "ListItem", "position": 8, "name": "Batch Cropping Multiple Images to One Size", "url": "https://spritescut.netlify.app/guides/batch-crop-images-en.html" },
+      { "@type": "ListItem", "position": 9, "name": "Pixel Art Image Specs: Frame Size, File Size, Optimization", "url": "https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html" }
+    ]
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">Sprite Sheet Splitter</a>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/">Home</a>
+      <a href="/guides/index-en.html">Guides</a>
+      <a href="/faq-en.html">FAQ</a>
+      <a href="/about-en.html">About</a>
+      <a href="/contact-en.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span>Guides</span>
+</nav>
+<h1>Feature Guides</h1>
+<p class="lede">Everything the Sprite Sheet Splitter does, explained step by step. If you are new here, read them in order from guide 1 onwards — that is the order the whole workflow usually follows.</p>
+<p class="lang-switch"><a href="/guides/index.html">이 가이드를 한국어로 읽기</a></p>
+
+<h2>What you need to know first</h2>
+<p>This tool runs entirely in your browser. There is nothing to install and no account to create. The images and GIFs you pick are never sent to a server: they are decoded, split and compressed inside the browser on the device you are using. Files are written straight to your device through the browser's own download mechanism.</p>
+
+<h2>The three tools</h2>
+<ul class="tool-grid">
+  <li class="tool">
+    <h3>Image Cutter</h3>
+    <p>Cuts a sprite sheet image into a horizontal × vertical grid and saves each frame as a PNG. Supports equal grid cutting, manual boundaries, solid background removal and per-frame editing.</p>
+    <a class="btn-ghost" href="/">Open the tool</a>
+  </li>
+  <li class="tool">
+    <h3>GIF Splitter</h3>
+    <p>Turns every frame of a GIF animation into either a set of individual PNG files or a single sprite sheet. Automatic transparent-area trimming and solid background removal are available.</p>
+    <a class="btn-ghost" href="/">Open the tool</a>
+  </li>
+  <li class="tool">
+    <h3>Batch Cropper</h3>
+    <p>Crops many photos to one fixed size with centre alignment and bundles the results into a ZIP of PNG files. Set the size and position once and every other photo follows the same rule.</p>
+    <a class="btn-ghost" href="/">Open the tool</a>
+  </li>
+</ul>
+
+<h2>All guides</h2>
+<ol class="card-grid">
+  <li class="card">
+    <h3><a href="/guides/sprite-sheet-basics-en.html">1. What Is a Sprite Sheet? A Beginner's Guide</a></h3>
+    <p>How to calculate frame size, the difference between row-major and column-major layouts, transparent versus solid backgrounds — the fundamentals worth knowing before you cut.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/how-to-cut-sprite-sheet-en.html">2. How to Cut a Sprite Sheet into Frames</a></h3>
+    <p>The basic flow: load an image, enter the column and row counts, confirm on the preview, then save everything as a ZIP.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/manual-boundaries-en.html">3. Manual Boundaries and Padding for Irregular Sheets</a></h3>
+    <p>How to trim away leftover transparent gutters that an even grid cannot handle, and how to place boundaries by absolute pixel coordinates.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/remove-background-chromakey-en.html">4. Removing Solid Backgrounds for Transparent PNGs</a></h3>
+    <p>Automatic detection of a single-colour background so it becomes transparent, plus how to tune the tolerance value for different images.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/frame-editing-undo-en.html">5. Per-Frame Editing and Undo/Redo</a></h3>
+    <p>Changing the size or position of a single cut, and the keyboard shortcuts that undo and redo what you just changed.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/zip-preview-animation-en.html">6. Previewing Animations with the ZIP Preview</a></h3>
+    <p>What is inside the saved ZIP, and how to organise your frames into folders and then preview the resulting animation.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/gif-to-sprite-sheet-en.html">7. 3 Ways to Convert a GIF into a Sprite Sheet</a></h3>
+    <p>Pick a GIF, choose a sheet layout and background options, then decide which of the three save buttons is right for your project.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/batch-crop-images-en.html">8. Batch Cropping Multiple Images to One Size</a></h3>
+    <p>Select many photos at once, crop them all to one size and bundle them into a ZIP — and why a reference photo is required.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/pixel-art-image-specs-en.html">9. Pixel Art Image Specs: Frame Size, File Size, Optimization</a></h3>
+    <p>Why sprite art must never be resampled, how to work out frame sizes and file weight, and a checklist to run before exporting.</p>
+  </li>
+</ol>
+
+<h2>Other documents</h2>
+<ul>
+  <li><a href="/faq-en.html">Frequently asked questions</a> — supported formats, size limits, where files are saved</li>
+  <li><a href="/privacy-en.html">Privacy Policy</a> — what information is collected and how it is handled</li>
+  <li><a href="/terms-en.html">Terms of Service</a> — the conditions of use and the limits of our liability</li>
+  <li><a href="/about-en.html">About this service</a> — what the tool does and who runs it</li>
+  <li><a href="/contact-en.html">Contact us</a> — report a problem or make a request</li>
+</ul>
+
+<div class="cta">
+  <h2>Try it now</h2>
+  <p>No install, no sign-up — it runs straight in your browser. Images are processed on your device and never uploaded.</p>
+  <a class="btn" href="/">Open the Sprite Sheet Splitter</a>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="/">Image Cutter</a></li>
+          <li><a href="/">GIF Splitter</a></li>
+          <li><a href="/">Batch Cropper</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Guides</h4>
+        <ul>
+          <li><a href="/guides/index-en.html">Browse all guides</a></li>
+          <li><a href="/faq-en.html">Frequently asked questions</a></li>
+          <li><a href="/guides/remove-background-chromakey-en.html">Background removal guide</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet-en.html">GIF conversion guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Service</h4>
+        <ul>
+          <li><a href="/about-en.html">About</a></li>
+          <li><a href="/contact-en.html">Contact</a></li>
+          <li><a href="/privacy-en.html">Privacy Policy</a></li>
+          <li><a href="/terms-en.html">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Sprite Sheet Splitter. All rights reserved.</span>
+      <span>All image processing happens on your own device.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

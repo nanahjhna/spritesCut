@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>픽셀 아트 이미지 규격 가이드 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="스프라이트 시트의 프레임 크기 계산, 확대 방식, 투명 PNG 용량, 배경 제거 허용 오차의 의미까지 정리한 픽셀 아트 이미지 규격 참고 가이드입니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/pixel-art-image-specs-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="픽셀 아트 이미지 규격 가이드">
+<meta property="og:description" content="스프라이트 시트의 프레임 크기 계산, 확대 방식, 투명 PNG 용량, 배경 제거 허용 오차의 의미까지 정리한 픽셀 아트 이미지 규격 참고 가이드입니다.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/pixel-art-image-specs.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "name": "픽셀 아트 이미지 규격 가이드",
+  "description": "스프라이트 시트의 프레임 크기 계산, 확대 방식, 투명 PNG 용량, 배경 제거 허용 오차의 의미까지 정리한 픽셀 아트 이미지 규격 참고 가이드입니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/pixel-art-image-specs.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 스프라이트 시트 분할 도구" }]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>픽셀 아트 이미지 규격 가이드</h1>
+<p class="lede">도구를 다루는 방법이 아니라, 픽셀 아트 이미지가 어떤 규칙으로 돌아가는지를 정리한 참고 문서입니다. 프레임 크기를 어떻게 계산하고, 왜 확대할 때 가장 가까운 픽셀을 골라야 하며, 투명 영역이 왜 파일을 무겁게 만드는지 다룹니다.</p>
+<p class="lang-switch"><a href="/guides/pixel-art-image-specs-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>왜 스프라이트 시트를 다시 샘플링하면 안 되는가</h2>
+<p>픽셀 아트는 색 하나하나가 의미 있는 정보입니다. 검은 선 한 칸으로 윤곽이 잡히고, 중간 회음 한 단계로 그림자가 결정되기 때문입니다. 그래서 스프라이트 시트를 다루는 모든 도구와 엔진은 확대할 때 반드시 <strong>가장 가까운 픽셀을 복제하는 방식</strong>을 씁니다. 1픽셀짜리 블록을 3배로 늘린 것뿐이므로 원본의 격자가 그대로 살아 있습니다.</p>
+<p>반대로 보간 확대는 인접 픽셀 색을 섞어 새로운 색을 만들어 냅니다. 결과는 미관적으로 부드러워 보이지만 픽셀 아트에서는 명백한 손상입니다. 윤곽이 흐려지고, 원본에 없던 회색 띠가 생기며, 나중에 다시 축소하면 원래 그림과 다른 것이 됩니다. 그래서 이 도구의 작업 캔버스는 이미지를 실제 크기 그대로 보여 주고 일부러 키우지 않습니다. 확대된 화면이 필요하다면 브라우저나 미리보기 쪽에서 확대하면 됩니다.</p>
+
+<table>
+<caption>확대 방식에 따른 결과 차이</caption>
+<thead>
+<tr><th scope="col">확대 방식</th><th scope="col">픽셀 처리</th><th scope="col">픽셀 아트 적합성</th></tr>
+</thead>
+<tbody>
+<tr><td>가장 가까운 이웃</td><td>블록을 정수 배수로 복제</td><td>격자가 유지됩니다. 이 도구가 쓰는 방식입니다.</td></tr>
+<tr><td>이중 선형 보간</td><td>경계 픽셀의 색을 섞음</td><td>적합하지 않습니다. 윤곽이 흐려집니다.</td></tr>
+<tr><td>bicubic 보간</td><td>더 넓은 영역의 색을 섞음</td><td>적합하지 않습니다. 잡음과 번짐이 생깁니다.</td></tr>
+<tr><td>공간 보간 (예: Lanczos)</td><td>가장자리의 링잉까지 발생</td><td>최적화되어도 원본 격자를 잃습니다.</td></tr>
+</tbody>
+</table>
+
+<p>이 규칙이 어디서 지켜지는지 한 번 더 짚어 두면, ZIP 안의 미리보기 HTML은 <code>image-rendering: pixelated</code> 로 프레임을 그리고, 미리보기 상자는 가로 최대 400px로 제한한 채 가로세로 비율을 유지합니다. 화면이 작아져도 격자는 흐려지지 않고, 원본이 400px보다 크다면 잘라 보이더라도 그것이 축소가 아니라 표시상의 제약이라는 사실은 분명합니다. 실제 데이터는 원본 크기 그대로 저장되어 있습니다.</p>
+
+<h2>프레임 크기 계산</h2>
+<p>분할 수가 정해졌을 때 한 컷의 크기는 두 수로 나누어 얻습니다.</p>
+<p><code>1컷 가로 = 시트 가로 ÷ 가로 분할 수</code><br>
+<code>1컷 세로 = 시트 세로 ÷ 세로 분할 수</code></p>
+<p>정확히 나누어떨어지지 않는다면 마지막 프레임 쪽에 남는 픽셀 때문에 가장자리 프레임이 조금 작아질 수 있습니다. 균등 분할에서는 영역 여백으로 남는 부분을 처리하고, <a href="/guides/manual-boundaries.html">수동 모드</a>에서는 경계선 좌표를 직접 지정해 Frame 수와 관계없이 정확히 같은 크기를 만들 수 있습니다.</p>
+
+<table>
+<caption>분할 수에 따른 프레임 크기 계산 예시</caption>
+<thead>
+<tr><th scope="col">시트 크기</th><th scope="col">가로 × 세로</th><th scope="col">1컷 크기</th><th scope="col">총 컷</th></tr>
+</thead>
+<tbody>
+<tr><td>512 × 128</td><td>4 × 1</td><td>128 × 128</td><td>4</td></tr>
+<tr><td>512 × 128</td><td>8 × 1</td><td>64 × 128</td><td>8</td></tr>
+<tr><td>1024 × 1024</td><td>8 × 8</td><td>128 × 128</td><td>64</td></tr>
+<tr><td>2048 × 512</td><td>16 × 2</td><td>128 × 256</td><td>32</td></tr>
+<tr><td>3840 × 2160</td><td>30 × 15</td><td>128 × 144</td><td>450</td></tr>
+</tbody>
+</table>
+
+<p>상태바에는 <code>전체: W × H px  •  영역: W × H px (상: n, 하: n, 좌: n, 우: n)  •  1컷: W × H px  •  총 N개 (C×R)</code> 형태로 요약됩니다. 영역 여백을 조절할 때 여백 값이 프레임 크기를 바꾸는 것처럼 보일 수 있는데, 그건 1컷 크기가 그만큼 줄어들기 때문입니다. 실제로 프레임이 작아지는 것이 아니라 영역이 좁아지는 것이며, 그 상태로도 모든 프레임의 크기는 같습니다. 수동 모드에서는 상태바에 <strong>수동 조절</strong> 표시가 붙고 1컷 크기가 최솟값과 최댓값의 범위로 표시됩니다. 경계선이 제각각인 경우 그 범위가 곧 문제가 있다는 뜻입니다.</p>
+
+<h2>묶어 출력할지, 풀어 출력할지</h2>
+<p>이 도구는 두 형태의 결과를 모두 줍니다. 프레임 PNG들을 ZIP으로 묶는 것과, GIF 도구 쪽에서 모든 프레임을 붙인 시트 PNG 한 장을 만드는 것입니다. 어떤 쪽이 나은지는 엔진이 무엇을 읽느냐에 따라 갈립니다.</p>
+
+<table>
+<caption>패킹된 시트와 개별 프레임 비교</caption>
+<thead>
+<tr><th scope="col">기준</th><th scope="col">시트 PNG 한 장</th><th scope="col">프레임 PNG 여러 장</th></tr>
+</thead>
+<tbody>
+<tr><td>텍스처 로딩</td><td>한 번만 읽으면 되므로 빠릅니다.</td><td>프레임마다 파일을 열어야 합니다.</td></tr>
+<tr><td>엔진 설정</td><td>시트 크기와 격자 수를 알려 줘야 합니다.</td><td>파일 이름만으로 순서를 알 수 있습니다.</td></tr>
+<tr><td>개별 프레임 교체</td><td>시트 전체를 다시 만들어야 합니다.</td><td>해당 파일만 바꾸면 됩니다.</td></tr>
+<tr><td>파일 수</td><td>하나입니다.</td><td>컷 수만큼 늘어납니다.</td></tr>
+<tr><td>자동화 스크립트</td><td>붙이는 규칙을 그대로 재현하면 됩니다.</td><td>그대로 쓰면 됩니다.</td></tr>
+<tr><td>GPU 메모리</td><td>시트 크기만큼 한 번에 올라갑니다.</td><td>실제로 그리는 프레임만 올리면 됩니다.</td></tr>
+</tbody>
+</table>
+
+<p>요약하면, 모바일까지 함께 배포하고 한 번에 불러오는 용도라면 시트 PNG가 낫고, 특정 프레임만 손보면서 규모가 커지는 작업이라면 개별 PNG가 편합니다. GIF 스프라이트 분할 도구는 세 번째 선택지인 GIF 재저장도 제공하니, 애니메이션을 엔진 밖에서 보존해야 할 때 쓸 수 있습니다. 관련 흐름은 <a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a>에 정리되어 있습니다.</p>
+
+<h2>파일 크기와 메모리</h2>
+<p>출력 형식은 언제나 PNG입니다. 손실 압축이므로 픽셀 값이 원본 그대로 보존되고, 투명 영역도 표현할 수 있습니다. JPG나 WebP를 선택하는 옵션은 없습니다. WebP가 더 작지만 브라우저와 엔진마다 지원 상황이 달라 스프라이트 데이터로는 여전히 위험한 선택이고, JPG는 알파 채널을 아예 지원하지 않아 투명 배경이 필요할 때 쓸 수 없습니다.</p>
+<p>PNG는 무손실이라 색이 조금만 달라져도 다른 값으로 저장합니다. 그래서 반투명 영역이 넓게 깔린 시트, 예를 들어 그림 전체가 아주 옅은 색의 먹선 위에 있는 상황에서는 파일이 생각보다 커집니다. 더 큰 문제는 잘 빠지지 않는 전혀 표시되지 않는 영역입니다. 완전히 투명한 픽셀이 아무리 많아도 그것을 생략하는 표시는 PNG 안에 없기 때문입니다. 프레임 사이에 빈 여백이 크게 남으면 그림에는 아무 변화가 없는데 파일 크기만 계속 올라갑니다. 그래서 균등 분할에서 영역 여백을 줄여 두는 것이 단순한 정리 이상의 의미가 있습니다.</p>
+<p>프레임 수를 제한하는 규칙은 코드에 없습니다. 남은 제약은 기기 메모리뿐입니다. 그래서 작업 전 두 가지를 미리 확인하는 편이 현명합니다.</p>
+
+<table>
+<caption>무엇을 미리 확인할지</caption>
+<thead>
+<tr><th scope="col">확인 항목</th><th scope="col">판단 기준</th></tr>
+</thead>
+<tbody>
+<tr><td>시트 전체 픽셀 수</td><td>가로 × 세로 값이 기기 메모리와 엔진의 최대 텍스처 크기 안에 들어오는가</td></tr>
+<tr><td>프레임당 프레임 크기</td><td>정수이며, 게임 화면에서 표시할 크기와 논리적으로 맞는가</td></tr>
+<tr><td>여백</td><td>프레임 사이에 표시되지 않는 투명 영역이 남아 있지 않은가</td></tr>
+<tr><td>알파</td><td>투명 배경이 정말 필요한가. 필요 없다면 배경 제거를 켜도 되는가</td></tr>
+<tr><td>색 수</td><td>쓸모없는 회색 톤이 배경 제거로 지워졌는지 눈으로 확인했는가</td></tr>
+</tbody>
+</table>
+
+<h2>색과 허용 오차의 관계</h2>
+<p>배경 제거는 특정 색을 골라 그 색과 비슷한 픽셀을 지우는 방식입니다. 어느 정도까지 비슷한 것으로 볼지를 정하는 것이 <strong>허용 오차</strong> 슬라이더이며, 두 도구에서 범위와 기본값이 다릅니다.</p>
+
+<table>
+<caption>도구별 허용 오차 범위</caption>
+<thead>
+<tr><th scope="col">도구</th><th scope="col">범위</th><th scope="col">기본값</th><th scope="col">재적용 간격</th></tr>
+</thead>
+<tbody>
+<tr><td>이미지 자르기</td><td>0% ~ 30%</td><td>10%</td><td>200ms 지연 후 재적용</td></tr>
+<tr><td>GIF 스프라이트 분할</td><td>1% ~ 50%</td><td>10%</td><td>150ms 지연 후 재적용</td></tr>
+</tbody>
+</table>
+
+<p>두 도구 모두 작은 값일수록 보수적으로 지워서 스프라이트 본체가 남고, 큰 값일수록 넓게 지워 배경을 깔끔하게 없앱니다. 장점은 제거되지 않은 잔여 배경, 단점은 캐릭터에 섞인 비슷한 색까지 함께 사라지는 것. 그래서 기본 10%에서 시작해 결과물을 눈으로 확인하며 조정하는 것이 기본 흐름입니다.</p>
+<p>이미지 자르기 도구에서는 스위치를 끄면 원본 이미지가 정확히 그대로 돌아옵니다. 제거로 잘못 지운 경우 다시 켤 필요 없이 끄기만 하면 되므로 여러 값을 빠르게 비교해 볼 수 있습니다. GIF 도구에서는 여러 프레임이 얇은 배경색을 공유하는 경우가 많으므로, 조금 넉넉한 오차를 쓰는 편이 자연스럽습니다. 감지와 오차 원리는 <a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a>에서 자세히 다룹니다.</p>
+
+<div class="note">
+<p>허용 오차는 색의 RGB 거리로 계산됩니다. 같은 입력이라면 언제 어느 기기에서 실행해도 같은 결과가 나오므로, 슬라이더 값을 조금씩 바꿔 가며 눈으로 비교하는 방식으로 충분히 좋은 값을 찾을 수 있습니다.</p>
+</div>
+
+<h2>내보내기 전 체크리스트</h2>
+<ol>
+<li>1컷 크기가 정수이며 프레임 간 차이가 없는가</li>
+<li>프레임 사이에 불필요한 투명 여백이 남지 않았는가</li>
+<li>1컷 크기가 엔진의 최대 텍스처 크기를 넘지 않는가</li>
+<li>프레임 사이를 건너뛰는 애니메이션이라면 전체 컷 수가 순서에 맞게 붙어 있는가</li>
+<li>배경 제거를 썼다면 아웃라인과 눈동자 같은 작은 요소가 지워지지 않았는가</li>
+<li>결과가 PNG인지 확인했는가</li>
+<li>실제 크기에서 확대했을 때 이음매가 보이는가</li>
+<li>애니메이션 동작이라면 <code>index.html</code>로 실제 재생 속도를 확인했는가</li>
+</ol>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/batch-crop-images.html"><span class="dir">이전 글</span><span class="ttl">여러 이미지 한 번에 같은 크기로 자르기</span></a>
+  <a class="next" href="/guides/index.html"><span class="dir">다음 글</span><span class="ttl">기능 가이드 전체 보기</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기능 사용 가이드 — 스프라이트 시트 분할 · GIF 변환 · 일괄 자르기 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="스프라이트 시트 분할 도구의 모든 기능 사용법을 정리한 가이드 목록입니다. 스프라이트 시트 기초 개념부터 균등 분할, 수동 경계선, 배경 제거, 프레임 개별 편집, ZIP 미리보기, GIF 변환, 일괄 자르기, 픽셀 아트 규격까지 단계별로 설명합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/index.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/index.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/index-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/index.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="기능 사용 가이드 — 스프라이트 시트 분할 도구">
+<meta property="og:description" content="스프라이트 시트 분할 도구의 9가지 사용 가이드를 한곳에서 확인하세요.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/index.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "기능 사용 가이드",
+  "description": "스프라이트 시트 분할 도구의 모든 기능 사용법을 정리한 가이드 목록.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/index.html",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "isPartOf": { "@type": "WebSite", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "홈", "item": "https://spritescut.netlify.app/" },
+      { "@type": "ListItem", "position": 2, "name": "기능 가이드", "item": "https://spritescut.netlify.app/guides/index.html" }
+    ]
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "스프라이트 시트란 무엇인가? 기초 개념 정리", "url": "https://spritescut.netlify.app/guides/sprite-sheet-basics.html" },
+      { "@type": "ListItem", "position": 2, "name": "스프라이트 시트 분할 기본 사용법", "url": "https://spritescut.netlify.app/guides/how-to-cut-sprite-sheet.html" },
+      { "@type": "ListItem", "position": 3, "name": "여백과 수동 경계선으로 정확히 나누기", "url": "https://spritescut.netlify.app/guides/manual-boundaries.html" },
+      { "@type": "ListItem", "position": 4, "name": "배경 제거로 투명 PNG 만들기", "url": "https://spritescut.netlify.app/guides/remove-background-chromakey.html" },
+      { "@type": "ListItem", "position": 5, "name": "프레임 개별 편집과 실행 취소/다시 실행", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html" },
+      { "@type": "ListItem", "position": 6, "name": "ZIP과 index.html 미리보기로 애니메이션 확인", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html" },
+      { "@type": "ListItem", "position": 7, "name": "GIF를 스프라이트 시트로 변환하기", "url": "https://spritescut.netlify.app/guides/gif-to-sprite-sheet.html" },
+      { "@type": "ListItem", "position": 8, "name": "여러 이미지 한 번에 같은 크기로 자르기", "url": "https://spritescut.netlify.app/guides/batch-crop-images.html" },
+      { "@type": "ListItem", "position": 9, "name": "픽셀 아트 이미지 규격 가이드", "url": "https://spritescut.netlify.app/guides/pixel-art-image-specs.html" }
+    ]
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span>기능 가이드</span>
+</nav>
+<h1>기능 사용 가이드</h1>
+<p class="lede">스프라이트 시트 분할 도구의 세 가지 도구를 실제로 다루는 방법을 단계별로 정리했습니다. 처음이라면 1번부터 순서대로 읽으시면 전체 흐름을 파악할 수 있습니다.</p>
+<p class="lang-switch"><a href="/guides/index-en.html">Read the guides in English</a></p>
+
+<h2>먼저 알아 두면 좋은 것</h2>
+<p>이 도구는 브라우저에서만 동작합니다. 설치할 프로그램이 없고 회원가입도 필요 없습니다. 선택한 이미지와 GIF는 서버로 전송되지 않고, 브라우저가 실행 중인 기기 안에서만 디코딩·분할·압축됩니다. 저장할 파일은 브라우저의 다운로드 기능으로 직접 기기에 기록됩니다.</p>
+
+<h2>제공하는 세 가지 도구</h2>
+<ul class="tool-grid">
+  <li class="tool">
+    <h3>이미지 자르기</h3>
+    <p>스프라이트 시트 이미지를 가로×세로 격자로 잘라 프레임 PNG로 저장합니다. 균등 분할과 수동 경계선, 단색 배경 제거, 프레임별 개별 편집을 지원합니다.</p>
+    <a class="btn-ghost" href="/">도구 열기</a>
+  </li>
+  <li class="tool">
+    <h3>GIF 스프라이트 분할</h3>
+    <p>GIF 애니메이션의 모든 프레임을 개별 PNG 모음 또는 하나의 스프라이트 시트로 변환합니다. 투명 영역 자동 제거와 단색 배경 제거를 함께 쓸 수 있습니다.</p>
+    <a class="btn-ghost" href="/">도구 열기</a>
+  </li>
+  <li class="tool">
+    <h3>다중 이미지 일괄 자르기</h3>
+    <p>여러 사진을 고정한 크기로 가운데 정렬 자르고 PNG로 묶어 ZIP으로 저장합니다. 크기·위치를 한 번에 지정하면 나머지 사진에는 같은 설정이 적용됩니다.</p>
+    <a class="btn-ghost" href="/">도구 열기</a>
+  </li>
+</ul>
+
+<h2>가이드 전체 목록</h2>
+<ol class="card-grid">
+  <li class="card">
+    <h3><a href="/guides/sprite-sheet-basics.html">1. 스프라이트 시트란 무엇인가? 기초 개념 정리</a></h3>
+    <p>프레임 크기를 계산하는 방법, 행 우선·열 우선 배치 차이, 투명 배경과 단색 배경의 차이 등 분할 전에 알아야 할 기초 개념을 정리합니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/how-to-cut-sprite-sheet.html">2. 스프라이트 시트 분할 기본 사용법</a></h3>
+    <p>이미지를 불러오고 가로·세로 분할 수를 입력한 뒤 미리보기로 확인하고 ZIP으로 저장하는 기본 흐름을 다룹니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/manual-boundaries.html">3. 여백과 수동 경계선으로 정확히 나누기</a></h3>
+    <p>균등 격자로 맞지 않는 시트에서 남는 투명 여백을 걷어내고, 절대 좌표로 경계선을 직접 지정하는 방법을 설명합니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/remove-background-chromakey.html">4. 배경 제거로 투명 PNG 만들기</a></h3>
+    <p>단색 배경을 자동으로 감지해 투명하게 바꾸는 기능과, 허용 오차 값을 상황별로 맞추는 방법을 다룹니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/frame-editing-undo.html">5. 프레임 개별 편집과 실행 취소/다시 실행</a></h3>
+    <p>특정 컷만 크기나 위치를 바꾸는 방법과, 실수로 바꾼 값을 되돌리는 실행 취소·다시 실행 단축키를 정리합니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/zip-preview-animation.html">6. ZIP과 index.html 미리보기로 애니메이션 확인</a></h3>
+    <p>저장되는 ZIP 안의 구성 요소와, 폴더로 프레임을 정리한 뒤 애니메이션을 미리 확인하는 방법을 설명합니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/gif-to-sprite-sheet.html">7. GIF를 스프라이트 시트로 변환하기</a></h3>
+    <p>GIF를 고른 뒤 시트 레이아웃과 배경 처리 옵션을 정하고, 세 가지 저장 방식 중 무엇을 골라야 하는지 안내합니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/batch-crop-images.html">8. 여러 이미지 한 번에 같은 크기로 자르기</a></h3>
+    <p>사진 여러 장을 한 번에 골라 동일 크기로 자르고 ZIP으로 묶는 방법과, 기준 사진이 필요 있는 이유를 다룹니다.</p>
+  </li>
+  <li class="card">
+    <h3><a href="/guides/pixel-art-image-specs.html">9. 픽셀 아트 이미지 규격 가이드</a></h3>
+    <p>확대하지 말아야 하는 이유, 프레임 크기와 용량 계산, 내보내기 전 점검 항목을 정리합니다.</p>
+  </li>
+</ol>
+
+<h2>자주 찾는 문서</h2>
+<ul>
+  <li><a href="/faq.html">자주 묻는 질문 (FAQ)</a> — 지원 형식, 용량 제한, 파일이 저장되는 위치 등</li>
+  <li><a href="/privacy.html">개인정보처리방침</a> — 수집하는 정보와 처리 방식</li>
+  <li><a href="/terms.html">이용약관</a> — 서비스 이용 조건과 책임 범위</li>
+  <li><a href="/about.html">서비스 소개</a> — 무엇을 만드는 도구인지, 누구 만드는지</li>
+  <li><a href="/contact.html">문의하기</a> — 문제 신고 및 요청</li>
+</ul>
+
+<div class="cta">
+  <h2>지금 바로 사용해 보기</h2>
+  <p>설치 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

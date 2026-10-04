@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZIP과 index.html 미리보기로 애니메이션 확인 | 스프라이트 시트 분할 도구</title>
+<meta name="description" content="스프라이트 시트 분할 도구에서 저장하는 ZIP 안에는 PNG 프레임과 함께 애니메이션을 확인해 주는 index.html, 배경 이미지 stage.jpg가 들어 있습니다. 폴더 정리로 묶어 정리하는 방법까지 설명합니다.">
+<link rel="canonical" href="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/zip-preview-animation-en.html">
+<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="스프라이트 시트 분할 도구">
+<meta property="og:title" content="ZIP과 index.html 미리보기로 애니메이션 확인">
+<meta property="og:description" content="스프라이트 시트 분할 도구에서 저장하는 ZIP 안에는 PNG 프레임과 함께 애니메이션을 확인해 주는 index.html, 배경 이미지 stage.jpg가 들어 있습니다. 폴더 정리로 묶어 정리하는 방법까지 설명합니다.">
+<meta property="og:url" content="https://spritescut.netlify.app/guides/zip-preview-animation.html">
+<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "ZIP과 index.html 미리보기로 애니메이션 확인",
+  "description": "스프라이트 시트 분할 도구에서 저장하는 ZIP 안에는 PNG 프레임과 함께 애니메이션을 확인해 주는 index.html, 배경 이미지 stage.jpg가 들어 있습니다. 폴더 정리로 묶어 정리하는 방법까지 설명합니다.",
+  "inLanguage": "ko",
+  "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html",
+  "image": "https://spritescut.netlify.app/assets/og.png",
+  "datePublished": "2026-10-04",
+  "dateModified": "2026-10-04",
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
+  "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 스프라이트 시트 분할 도구" }],
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "이미지를 올리고 분할 수를 정하기", "text": "이미지 자르기 화면에서 스프라이트 시트를 업로드한 뒤 가로 분할과 세로 분할 값을 정합니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "저장 및 다운로드 버튼 누르기", "text": "하단의 저장 및 다운로드 (ZIP) 버튼을 누르면 프레임 PNG를 ZIP으로 묶는 작업이 시작됩니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "저장 미리보기에서 폴더 정리 설정하기", "text": "저장할 스프라이트 미리보기 팝업에서 폴더 정리 스위치를 켜고 새 폴더를 만들어 프레임을 분류합니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "ZIP 압축을 풀고 index.html 열기", "text": "받은 ZIP 파일의 압축을 푼 뒤 index.html 파일을 더블클릭해 브라우저에서 엽니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "재생 버튼과 FPS 슬라이더로 속도 조절하기", "text": "일시정지와 재생 버튼으로 멈춤과 재생을 전환하고 재생 속도 슬라이더로 1~30 FPS 사이에서 조정합니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "엔진에 넣을 PNG만 골라 쓰기", "text": "폴더별로 묶인 PNG 프레임은 번호가 1부터 다시 매겨지므로 그대로 엔진에 넣을 수 있습니다.", "url": "https://spritescut.netlify.app/guides/zip-preview-animation.html#step-6" }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">본문 바로가기</a>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">스프라이트 시트 분할 도구</a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/">홈</a>
+      <a href="/guides/index.html">기능 가이드</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/about.html">서비스 소개</a>
+      <a href="/contact.html">문의</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+<nav class="breadcrumb" aria-label="현재 위치">
+  <a href="/">홈</a><span><a href="/guides/index.html">기능 가이드</a></span>
+</nav>
+<h1>ZIP과 index.html 미리보기로 애니메이션 확인</h1>
+<p class="lede">저장 버튼 하나를 누르면 PNG뿐 아니라 그 프레임들을 순서대로 재생해 주는 index.html과 배경 이미지 stage.jpg가 함께 들어 있습니다. 그대로 열어 보면 애니메이션이 실제로 어떤지 브라우저에서 즉시 확인할 수 있습니다.</p>
+<p class="lang-switch"><a href="/guides/zip-preview-animation-en.html">Read this guide in English</a></p>
+<div class="post-meta">작성일 2026-10-04 · 최종 업데이트 2026-10-04 · 약 8분 분량</div>
+
+<h2>ZIP 안에 무엇이 들어 있나</h2>
+<p>이미지 자르기 도구에서 저장하면 결과물은 PNG 한 장이 아니라 ZIP 파일 하나입니다. 그 안에는 나눈 프레임 PNG들이 들어 있고, 여기에 더해 애니메이션 미리보기용 HTML 파일과 배경 이미지 한 장이 같이 실립니다. 즉 압축을 풀면 "쓸 수 있는 이미지"와 "확인용 파일"이 한 번에 정리되어 나옵니다.</p>
+
+<table>
+<caption>저장 ZIP의 구성</caption>
+<thead>
+<tr><th scope="col">항목</th><th scope="col">이름 규칙</th><th scope="col">용도</th></tr>
+</thead>
+<tbody>
+<tr><td>프레임 PNG</td><td><code>{파일명}_{가로}_{세로}_1.png</code> … <code>_N.png</code></td><td>실제 결과물. 번호 순서대로 프레임 번호를 나타냅니다.</td></tr>
+<tr><td>미리보기 HTML</td><td><code>index.html</code></td><td>프레임을 순서대로 재생하는 확인용 페이지. 네트워크 요청 없이 동작합니다.</td></tr>
+<tr><td>배경 이미지</td><td><code>stage.jpg</code></td><td>미리보기 배경으로 쓰이는 이미지입니다.</td></tr>
+</tbody>
+</table>
+
+<p>ZIP 파일 이름도 규칙이 있습니다. 원본 파일명에 가로와 세로 분할 수를 붙여 <code>{파일명}_{H}_{V}.zip</code> 형태가 되고, 프레임 안의 이름도 <code>{파일명}_{H}_{V}_1.png</code> 꼴입니다. 파일명에 들어갈 수 없는 문자는 밑줄로 바뀝니다. 파일명이 비어 있으면 이름 대신 <code>sprite</code>가 쓰입니다.</p>
+
+<div class="note">
+<p>여기에서 만든 ZIP에만 index.html과 stage.jpg가 들어 있습니다. <a href="/guides/batch-crop-images.html">다중 이미지 일괄 자르기</a> 도구의 ZIP은 사진마다 PNG 하나만 담기 때문에 미리보기 파일이 없습니다.</p>
+</div>
+
+<h2>저장까지 순서대로 해 보기</h2>
+
+<h3 id="step-1">이미지를 올리고 분할 수를 정하기</h3>
+<p>홈 화면의 이미지 자르기 도구로 이동해 <strong>이미지 업로드</strong> 버튼으로 스프라이트 시트를 불러옵니다. 이미지를 올리면 <strong>배경 처리</strong>, <strong>분할 수 (가로 × 세로)</strong>, <strong>분할 모드</strong> 순서로 화면이 펼쳐집니다. 프레임이 가로로 나란히 붙어 있는 시트라면 가로 분할만 맞추면 됩니다. 하단 상태바에는 전체 크기, 영역 크기, 1컷 크기, 총 컷 수가 표시되니 여기서 1컷 크기가 원하는 값인지 먼저 확인합니다.</p>
+
+<h3 id="step-2">저장 및 다운로드 (ZIP) 누르기</h3>
+<p>확인이 끝나면 하단의 <strong>저장 및 다운로드 (ZIP)</strong> 버튼을 누릅니다. 버튼은 작업 중 <strong>처리 중…</strong>으로 바뀌고, 작업이 끝나면 <strong>저장할 스프라이트 미리보기</strong> 모달이 열립니다. 모달 상단에는 총 컷 수와 <strong>(삭제 {k})</strong> 형식으로 제외한 컷 수가 함께 표시됩니다. 드래그로 잘라낼 필요가 없는 프레임은 여기서 먼저 걸러낼 수 있습니다.</p>
+
+<h3 id="step-3">폴더 정리로 묶어 보기</h3>
+<p>모달에는 <strong>폴더 정리</strong> 스위치가 있습니다. 켜져 있으면 ZIP 안에 폴더가 만들어지고 이미지들이 그 안으로 들어갑니다(기본값은 켜짐). 꺼져 있으면 모든 PNG가 한 줄로 나열됩니다.</p>
+<p>옆에 있는 사이드바에서 <strong>전체 보기</strong>와 <strong>기본(폴더 없음)</strong> 사이를 오가며 확인할 수 있고, <strong>폴더 추가</strong>를 누르면 <code>새 폴더 1</code>, <code>새 폴더 2</code> … 처럼 이름이 붙은 폴더가 생깁니다. 폴더는 언제든 <strong>이름 변경</strong>하거나 <strong>폴더 삭제</strong>할 수 있습니다. 폴더를 지우면 그 안에 있던 이미지는 삭제되지 않고 기본(폴더 없음)으로 옮겨지며, <em>폴더 "{name}"의 이미지 {n}개가 기본(폴더 없음)으로 이동합니다.</em>라는 확인 메시지가 먼저 뜹니다.</p>
+<p>이미지를 폴더로 보내는 방법은 두 가지입니다.</p>
+<ol>
+<li><strong>0.5초 길게 누른 뒤 드래그</strong> — 이미지를 약 0.5초 동안 누르고 있는 동안 잡힌 상태가 되므로, 이 상태로 사이드바의 원하는 폴더 위까지 끌어다 놓으면 됩니다. 안내 문구에도 "이미지를 0.5초 길게 눌러 드래그하거나, 선택 후 [이동] 버튼으로 넣으세요."라고 적혀 있습니다.</li>
+<li><strong>선택한 뒤 [이동] 버튼</strong> — 이미지를 여러 개 선택하고 <strong>이동</strong>을 누른 뒤 <strong>이동할 폴더 선택</strong> 대화상자에서 목적지를 고릅니다.</li>
+</ol>
+<p>여러 장을 한꺼번에 고르는 방법은 Ctrl 클릭 또는 Shift 클릭이며, 화면 위의 <strong>선택 모드</strong> 토글로도 여러 개 선택 상태를 유지할 수 있습니다. 툴팁 설명은 "선택 모드 (여러 개 선택)"입니다.</p>
+<p><strong>선택 삭제</strong>를 누르면 모달 상단의 삭제 개수가 늘어납니다. 삭제를 마치고 나면 남은 프레임 번호가 1부터 다시 붙여집니다. 그리고 이 번호는 <strong>폴더마다 따로 시작</strong>됩니다. 예를 들어 첫 폴더에 6컷, 두 번째 폴더에 4컷이 들어 있다면 두 번째 폴더의 파일은 1번부터 4번까지로 저장됩니다. 정리한 폴더 하나가 곧 애니메이션 하나이므로, 걷기와 뛰기 같은 동작을 나누고 싶을 때 이 방식을 씁니다.</p>
+
+<h3 id="step-4">압축을 풀고 index.html 열기</h3>
+<p>모달에서 <strong>다운로드 (ZIP)</strong>을 누르면 ZIP이 내려받아집니다. 그 다음 순서는 단순합니다.</p>
+<ol>
+<li>받은 ZIP 파일을 더블클릭해 압축을 풉니다.</li>
+<li>폴더 안의 <code>index.html</code> 파일을 더블클릭해 엽니다.</li>
+<li>브라우저에서 애니메이션이 바로 재생됩니다.</li>
+</ol>
+<p>이 HTML은 외부 파일이나 서버를 전혀 읽지 않습니다. 프레임 PNG는 페이지가 열릴 때 모두 미리 읽어 둔 뒤 화면에 그리기만 하는 구조이며, 네트워크 요청이 하나도 없습니다. 그래서 태블릿을 비행기 모드로 두고 확인하거나, USB에 저장해 다른 컴퓨터로 옮겨도 똑같이 동작합니다.</p>
+
+<h3 id="step-5">재생 버튼과 FPS 슬라이더</h3>
+<p>열린 페이지의 제목은 <strong>스프라이트 애니메이션 미리보기</strong>이고, 그 아래 정보 줄에는 <code>총 {n}컷 ({w} × {h}px)</code> 형태로 총 컷 수와 1컷 크기가 나옵니다. 버튼 하나가 <strong>일시정지</strong>와 <strong>재생</strong>을 오가도록 바뀝니다. <strong>재생 속도 (FPS): </strong> 슬라이더는 1~30 FPS 범위에서 움직이며 기본값은 10 FPS입니다. 페이지를 열면 자동으로 재생이 시작되므로, 속도가 맞는지 보는 동안 손댈 필요는 없습니다.</p>
+
+<h3 id="step-6">PNG만 골라 엔진에 넣기</h3>
+<p>확인이 끝났다면 <code>index.html</code>과 <code>stage.jpg</code>는 지워도 결과물에는 영향이 없습니다. 엔진에 넣을 것은 PNG뿐입니다. 폴더 구조를 썼다면 폴더 하나를 통째로 골라 통째로 넘기면 되므로, 한 시트에서 여러 애니메이션을 뽑아 내는 작업이 훨씬 짧아집니다.</p>
+
+<h2>stage.jpg 는 무엇을 하는가</h2>
+<p>미리보기 배경에는 <code>stage.jpg</code>가 쓰입니다. 미리보기 박스는 <code>background-size: cover</code> 로 이 이미지를 채우게 됩니다. 캐릭터 위에 올릴 바닥이나 벽 같은 그림을 미리 넣어 두고, 투명 부분이 실제로 어떻게 보이는지 확인하려는 용도입니다.</p>
+<p>이 파일이 ZIP에 없거나 이름이 달라졌거나 손상되었다면 미리보기는 배경 그림 없이 열립니다. 이때는 CSS로 만든 체커보드 패턴이 대신 깔려서, 투명 영역이 어떤 모양인지 배경과 겹치지 않게 볼 수 있습니다. 즉 <code>stage.jpg</code>는 어디까지나 연출용이며, 없어도 애니메이션 자체는 그대로 재생됩니다.</p>
+
+<div class="note">
+<p>미리보기 박스는 가로 최대 400px에 맞춰지고 가로세로 비율은 그대로 유지됩니다. 스프라이트가 화면보다 훨씬 작게 보이더라도 이음매가 드러나게 표시되도록 <code>image-rendering: pixelated</code> 로 렌더링하기 때문에, 픽셀 아트의 격자가 흐려지지 않습니다.</p>
+</div>
+
+<h2>실무 팁</h2>
+<ul>
+<li><strong>FPS부터 맞춰 보세요.</strong> 실제 게임에 쓰일 속도는 보통 10~12 FPS입니다. 기본값이 10이라 대체로 맞는 편이라, 슬라이더를 만질 일은 드뭅니다.</li>
+<li><strong>컷 수와 프레임 크기를 함께 보세요.</strong> 1컷 크기는 정보 줄에 나온 <code>{w} × {h}px</code>로 확인할 수 있습니다. 가로와 세로 분할 수의 비율이 1:2가 아니면 프레임에 원치 않는 빈 공간이 들어가 애니메이션이 부자연스럽게 보일 수 있습니다.</li>
+<li><strong>여백으로 남는 빈 공간을 줄이세요.</strong> 균등 분할에서 쓰는 영역 여백은 프레임마다 반복되는 여백을 없애 줍니다. 여백 때문에 투명 픽셀이 늘어나면 PNG 용량도 함께 커집니다. 자세한 조정은 <a href="/guides/manual-boundaries.html">여백과 수동 경계선 가이드</a>를 참고하세요.</li>
+<li><strong>개별 컷 크기가 이상하면 미리보기를 확인하세요.</strong> 결과물 미리보기에서 각 프레임의 크기를 직접 지정할 수 있고, 그 값이 ZIP에도 그대로 반영됩니다. <a href="/guides/frame-editing-undo.html">프레임 개별 편집 가이드</a>에서 다룹니다.</li>
+</ul>
+
+<h2>요약</h2>
+<p>이미지 자르기 도구의 ZIP은 프레임 PNG, 재생용 <code>index.html</code>, 배경용 <code>stage.jpg</code> 세 가지로 구성됩니다. <code>index.html</code>은 오프라인에서 완전히 동작하며 1~30 FPS로 재생 속도를 조절할 수 있고, <code>stage.jpg</code>가 없으면 체커보드 배경으로 대체됩니다. 저장 모달의 폴더 정리를 활용하면 한 번의 작업에서 여러 애니메이션을 동시에 정리해 둘 수 있습니다.</p>
+
+<div class="cta">
+  <h2>바로 사용해 보기</h2>
+  <p>가입 없이 브라우저에서 바로 실행됩니다. 이미지는 기기 안에서만 처리되므로 업로드되지 않습니다.</p>
+  <a class="btn" href="/">스프라이트 시트 분할 도구 열기</a>
+</div>
+
+<nav class="pager" aria-label="가이드 이동">
+  <a class="prev" href="/guides/frame-editing-undo.html"><span class="dir">이전 글</span><span class="ttl">프레임 개별 편집과 실행 취소/다시 실행</span></a>
+  <a class="next" href="/guides/gif-to-sprite-sheet.html"><span class="dir">다음 글</span><span class="ttl">GIF를 스프라이트 시트로 변환하기</span></a>
+</nav>
+<p class="to-top"><a href="#main">맨 위로 올라가기</a></p>
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h4>도구</h4>
+        <ul>
+          <li><a href="/">이미지 자르기</a></li>
+          <li><a href="/">GIF 스프라이트 분할</a></li>
+          <li><a href="/">다중 이미지 일괄 자르기</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>가이드</h4>
+        <ul>
+          <li><a href="/guides/index.html">전체 가이드 보기</a></li>
+          <li><a href="/faq.html">자주 묻는 질문</a></li>
+          <li><a href="/guides/remove-background-chromakey.html">배경 제거 사용법</a></li>
+          <li><a href="/guides/gif-to-sprite-sheet.html">GIF 변환 가이드</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>서비스 정보</h4>
+        <ul>
+          <li><a href="/about.html">서비스 소개</a></li>
+          <li><a href="/contact.html">문의하기</a></li>
+          <li><a href="/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/terms.html">이용약관</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 스프라이트 시트 분할 도구. All rights reserved.</span>
+      <span>모든 이미지 처리는 이용자의 기기 안에서만 수행됩니다.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
