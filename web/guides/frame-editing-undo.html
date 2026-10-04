@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>프레임 개별 편집과 실행 취소/다시 실행 | 스프라이트 시트 분할 도구</title>
 <meta name="description" content="결과물 미리보기에서 한 프레임만 골라 좌표와 크기를 바꾸는 방법, 기본값·전체 초기화 활용, 그리고 100단계 실행 기록과 Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y 단축키 정리.">
-<link rel="canonical" href="https://spritescut.netlify.app/guides/frame-editing-undo.html">
+<link rel="canonical" href="https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="alternate" hreflang="ko" href="https://spritescut.netlify.app/guides/frame-editing-undo.html">
-<link rel="alternate" hreflang="en" href="https://spritescut.netlify.app/guides/frame-editing-undo-en.html">
-<link rel="alternate" hreflang="x-default" href="https://spritescut.netlify.app/guides/frame-editing-undo.html">
+<link rel="alternate" hreflang="ko" href="https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html">
+<link rel="alternate" hreflang="en" href="https://sprite-cut-zip.netlify.app/guides/frame-editing-undo-en.html">
+<link rel="alternate" hreflang="x-default" href="https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:site_name" content="스프라이트 시트 분할 도구">
 <meta property="og:title" content="프레임 개별 편집과 실행 취소/다시 실행">
 <meta property="og:description" content="프레임별 좌표·크기 조정과 실행 취소 기록, 단축키 정리.">
-<meta property="og:url" content="https://spritescut.netlify.app/guides/frame-editing-undo.html">
-<meta property="og:image" content="https://spritescut.netlify.app/assets/og.png">
+<meta property="og:url" content="https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html">
+<meta property="og:image" content="https://sprite-cut-zip.netlify.app/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="stylesheet" href="/assets/site.css">
@@ -28,20 +28,20 @@
   "name": "프레임 개별 편집과 실행 취소/다시 실행",
   "description": "결과물 미리보기에서 한 프레임만 골라 좌표와 크기를 바꾸는 방법, 기본값·전체 초기화 활용, 그리고 100단계 실행 기록과 Ctrl+Z, Ctrl+Shift+Z, Ctrl+Y 단축키 정리.",
   "inLanguage": "ko",
-  "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html",
-  "image": "https://spritescut.netlify.app/assets/og.png",
+  "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html",
+  "image": "https://sprite-cut-zip.netlify.app/assets/og.png",
   "datePublished": "2026-10-04",
   "dateModified": "2026-10-04",
-  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://spritescut.netlify.app/" },
+  "author": { "@type": "Organization", "name": "스프라이트 시트 분할 도구", "url": "https://sprite-cut-zip.netlify.app/" },
   "estimatedCost": { "@type": "MonetaryAmount", "currency": "KRW", "value": "0" },
   "tool": [{ "@type": "HowToTool", "name": "브라우저에서 실행되는 스프라이트 시트 분할 도구" }],
   "step": [
-    { "@type": "HowToStep", "position": 1, "name": "결과물 미리보기 패널 펼치기", "text": "화면 하단의 '결과물 미리보기' 영역을 펼치면 썸네일 격자가 투명 체스판 배경 위에 나타납니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-1" },
-    { "@type": "HowToStep", "position": 2, "name": "썸네일 라벨로 프레임 확인하기", "text": "각 썸네일에는 순번과 픽셀 크기가 '12 · 64×64'처럼 표시됩니다. 라벨을 읽어 어느 프레임이 문제인지 특정합니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-2" },
-    { "@type": "HowToStep", "position": 3, "name": "프레임 편집 모드 진입하기", "text": "썸네일을 누르면 '프레임 N 편집' 모드로 들어가고, 캔버스는 해당 프레임만 다루는 핸들로 바뀝니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-3" },
-    { "@type": "HowToStep", "position": 4, "name": "x, y, w, h 값 수정하기", "text": "입력 칸에서 좌표와 크기를 바꿉니다. 최소 크기는 8px이며 값은 150ms 정도의 지연 후 다시 계산됩니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-4" },
-    { "@type": "HowToStep", "position": 5, "name": "기본값 복원과 전체 초기화", "text": "'기본값'은 현재 프레임만 격자 기본으로 되돌리고, '전체 초기화'는 모든 프레임의 개별 조정을 한 번에 지웁니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-5" },
-    { "@type": "HowToStep", "position": 6, "name": "실행 취소와 다시 실행으로 결과 확인하기", "text": "Ctrl+Z로 되돌리고 Ctrl+Shift+Z 또는 Ctrl+Y로 다시 적용합니다. 새 이미지를 불러오면 기록은 초기화됩니다.", "url": "https://spritescut.netlify.app/guides/frame-editing-undo.html#step-6" }
+    { "@type": "HowToStep", "position": 1, "name": "결과물 미리보기 패널 펼치기", "text": "화면 하단의 '결과물 미리보기' 영역을 펼치면 썸네일 격자가 투명 체스판 배경 위에 나타납니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-1" },
+    { "@type": "HowToStep", "position": 2, "name": "썸네일 라벨로 프레임 확인하기", "text": "각 썸네일에는 순번과 픽셀 크기가 '12 · 64×64'처럼 표시됩니다. 라벨을 읽어 어느 프레임이 문제인지 특정합니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-2" },
+    { "@type": "HowToStep", "position": 3, "name": "프레임 편집 모드 진입하기", "text": "썸네일을 누르면 '프레임 N 편집' 모드로 들어가고, 캔버스는 해당 프레임만 다루는 핸들로 바뀝니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-3" },
+    { "@type": "HowToStep", "position": 4, "name": "x, y, w, h 값 수정하기", "text": "입력 칸에서 좌표와 크기를 바꿉니다. 최소 크기는 8px이며 값은 150ms 정도의 지연 후 다시 계산됩니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-4" },
+    { "@type": "HowToStep", "position": 5, "name": "기본값 복원과 전체 초기화", "text": "'기본값'은 현재 프레임만 격자 기본으로 되돌리고, '전체 초기화'는 모든 프레임의 개별 조정을 한 번에 지웁니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-5" },
+    { "@type": "HowToStep", "position": 6, "name": "실행 취소와 다시 실행으로 결과 확인하기", "text": "Ctrl+Z로 되돌리고 Ctrl+Shift+Z 또는 Ctrl+Y로 다시 적용합니다. 새 이미지를 불러오면 기록은 초기화됩니다.", "url": "https://sprite-cut-zip.netlify.app/guides/frame-editing-undo.html#step-6" }
   ]
 }
 </script>

@@ -9,7 +9,7 @@ class SiteFooter extends StatelessWidget {
   const SiteFooter({super.key});
 
   /// 웹 배포 주소. 정적 페이지와 동일한 origin을 사용한다.
-  static const String origin = 'https://spritescut.netlify.app';
+  static const String origin = 'https://sprite-cut-zip.netlify.app';
 
   static const List<({String label, String path})> _links = [
     (label: '기능 가이드', path: '/guides/index.html'),
