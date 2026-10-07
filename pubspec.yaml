@@ -1,6 +1,6 @@
 name: spritescut
 description: "스프라이트 시트 분할 도구 — 스프라이트 시트 이미지 자르기, GIF 프레임 분할, 다중 이미지 일괄 자르기 브라우저 도구"
-homepage: https://spritescut.netlify.app/
+homepage: https://sprite-cut-zip.netlify.app/
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

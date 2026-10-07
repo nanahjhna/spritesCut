@@ -2,7 +2,7 @@
 
 브라우저에서만 동작하는 이미지 처리 도구입니다. Flutter Web으로 만들어졌으며, 모든 이미지 디코딩·분할·압축이 이용자의 기기 안에서 끝나므로 **이미지가 서버로 업로드되지 않습니다.**
 
-- 라이브 사이트: https://spritescut.netlify.app/
+- 라이브 사이트: https://sprite-cut-zip.netlify.app/
 
 ## 제공 기능
 
@@ -35,7 +35,7 @@ web/
 - 정적 페이지는 빌드 의존성이 없는 순수 HTML과 `assets/site.css` 한 장으로 이루어져 있습니다.
 - 한국어(`/`)와 영어(`-en`) 페이지를 `hreflang`으로 서로 연결했습니다.
 - 앱 화면 하단의 안내 링크(`lib/widgets/site_footer.dart`)에서 위 문서로 이동할 수 있습니다.
-- 도메인을 바꿀 때는 `web/` 안의 `https://spritescut.netlify.app` 문자열과 `lib/widgets/site_footer.dart`의 `SiteFooter.origin`을 함께 바꿔 주세요.
+- 도메인을 바꿀 때는 `web/` 안의 `https://sprite-cut-zip.netlify.app` 문자열과 `lib/widgets/site_footer.dart`의 `SiteFooter.origin`을 함께 바꿔 주세요.
 
 ## 의존성
 
