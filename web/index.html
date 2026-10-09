@@ -43,9 +43,196 @@
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <link rel="manifest" href="manifest.json">
+
+<style>
+  /*
+    앱 화면이 첫 번째 뷰포트를 차지하고, 그 아래로 정적 텍스트 콘텐츠가
+    실제로 보이도록 배치합니다. absolute + top:100vh 를 사용해 앱 컨테이너의
+    레이아웃에는 영향을 주지 않으면서도 스크롤로 접근할 수 있게 합니다.
+  */
+  html {
+    overflow-y: auto;
+  }
+
+  #site-content {
+    position: absolute;
+    top: 100vh;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+    padding: 40px 20px 64px;
+    background: #f7f8fc;
+    border-top: 1px solid #e2e5f0;
+    color: #1f2333;
+    font-family: system-ui, -apple-system, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    line-height: 1.75;
+    text-align: left;
+  }
+
+  #site-content .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  #site-content h1 {
+    font-size: 1.75rem;
+    margin: 0 0 12px;
+  }
+
+  #site-content h2 {
+    font-size: 1.3rem;
+    margin: 40px 0 10px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e5f0;
+  }
+
+  #site-content h2:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  #site-content h3 {
+    font-size: 1.05rem;
+    margin: 22px 0 6px;
+  }
+
+  #site-content .lede {
+    font-size: 1.05rem;
+    color: #41496b;
+    margin: 0 0 8px;
+  }
+
+  #site-content ul,
+  #site-content ol {
+    padding-left: 22px;
+    margin: 12px 0;
+  }
+
+  #site-content li {
+    margin-bottom: 8px;
+  }
+
+  #site-content a {
+    color: #3f51b5;
+  }
+
+  #site-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.95rem;
+  }
+
+  #site-content caption {
+    text-align: left;
+    font-size: 0.9rem;
+    color: #5b6284;
+    padding-bottom: 6px;
+  }
+
+  #site-content th,
+  #site-content td {
+    border: 1px solid #d9dcea;
+    padding: 8px 10px;
+    text-align: left;
+  }
+
+  #site-content th {
+    background: #eef0f8;
+  }
+
+  @media (max-width: 640px) {
+    #site-content {
+      padding: 32px 16px 48px;
+    }
+
+    #site-content h1 {
+      font-size: 1.45rem;
+    }
+
+    #site-content h2 {
+      font-size: 1.15rem;
+    }
+  }
+</style>
 </head>
 <body>
 <script src="flutter_bootstrap.js" async></script>
+
+<!--
+  아래 <section id="site-content"> 는 앱 화면(첫 번째 뷰포트) 바로 아래에
+  배치되는 정적 텍스트 콘텐츠입니다. Flutter 앱이 캔버스로 렌더링하므로
+  JavaScript가 켜진 상태에서는 이 영역이 보이지 않아 검색엔진과 AdSense
+  크롤러가 "게시자 콘텐츠가 없는 화면"으로 판단하는 것을 막기 위해 둡니다.
+-->
+<section id="site-content">
+  <div class="wrap">
+    <h1>스프라이트 시트 분할 도구</h1>
+    <p class="lede">스프라이트 시트 이미지를 가로×세로 격자로 잘라 프레임 PNG로 만들고, GIF 애니메이션을 스프라이트 시트로 변환하고, 여러 사진을 같은 크기로 일괄 자릅니다. 모든 처리는 브라우저 안에서만 이루어져 이미지 파일이 서버로 업로드되지 않습니다.</p>
+
+    <h2>제공하는 세 가지 도구</h2>
+    <ul>
+      <li><strong>이미지 자르기</strong> — 스프라이트 시트 이미지를 가로×세로 격자로 잘라 개별 프레임 PNG로 저장합니다. 균등 분할과 수동 경계선, 단색 배경 제거, 프레임별 개별 편집을 지원합니다.</li>
+      <li><strong>GIF 스프라이트 분할</strong> — GIF 애니메이션의 모든 프레임을 개별 PNG 모음 또는 하나의 스프라이트 시트로 변환합니다.</li>
+      <li><strong>다중 이미지 일괄 자르기</strong> — 여러 사진을 고정한 크기로 가운데 정렬 자르고 PNG로 묶어 ZIP으로 저장합니다.</li>
+    </ul>
+
+    <h2>스프라이트 시트를 자르는 기본 방법</h2>
+    <ol>
+      <li>이미지 자르기 도구에서 스프라이트 시트 이미지 한 장을 선택합니다.</li>
+      <li>한 줄에 들어가는 컷 수(가로 분할)와 줄 수(세로 분할)를 입력합니다.</li>
+      <li>캔버스 아래 상태 표시줄에서 전체 크기, 1컷 크기, 총 컷 수를 확인합니다.</li>
+      <li>결과물 미리보기로 각 프레임이 제대로 잘렸는지 확인합니다.</li>
+      <li>ZIP으로 저장하면 프레임 PNG와 미리보기용 index.html이 함께 묶입니다.</li>
+    </ol>
+    <p>자세한 절차는 <a href="/guides/how-to-cut-sprite-sheet.html">스프라이트 시트 분할 기본 사용법</a>에서 단계별로 볼 수 있습니다. 여백이 끼어 있거나 프레임 크기가 제각각이라면 <a href="/guides/manual-boundaries.html">여백과 수동 경계선 가이드</a>를 참고하세요.</p>
+
+    <h2>프레임 크기 계산 예시</h2>
+    <table>
+      <caption>이미지 크기와 분할 개수에 따른 한 컷 크기</caption>
+      <thead>
+        <tr><th scope="col">이미지 크기</th><th scope="col">분할 수 (가로 × 세로)</th><th scope="col">1컷 크기</th><th scope="col">총 컷 수</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>256 × 64</td><td>4 × 1</td><td>64 × 64</td><td>4</td></tr>
+        <tr><td>512 × 128</td><td>4 × 2</td><td>128 × 64</td><td>8</td></tr>
+        <tr><td>1024 × 1024</td><td>8 × 8</td><td>128 × 128</td><td>64</td></tr>
+        <tr><td>800 × 600</td><td>16 × 12</td><td>50 × 50</td><td>192</td></tr>
+      </tbody>
+    </table>
+    <p>픽셀 아트라면 32, 64, 128 같은 2의 거듭제곱 크기를 쓰면 계산이 정확하게 떨어집니다. 1000px를 3등분하면 333.33px가 되어 어느 한쪽은 어긋나기 때문입니다.</p>
+
+    <h2>배경 제거로 투명 PNG 만들기</h2>
+    <p>스프라이트 시트 배경이 마젠타나 초록 같은 단색이라면, 배경 제거 스위치를 켜서 해당 색을 투명하게 만들 수 있습니다. 감지된 배경색과 허용 오차 슬라이더를 확인하면서 스프라이트 안쪽 색까지 지워지지 않았는지 체스판 배경으로 검증하세요. 배경 제거가 실패하는 경우와 해결 방법은 <a href="/guides/remove-background-chromakey.html">배경 제거 가이드</a>에 정리되어 있습니다.</p>
+
+    <h2>GIF를 스프라이트 시트로 변환하기</h2>
+    <p>GIF 스프라이트 분할 도구에서는 애니메이션의 모든 프레임을 개별 PNG로 뽑거나, 가로·세로·격자 레이아웃으로 하나의 시트에 다시 배치할 수 있습니다. 배경 제거를 함께 쓰면 투명 시트로 저장됩니다. 자세한 내용은 <a href="/guides/gif-to-sprite-sheet.html">GIF를 스프라이트 시트로 변환하기</a>를 보세요.</p>
+
+    <h2>자주 묻는 질문</h2>
+    <h3>이미지가 서버로 업로드되나요?</h3>
+    <p>아닙니다. 파일 선택부터 PNG 생성, ZIP 압축까지 모든 계산이 이용자의 기기 안에서 수행됩니다. 가입이나 로그인이 필요하지 않고 비용도 없습니다.</p>
+
+    <h3>출력 형식은 무엇인가요?</h3>
+    <p>투명 영역을 유지해야 하므로 출력은 항상 RGBA PNG로 고정됩니다. JPG나 WebP를 선택하는 옵션은 없습니다.</p>
+
+    <h3>여러 이미지를 같은 크기로 자를 수 있나요?</h3>
+    <p>가능합니다. 다중 이미지 일괄 자르기 도구에서 크기와 위치를 한 번 지정하면 나머지 사진에 같은 설정이 적용됩니다. 자세한 절차는 <a href="/guides/batch-crop-images.html">여러 이미지 한 번에 같은 크기로 자르기</a>에서 볼 수 있습니다.</p>
+
+    <h3>이 도구가 하지 않는 것은 무엇인가요?</h3>
+    <p>이미지 확대·축소나 리샘플링, 애니메이션 파일 생성, 색상 보정 같은 작업은 하지 않습니다. 입력 픽셀을 그대로 잘라내는 것이 이 도구의 역할입니다.</p>
+
+    <h2>더 자세한 문서</h2>
+    <ul>
+      <li><a href="/guides/index.html">기능 사용 가이드 전체 목록</a> — 9가지 사용법을 단계별로 정리했습니다.</li>
+      <li><a href="/guides/sprite-sheet-basics.html">스프라이트 시트란 무엇인가?</a> — 배치 방식과 프레임 크기 기초 개념.</li>
+      <li><a href="/guides/zip-preview-animation.html">ZIP 미리보기로 애니메이션 확인</a> — 저장된 파일 구조 활용법.</li>
+      <li><a href="/guides/pixel-art-image-specs.html">픽셀 아트 이미지 규격 가이드</a> — 내보내기 전 점검 항목.</li>
+      <li><a href="/faq.html">자주 묻는 질문</a> — 지원 형식, 용량 제한, 파일 저장 위치 등.</li>
+      <li><a href="/about.html">서비스 소개</a> · <a href="/contact.html">문의하기</a> · <a href="/privacy.html">개인정보처리방침</a> · <a href="/terms.html">이용약관</a></li>
+    </ul>
+  </div>
+</section>
+
 <noscript>
   <div style="max-width:720px;margin:0 auto;padding:32px 20px;font-family:system-ui,'Malgun Gothic',sans-serif;line-height:1.7">
     <h1>스프라이트 시트 분할 도구</h1>
